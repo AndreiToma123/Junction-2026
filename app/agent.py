@@ -706,7 +706,7 @@ def handle_text(text, scenario=None, today=None):
               "origin": "typed", "status": "basket", "children": [], "steps": [], "history": []}
     _step(parent, "request", f"Read a request with {len(items)} products: " + "; ".join(
         f"{rules.num(i['amount']) + ' ' + ('kg' if i['unit'] == 'KG' else i['unit'] or '') if i['amount'] is not None else '? (amount missing)'} "
-        f"{i['product'] or '?'}" for i in items) + (f", by {rules.nice_date(items[0]['deadline'])}" if items[0]["deadline"] else ", no date given")
+        f"{i['product'] or '?'} by {rules.nice_date(i['deadline']) if i['deadline'] else '? (no date)'}" for i in items)
           + ". Each product becomes its own request.", "simple pattern reader")
     store.save(parent)
     for i in items:
@@ -735,7 +735,12 @@ def basket_view(parent):
         out.append({"id": k["id"], "status": k["status"], "text": k.get("current_request") or k.get("text"),
                     "product": (k.get("parsed") or {}).get("product"), "total": o["total_with_tax"] if o else None,
                     "order_id": k.get("order_id"), "delivery_message": k.get("delivery_message"),
-                    "question": k.get("question"), "reason": k.get("reason")})
+                    "question": k.get("question"), "reason": k.get("reason"), "ask_kind": k.get("ask_kind"),
+                    "ask_fields": k.get("ask_fields"), "deadline": (k.get("parsed") or {}).get("deadline"),
+                    "parsed": {f: (k.get("parsed") or {}).get(f) for f in ("unit", "deadline", "amount", "item_id")},
+                    "request_checks": k.get("request_checks"), "text_raw": k.get("text")})
+    order = {"needs_approval": 0, "ask_buyer": 0, "cannot_fulfil": 1}
+    out.sort(key=lambda c: order.get(c["status"], 2))  # what needs a person first
     parent["child_summaries"] = out
     parent["counts"] = {s: sum(1 for c in out if c["status"] == s) for s in {c["status"] for c in out}}
     return parent

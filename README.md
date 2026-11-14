@@ -67,12 +67,12 @@ stock, and a re-check of price and stock at the moment someone approves.
 
 ## The dashboard
 
-Screens: **New request · Requests · Events · Kitchen · Audit log · Rules** (◐ = dark mode).
+Screens: **New request · Requests · Events · Kitchen · Audit log · Rules** (the **Dark** button switches to dark mode).
 
-1. **New request**: type what you need (several products are fine), or tap one of "Your usual".
-   The agent's steps appear one by one, then the result per product.
+1. **New request**: type what you need (several products, each with its own date, are fine), or tap one of
+   "Your usual". The agent's steps appear one by one, then the result per product, with **what needs you first**.
 2. **Requests**: grouped by what needs doing (*Needs approval* first). Each request reads top to bottom:
-   **what needs deciding** (the situation, then the exact reason) → total, budget, delivery → the order →
+   **what needs deciding** (the situation, then **the exact reason in bold**) → total, budget, delivery → the order →
    **Approve / Reject** → *or instead* (only the usual product, wait for the restock, substitutes) →
    **how the agent ranked the options** → rule checks → the agent's steps and the audit log.
 3. **Events**: plan an extra booking, see its cost against its budget, fix what can't be sourced.
@@ -209,7 +209,7 @@ stock of supplier products.
 
 ```bash
 .venv/bin/python -m scripts.run_scenarios     # the 4 original scenarios: normal | split | spend | typo
-.venv/bin/python -m scripts.try_events        # 39 checks: several products, dates, unclear requests, stock-out,
+.venv/bin/python -m scripts.try_events        # 44 checks: several products, dates, unclear requests, stock-out,
                                               #   restock, duplicates, events, budgets, ranking, menu, swap list
 .venv/bin/python -m scripts.try_rules         # 9 rule cases with live data
 .venv/bin/python -m scripts.try_rule_edits    # editing the rulebook: preview, apply, refuse, undo

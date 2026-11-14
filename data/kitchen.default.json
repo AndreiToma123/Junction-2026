@@ -445,6 +445,44 @@
      ],
      "pre_approved": false,
      "note": "Closest swap: similar fat and texture, cooks the same way in soup and in the oven. Milder taste and a little pinker. A different fish on a fish dish, so the chef decides."
+    },
+    {
+     "product_id": "469560",
+     "name": "Rainbow trout fillet, frozen",
+     "dishes": [
+      "salmon-soup",
+      "baked-salmon"
+     ],
+     "pre_approved": false,
+     "note": "The same fish as the fresh trout, frozen: thaw overnight. Slightly softer, milder than salmon, a little pinker. Costs more than salmon."
+    },
+    {
+     "product_id": "475684",
+     "name": "Redfish fillet, frozen",
+     "dishes": [
+      "salmon-soup",
+      "baked-salmon"
+     ],
+     "pre_approved": false,
+     "note": "Firm white fish that holds together in soup and in the oven. The soup becomes a white-fish soup: no pink colour, milder taste. Much cheaper."
+    },
+    {
+     "product_id": "475485",
+     "name": "Pacific ocean perch, frozen",
+     "dishes": [
+      "salmon-soup"
+     ],
+     "pre_approved": false,
+     "note": "Mild, firm white fish; good in soup, too lean for the oven dish. Changes the soup's colour and taste; cheaper."
+    },
+    {
+     "product_id": "475530",
+     "name": "Pangasius fillet, frozen",
+     "dishes": [
+      "salmon-soup"
+     ],
+     "pre_approved": false,
+     "note": "Cheapest option. Very mild and soft: add it at the end or it falls apart. Guests will notice it is not salmon."
     }
    ]
   },

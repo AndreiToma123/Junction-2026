@@ -96,10 +96,10 @@ if __name__ == "__main__":
 
     no_key()
     rec = agent.handle("I need 2,000 litres of lactose-free milk by Monday.", today=TODAY)
-    fake({"summary": "This order costs €2,300.00, which is €300.00 over the €2,000.00 limit, so it needs your approval."})
+    fake({"situation": "This is the usual milk, 2,000 L for Monday.", "reason": "It costs €2,300.00, which is €300.00 over the €2,000.00 limit."})
     s = ai.summarize(rec)
     check("summary: accepts wording that only uses real numbers", s["written_by"] == "Gemini", s["text"])
-    fake({"summary": "This order costs €2,300.00 and saves you €450 compared with last month."})
+    fake({"situation": "This is the usual milk.", "reason": "It costs €2,300.00 and saves you €450 compared with last month."})
     s = ai.summarize(rec)
     check("summary: rejects an invented number (€450) and uses the plain summary", s["written_by"] != "Gemini", s["text"])
 

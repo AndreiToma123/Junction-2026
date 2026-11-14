@@ -242,11 +242,19 @@ def _check_approved_brands(rule, option, quote, req, ctx):
                for pid, b in brands.items() if b not in ok]
         return "pass", "; ".join(why) + ".", facts
     if others:
-        names = [f"{(catalog.get(pid) or {}).get('name_en') or pid} ({pid}, {b or 'no brand'})"
-                 for pid, b in brands.items() if not fine(pid, b)]
-        return rule["result"], (f"{'; '.join(names)} {'is' if len(names) == 1 else 'are'} not "
-                                + ("the kitchen's usual product, not a pre-approved swap and not " if usual else "")
-                                + f"an approved brand (approved: {', '.join(ok)})."), facts
+        listed = ctx.get("listed_swaps") or []
+        parts = []
+        for pid, b in brands.items():
+            if fine(pid, b):
+                continue
+            name = f"{(catalog.get(pid) or {}).get('name_en') or pid} ({pid}, {b or 'no brand'})"
+            if pid in listed:
+                parts.append(f"{name} is on the chef's swap list but not pre-approved, so a person decides")
+            elif usual:
+                parts.append(f"{name} is not the usual product, not on the chef's swap list and not an approved brand")
+            else:
+                parts.append(f"{name} is not an approved brand")
+        return rule["result"], "; ".join(parts) + f" (approved brands: {', '.join(ok)}).", facts
     return "pass", f"{', '.join(sorted(set(brands.values())))}: approved.", facts
 
 

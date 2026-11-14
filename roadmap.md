@@ -54,7 +54,7 @@ run in a sandbox and can't touch real data.
 
 ## 2. Decisions so far (short version)
 
-Full list with reasons: [DECISIONS.md](DECISIONS.md) (60 decisions).
+Full list with reasons: [DECISIONS.md](DECISIONS.md) (64 decisions).
 
 **Scope and data**
 - Ordering is our own mock order service; nothing is sent to Aimo (1).

@@ -114,27 +114,35 @@ def _check_parsed(g, text, today):
 # =============================================================== 2. summary for the approver
 
 def summarize(rec):
-    """One or two sentences saying what is decided and why. Built only from rule results."""
+    """What is happening and, separately, the exact reason a person must decide (shown in bold).
+    Built only from data and rule results. Returns {"text", "situation", "reason", "written_by"}."""
     facts = _summary_facts(rec)
-    fallback = {"text": _template_summary(rec, facts), "written_by": CODE}
+    fallback = _template_parts(rec, facts)
     if not llm.available() or rec.get("status") not in ("needs_approval", "cannot_fulfil"):
         return fallback  # simple outcomes don't need AI wording
-    system = ("Write a summary of at most 2 short sentences for a kitchen manager who must approve or reject a purchase. "
-              "Sentence 1: what the order is, from 'situation' (e.g. that it is a split and why). Sentence 2: the exact reason "
-              "a person must decide, from 'rules_not_passed'. Use ONLY the facts in the JSON. "
-              "Do not list products or repeat the order lines. Do not add numbers that are not in the JSON. "
-              "'delivery_date' is the day the goods will be delivered (not a deadline). "
-              "Plain words, no jargon. Return JSON: {\"summary\": \"...\"}")
+    system = ("Write for a kitchen manager who must approve or reject a purchase. Return JSON "
+              "{\"situation\": one short sentence saying what the order is, from 'situation' (e.g. that it is a split and why), "
+              "\"reason\": one short sentence with the exact reason a person must decide, from 'rules_not_passed'}. "
+              "Use ONLY the facts in the JSON. Do not list products or repeat the order lines. Do not add numbers that are "
+              "not in the JSON. 'delivery_date' is the day the goods will be delivered (not a deadline). Plain words, no jargon.")
     try:
         g = llm.generate_json(system, json.dumps(facts, ensure_ascii=False))
     except llm.LLMError:
         return fallback
-    text = g.get("summary")
-    if not isinstance(text, str) or not (10 <= len(text) <= 420):
+    sit, why = g.get("situation"), g.get("reason")
+    if not all(isinstance(x, str) and 10 <= len(x) <= 300 for x in (sit, why)):
         return fallback
-    if not _numbers(text) <= _numbers(json.dumps(facts, ensure_ascii=False)):
+    if not _numbers(sit + " " + why) <= _numbers(json.dumps(facts, ensure_ascii=False)):
         return fallback  # it used a number that is not in the facts
-    return {"text": text.strip(), "written_by": AI}
+    return {"text": f"{sit.strip()} {why.strip()}", "situation": sit.strip(), "reason": why.strip(), "written_by": AI}
+
+
+def _template_parts(rec, facts):
+    text = _template_summary(rec, facts)
+    if facts["status"] == "needs_approval":
+        reason = "A person must decide because: " + " ".join(r["detail"] for r in facts["rules_not_passed"])
+        return {"text": text, "situation": facts.get("situation") or "", "reason": reason, "written_by": CODE}
+    return {"text": text, "written_by": CODE}
 
 
 def _summary_facts(rec):

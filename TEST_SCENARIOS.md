@@ -26,6 +26,11 @@ can't be met (the agent will say so, which is correct). Then use "by Tuesday" or
 - ✅ Butter is **60 kg** (usual 40 + 20 extra).
 - ✅ Milk / butter / cheese show a demo delivery time; cream and eggs say *"Valio Aimo gives the day, not the time"*.
 
+## 2b. Several products with different dates (and a typo)
+**New request:** `Usual dairy order, plus 20 kg extra butter by Wednesday, 500 L milk, 60 kg salmon and some potatoes by Thrusday`
+- ✅ 8 products. The dairy items (and the extra butter) are for **Wed 18 Nov**; the 500 L milk, salmon and potatoes for **Thu 19 Nov** ("Thrusday" is understood).
+- ✅ The top line counts them, e.g. *"7 ordered · 1 needs your answer"*, and **Needs you** lists the potatoes first, with a *How much* box right there. Type `150` → **Continue** → ✅ *"8 ordered"*.
+
 ## 3. Mixed results in one request
 **New request:** `500 L lactose-free milk, 60 kg salmon and some potatoes by Monday`
 - ✅ Milk **Ordered**, salmon **Needs approval**, potatoes **Needs your answer** ("how much").
@@ -35,7 +40,8 @@ can't be met (the agent will say so, which is correct). Then use "by Tuesday" or
 Open the **salmon** request from scenario 3 (Requests → Needs approval).
 - ✅ **What needs deciding** starts with *"Split order: Valio Aimo has only 43 kg of the usual salmon… 20 kg with rainbow trout"*, then the reason (trout isn't pre-approved).
 - ✅ Order table: 40 kg salmon + 20 kg trout. Ranking table: the split is #1; "60 kg salmon" is #2 *Can't be used: only 43 in stock*.
-- ✅ **Or instead** offers: *Order only the usual product (40 kg)*, *Wait for the usual product: order all 60 kg for Wed 18 Nov* (demo restock), *Show recipe-compatible substitutes* (ranked #1, #2… with "Why #1").
+- ✅ **What needs deciding**: the situation in plain text, **the reason in bold**.
+- ✅ **Or instead** offers: *Order only the usual product (40 kg)*, *Wait for the usual product: order all 60 kg for Wed 18 Nov* (demo restock), *Show recipe-compatible substitutes*: **five** fish, ranked in the chef's order (fresh trout, frozen trout, redfish, ocean perch, pangasius), each with its trade-off and "Why #n".
 - Click **Wait for the usual product** → ✅ new request **Ordered** for Wed 18 Nov, stock check says *"includes a demo restock"*.
 
 ## 5. Spend limit + price re-checked at approval (story 6)
@@ -94,4 +100,4 @@ Open the **salmon** request from scenario 3 (Requests → Needs approval).
 ## 14. Requests screen
 - ✅ Opens on **Needs approval**. Cancel a request there → ✅ you stay in Needs approval.
 - ✅ **All** folds finished requests away. **Clear requests** (type `CLEAR`) empties the lists but keeps orders, stock, rules and the log.
-- ✅ ◐ switches dark mode.
+- ✅ The **Dark** button (moon) switches to dark mode; it then shows **Light** (sun).

@@ -63,6 +63,12 @@ def _deadline(text, today):
         if re.search(rf"\b{name}", t):
             days = (wd - today.weekday()) % 7 or 7  # next such day, never today
             return (today + timedelta(days=days)).isoformat()
+    import difflib  # small typos: "Thrusday", "wensday", "firday"
+    for w in re.findall(r"[a-zäö]{5,}", t):
+        close = difflib.get_close_matches(w, list(WEEKDAYS), n=1, cutoff=0.75)
+        if close:
+            days = (WEEKDAYS[close[0]] - today.weekday()) % 7 or 7
+            return (today + timedelta(days=days)).isoformat()
     return None
 
 
@@ -108,42 +114,53 @@ _CATEGORY_WORDS = {"dairy": "dairy", "milk products": "dairy", "maito": "dairy",
 
 
 def split_items(text, today=None):
-    """'Usual dairy order, plus 20 kg extra butter and 30 kg salmon by Monday' ->
-    one entry per product (same deadline for all). Returns [] if the text is about one product only.
+    """'Usual dairy order, plus 20 kg extra butter by Wednesday, 500 L milk, 60 kg salmon and some potatoes
+    by Thursday' -> one entry per product, each with ITS date: a date applies to the products named before
+    it (since the previous date). Products after the last date get that last date.
+    Returns [] if the text is about one product only.
     'usual <category> order' expands to every usual item of that category with its usual amount.
-    The same product named twice is added up (usual butter + 20 kg extra butter)."""
-    deadline = _deadline(text, today or date.today())
-    items, order = {}, []
+    The same product named twice FOR THE SAME DATE is added up (usual butter + 20 kg extra butter)."""
+    today = today or date.today()
+    found, pending, last_date = [], [], None
 
-    def add(item_id, product, amount, unit, source, extra=False):
-        key = item_id or (product or "").lower()
-        if key in items and items[key]["amount"] is not None and amount is not None:
-            items[key]["amount"] += amount
-            items[key]["source"] += " + " + source
-            return
-        items[key] = {"product": product, "item_id": item_id, "amount": amount, "unit": unit, "deadline": deadline,
-                      "as_much_as_possible": False, "source": source, "parsed_by": "simple pattern reader (several products)"}
-        order.append(key)
-
-    for seg in [s for s in _SPLIT.split(text or "") if s and s.strip()]:
+    for seg in [x for x in _SPLIT.split(text or "") if x and x.strip()]:
         low = seg.lower()
+        seg_date = _deadline(seg, today)
+        new = []
         cat = next((c for w, c in _CATEGORY_WORDS.items() if w in low), None)
         if "usual" in low and cat:
-            for i in rules.usual_orders()["items"]:
-                if i.get("category") == cat:
-                    add(i["item_id"], i["name"], float(i["usual_amount"]), i["unit"], f"usual {cat} order")
-            continue
-        m = _AMOUNT.search(seg)
-        item = _item(seg)
-        if not m and not item:
-            continue  # date words, "please", etc.
-        if item:
-            add(item["item_id"], item["name"], _number(m.group(1)) if m else None,
-                UNITS[m.group(2).lower()] if m else item["unit"], seg.strip())
+            new = [{"item_id": i["item_id"], "product": i["name"], "amount": float(i["usual_amount"]), "unit": i["unit"],
+                    "source": f"usual {cat} order"} for i in rules.usual_orders()["items"] if i.get("category") == cat]
         else:
-            after = seg[m.end():]
-            words = re.split(r"\b(by|until|before|for|mennessä)\b", after, flags=re.I)[0]
-            name = re.sub(r"^\s*(of|extra)\s+", "", words.strip(" .,"), flags=re.I) or None
-            add(None, name, _number(m.group(1)), UNITS[m.group(2).lower()], seg.strip())
+            m = _AMOUNT.search(seg)
+            item = _item(seg)
+            if item:
+                new = [{"item_id": item["item_id"], "product": item["name"], "amount": _number(m.group(1)) if m else None,
+                        "unit": UNITS[m.group(2).lower()] if m else item["unit"], "source": seg.strip()}]
+            elif m:
+                after = seg[m.end():]
+                words = re.split(r"\b(by|until|before|for|mennessä)\b", after, flags=re.I)[0]
+                name = re.sub(r"^\s*(of|extra)\s+", "", words.strip(" .,"), flags=re.I) or None
+                new = [{"item_id": None, "product": name, "amount": _number(m.group(1)), "unit": UNITS[m.group(2).lower()],
+                        "source": seg.strip()}]
+        pending += new
+        if seg_date:
+            for x in pending:
+                x["deadline"] = seg_date
+            found += pending
+            pending, last_date = [], seg_date
+    for x in pending:
+        x["deadline"] = last_date
+    found += pending
+
+    items, order = {}, []
+    for x in found:
+        key = (x["item_id"] or (x["product"] or "").lower(), x["deadline"])
+        if key in items and items[key]["amount"] is not None and x["amount"] is not None:
+            items[key]["amount"] += x["amount"]
+            items[key]["source"] += " + " + x["source"]
+            continue
+        items[key] = {**x, "as_much_as_possible": False, "parsed_by": "simple pattern reader (several products)"}
+        order.append(key)
     out = [items[k] for k in order]
     return out if len(out) > 1 else []

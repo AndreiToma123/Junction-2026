@@ -34,7 +34,8 @@ def _check(pid, amount, unit, deadline, q):
     units = rules.units_for(pid, amount, unit)
     stock_ok = q["stock_status"] in ("no_limit", "unknown") or (q["stock_status"] == "known" and q["stock_amount"] >= units)
     in_time = bool(q["deliverable"]) and not q["cutoff_passed"] and bool(q["available_date"]) and q["available_date"] <= deadline
-    ok = in_time and stock_ok and bool(q["priced"]) and not q["sales_block"]
+    too_much = units * per > amount * 1.25 + 1e-9  # pack size would force far more than needed
+    ok = in_time and stock_ok and bool(q["priced"]) and not q["sales_block"] and not too_much
     why = None
     if not q["deliverable"]:
         why = "Valio Aimo gave no delivery date"
@@ -46,6 +47,8 @@ def _check(pid, amount, unit, deadline, q):
         why = f"only {rules.num(q['stock_amount'] * per)} {_u(unit)} in stock"
     elif not q["priced"]:
         why = "no price"
+    elif too_much:
+        why = f"comes in packs that would mean {rules.num(units * per)} {_u(unit)} for {rules.num(amount)} needed"
     return {"product_id": pid, "name": p["name_en"] or p["name_fi"], "brand": p["brand"], "unit": unit,
             "units": units, "amount": round(units * per, 3), "sales_unit": p["sales_unit"],
             "price_per_unit_with_tax": q.get("price_per_unit_with_tax"),
@@ -133,11 +136,11 @@ def propose(item_id, amount, deadline, dishes=None, portions=None, use_ai=True):
         return {"item_id": item_id, "name": item["name"], "error": f"Could not ask Valio Aimo: {e}", "options": [], "dish_swaps": []}
 
     options = []
-    for s in swaps:
+    for n, s in enumerate(swaps, 1):
         f = _check(s["product_id"], amount, unit, deadline, quote.get(s["product_id"]))
         if f:
             options.append({**f, "source": "chef's swap list", "pre_approved": bool(s.get("pre_approved")),
-                            "note": s["note"], "needs_chef": not s.get("pre_approved")})
+                            "note": s["note"], "needs_chef": not s.get("pre_approved"), "chef_order": n})
     checked = [f for f in (_check(p["id"], amount, unit, deadline, quote.get(p["id"])) for p in cands) if f and f["ok"]]
     checked.sort(key=lambda f: f["price_per"] or 1e9)
     checked = checked[:MAX_CATALOG_CANDIDATES]
@@ -158,11 +161,13 @@ def propose(item_id, amount, deadline, dishes=None, portions=None, use_ai=True):
                             "needs_chef": True})
     usable = [o for o in options if o["ok"]]
     fit_order = {"good": 0, "ok": 1, None: 2}
-    usable.sort(key=lambda o: (not o["pre_approved"], o["source"] != "chef's swap list", fit_order.get(o.get("fit"), 2), o["price_per"] or 1e9))
+    # pre-approved first, then the chef's list in the chef's own order of preference, then AI picks by fit, then price
+    usable.sort(key=lambda o: (not o["pre_approved"], o["source"] != "chef's swap list", o.get("chef_order", 99),
+                               fit_order.get(o.get("fit"), 2), o["price_per"] or 1e9))
     for n, o in enumerate(usable, 1):
         o["rank"] = n
         why = ("on the chef's list and pre-approved: the agent may order it alone" if o["pre_approved"] else
-               "on the chef's list of recipe swaps" if o["source"] == "chef's swap list" else
+               f"the chef's choice #{o['chef_order']} on the swap list" if o["source"] == "chef's swap list" else
                f"picked by the AI as a {o.get('fit', 'possible')} fit for the recipe" if o["source"] == "suggested by AI" else
                "same product group only, not checked against the recipe")
         o["rank_reason"] = why[0].upper() + why[1:] + f"; €{o['price_per']:,.2f}/{_u(unit)}."

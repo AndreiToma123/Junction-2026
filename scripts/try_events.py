@@ -151,4 +151,24 @@ except kitchen.KitchenError:
     ok = True
 check("a swap without a trade-off note is refused", ok)
 
+print("\n=== dates per product, typos, substitute order")
+from app.parse import split_items, parse as _parse
+its = split_items("Usual dairy order, plus 20 kg extra butter by Wednesday, 500 L milk, 60 kg salmon and some potatoes by Thrusday", T)
+dates = {(i["product"], i["deadline"]) for i in its}
+check("each product gets the date that follows it ('by Wednesday' / 'by Thrusday')",
+      ("Butter", "2026-11-18") in dates and ("Potatoes", "2026-11-19") in dates and ("Salmon fillet", "2026-11-19") in dates
+      and ("Lactose-free semi-skimmed milk", "2026-11-18") in dates and ("Lactose-free semi-skimmed milk", "2026-11-19") in dates,
+      "; ".join(f"{i['product']} {i['amount']} by {i['deadline']}" for i in its))
+check("misspelled weekdays are understood", _parse("40 kg salmon by wensday", T)["deadline"] == "2026-11-18")
+b2 = agent.handle_text("500 L lactose-free milk, 60 kg salmon and some potatoes by Monday", today=T)
+check("in a several-product request, what needs a person comes first", b2["child_summaries"][-1]["status"] == "ordered",
+      " → ".join(c["status"] for c in b2["child_summaries"]))
+kitchen.reset()
+s3 = agent.handle(text="restock", parsed={"product": "Salmon fillet", "item_id": "salmon", "amount": 60.0, "unit": "KG",
+                                           "deadline": "2026-11-16", "parsed_by": "test"})
+subs3 = substitutes.for_request(s3)
+check("salmon has several recipe swaps, ranked in the chef's order", [o["product_id"] for o in subs3["options"][:3]] == ["462016", "469560", "475684"],
+      "; ".join(f"#{o['rank']} {o['name']}" for o in subs3["options"][:5]))
+check("the reason for a decision is a separate (bold) part", bool(s3["summary"].get("reason")), s3["summary"].get("reason"))
+
 print(f"\n{sum(results)} of {len(results)} checks passed.")

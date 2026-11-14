@@ -179,8 +179,10 @@ Not used: option A (making Arla the usual milk, so everything stays real data). 
   (e.g. salmon fillet 462150, penne 463190), with a usual order amount, a reorder level (about two days of use),
   a starting stock and a budget category. Amounts made up; product codes, prices and Aimo stock real.
 - **The chef's swap list** per ingredient: real Aimo products that can replace it in named dishes, a note on the
-  trade-off, and whether it is **pre-approved** (the agent may order it alone). E.g. salmon → rainbow trout
-  (462016, chef decides); penne → penne rigate (471450, pre-approved).
+  trade-off, and whether it is **pre-approved** (the agent may order it alone). The list order is the chef's
+  preference and is how substitutes are ranked. E.g. salmon → fresh rainbow trout 462016, frozen trout 469560,
+  redfish 475684, ocean perch 475485, pangasius 475530 (all "chef decides", all deliverable by Monday when checked);
+  penne → penne rigate (471450, pre-approved).
 - **Weekly budgets**: dairy €4,000, dry goods €1,500, fresh produce €1,500, fish & meat €4,500.
 
 ## 7. Demo values (simulated, always labelled)
