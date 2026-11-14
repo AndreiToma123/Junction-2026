@@ -51,6 +51,7 @@ if you want to try "Ask the log"), or:
 ```
 
 **Live test walk-through:** [TEST_SCENARIOS.md](TEST_SCENARIOS.md), step by step, with what you should see.
+**How it is built, the trust protocol and next steps:** [TECHNICAL.md](TECHNICAL.md). **Pitch script:** [PITCH_SCRIPT.md](PITCH_SCRIPT.md).
 
 ---
 
