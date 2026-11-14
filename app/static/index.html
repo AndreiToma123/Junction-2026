@@ -155,6 +155,30 @@ function toast(msg) { const t = $("#toast"); t.textContent = msg; t.style.displa
 const meInput = $("#me");
 try { meInput.value = localStorage.getItem("me") || ""; } catch (e) {}
 meInput.addEventListener("input", () => { try { localStorage.setItem("me", meInput.value); } catch (e) {} });
+// ---------- drafts: text typed into a box stays there when you switch screens (kept in this browser tab only).
+// A box gets its text back only if the screen draws it empty; the draft is forgotten when its form is sent.
+const DRAFT_TYPES = new Set(["text", "search", "number", "date", "textarea"]);
+let DRAFTS = (() => { try { return JSON.parse(sessionStorage.getItem("drafts") || "{}"); } catch (e) { return {}; } })();
+const saveDrafts = () => { try { sessionStorage.setItem("drafts", JSON.stringify(DRAFTS)); } catch (e) {} };
+const draftable = el => el && el.closest && el.closest("#view") && DRAFT_TYPES.has(el.type) && (el.id || el.name);
+function draftKey(el) {
+  const form = el.closest("form"), path = (location.hash.slice(1) || "/new").split("?")[0];
+  const ctx = form ? (form.id || Object.entries(form.dataset).map(([k, v]) => k + "=" + v).join(",")) : "";
+  const base = `${path}|${ctx}|${el.id || el.name}`;
+  const same = [...$("#view").querySelectorAll(el.id ? `#${CSS.escape(el.id)}` : `[name="${CSS.escape(el.name)}"]`)].filter(x => (x.closest("form") || null) === (form || null));
+  return same.length > 1 ? `${base}#${same.indexOf(el)}` : base;
+}
+function rememberDraft(el) { if (!draftable(el)) return; const k = draftKey(el); if (el.value) DRAFTS[k] = el.value; else delete DRAFTS[k]; saveDrafts(); }
+function forgetDrafts(root) { root.querySelectorAll("input,textarea").forEach(el => { if (draftable(el)) delete DRAFTS[draftKey(el)]; }); saveDrafts(); }
+function restoreDrafts(root) {
+  root.querySelectorAll("input,textarea").forEach(el => { if (!draftable(el) || el.value) return; const v = DRAFTS[draftKey(el)]; if (v) el.value = v; });
+}
+document.addEventListener("input", e => rememberDraft(e.target));
+document.addEventListener("change", e => rememberDraft(e.target));
+document.addEventListener("submit", e => { if (e.target.closest("#view")) forgetDrafts(e.target); }, true);
+new MutationObserver(muts => { for (const m of muts) m.addedNodes.forEach(n => { if (n.nodeType === 1) restoreDrafts(n.matches?.("input,textarea") ? n.parentNode : n); }); })
+  .observe(document.getElementById("view") || document.body, { childList: true, subtree: true });
+
 function me() { const v = meInput.value.trim(); if (!v) { meInput.focus(); toast("Type your name first (top right). It goes into the audit log."); } return v; }
 
 let NEEDS_PW = false;
@@ -295,7 +319,7 @@ async function doAnswer(btn) {
   else if (btn.dataset.custom) { const v = parseFloat($("#amt-" + CSS.escape(id)).value); if (!(v > 0)) return toast("Type an amount first."); body = { new_amount: v }; }
   else body = { new_amount: parseFloat(btn.dataset.amount) };
   btn.disabled = true;
-  try { const r = await api(`/api/requests/${id}/answer`, { body }); await loadRequests(); location.hash = "#/requests/" + r.id; if (CURRENT === "requests") route(); }
+  try { const r = await api(`/api/requests/${id}/answer`, { body }); forgetDrafts(btn.parentNode); await loadRequests(); location.hash = "#/requests/" + r.id; if (CURRENT === "requests") route(); }
   catch (e) { toast(e.message); btn.disabled = false; }
 }
 document.addEventListener("click", e => { const b = e.target.closest("[data-answer]"); if (b) doAnswer(b); });
@@ -347,13 +371,13 @@ async function viewNew(params) {
     <div id="result" class="stack"></div>
     <p class="small mute" style="margin:0">Prices, stock and delivery dates come live from the Valio Aimo mock API. Orders are mock orders for the demo; nothing is sent to Valio Aimo.</p></div>`;
   const ta = $("#need");
-  v.querySelectorAll("[data-fill]").forEach(b => b.onclick = () => { ta.value = b.dataset.fill; ta.focus(); });
+  v.querySelectorAll("[data-fill]").forEach(b => b.onclick = () => { ta.value = b.dataset.fill; rememberDraft(ta); ta.focus(); });
   const send = async () => {
     const text = ta.value.trim(); if (!text) { ta.focus(); return toast("Write what you need first."); }
     const btn = $("#send"); btn.disabled = true; btn.textContent = "Working…";
     $("#result").innerHTML = `<div class="card mute">The agent is reading your request and asking Valio Aimo…</div>`;
     try {
-      const r = await api("/api/requests", { body: { text, scenario: $("#demoScenario").value || null } });
+      const r = await api("/api/requests", { body: { text, scenario: $("#demoScenario").value || null } }); forgetDrafts(ta.parentNode);
       await loadRequests(); showRun(r);
     } catch (e) { $("#result").innerHTML = `<div class="problem">${esc(e.message)}</div>`; }
     btn.disabled = false; btn.textContent = "Send to agent";
