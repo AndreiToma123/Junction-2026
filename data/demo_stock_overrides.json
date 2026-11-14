@@ -1,0 +1,12 @@
+{
+  "_note": "SIMULATED STOCK for demo scenario 2 only (see DECISIONS.md #4). Prices, dates and cut-offs stay real.",
+  "scenarios": {
+    "split": {
+      "464306": 600,
+      "464398": 0,
+      "464201": 0,
+      "463779": 0,
+      "469363": 500
+    }
+  }
+}

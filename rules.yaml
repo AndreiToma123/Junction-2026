@@ -1,0 +1,78 @@
+# THE RULEBOOK (single source). rulebook.md is generated from this file.
+# Edit via the dashboard (Rules screen) or by hand; every change is checked before it is saved.
+#
+# Each rule: id, type (see app/rule_types.py for all types), name, settings, and
+# `result` = what happens when the rule is not met:
+#   approve  -> needs a person's approval
+#   ask      -> ask the buyer
+#   blocked  -> this option can't be used
+# Locked rules (safety) can be tuned but not removed.
+version: 2
+kitchen: Demo Kitchen Oy
+currency: EUR
+
+rules:
+  # ---- A: the request (checked before searching)
+  - id: A2
+    type: clear_request
+    name: Request is clear
+    settings: {required_fields: [product, amount, unit, deadline]}
+    result: ask
+  - id: A1
+    type: usual_size
+    name: Much bigger than usual
+    settings: {max_ratio: 3, if_buyer_confirms: approve, if_new_item: approve}
+    result: ask
+
+  # ---- B: each product in an option
+  - id: B1
+    type: can_be_sold
+    name: Can be sold
+    settings: {}
+    result: blocked
+  - id: B2
+    type: matches_request
+    name: Matches the request
+    settings: {}
+    result: blocked
+  - id: B3
+    type: arrives_by_deadline
+    name: Arrives by the deadline
+    settings: {}
+    result: blocked
+  - id: B4
+    type: enough_stock
+    name: Enough stock
+    settings: {if_stock_unknown: allow_with_warning}
+    result: blocked
+
+  # ---- C: the whole order
+  - id: C4
+    type: order_steps
+    name: Allowed order steps
+    settings: {max_overshoot_pct: 5}
+    result: approve
+  - id: C1
+    type: spend_limit
+    name: Spend limit
+    settings: {limit_eur: 2000, includes_tax: true}
+    result: approve
+  - id: C2
+    type: approved_brands
+    name: Approved brands
+    settings: {brands: [Valio]}
+    result: approve
+  - id: C3
+    type: max_brands
+    name: Brands per split
+    settings: {max_brands: 2}
+    result: blocked
+
+# Choosing between options that are not blocked (rulebook section D), in this order:
+choose_by: [fewest_approvals, most_usual_product, lowest_total]
+
+# Always listed in the summary as NOT checked by the agent.
+not_checked:
+  - Allergens and food quality (out of scope)
+  - "Customer-specific price: the mock API ignores the customer number"
+  - "Real order confirmation: this is a mock order, nothing is sent to Valio Aimo"

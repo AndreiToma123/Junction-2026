@@ -1,0 +1,14 @@
+.env
+__pycache__/
+.venv/
+# big dataset (87 MB) - download it again via /api/products/download
+docs/aimo_api/valio_aimo_junction26_product_data.json
+# contains the API key and portal password
+docs/Challenge Instructions.txt
+data/log*.jsonl
+data/catalog_index.json
+data/orders.jsonl
+data/requests/
+data/rule_changes.jsonl
+data/rule_versions/
+data/log.jsonl

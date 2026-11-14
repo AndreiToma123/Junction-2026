@@ -1,0 +1,3875 @@
+[
+ {
+  "id": "464306",
+  "salesUnitGtin": "6408430000487",
+  "salesUnit": "ST",
+  "baseUnit": "ST",
+  "category": "10400",
+  "allowedLotSize": 0.01,
+  "deleted": false,
+  "temperatureCondition": 4,
+  "vendorName": "VALIO OY TUORE",
+  "countryOfOrigin": "fi",
+  "synkkaData": {
+   "gtin": "6408430000487",
+   "lastUpdated": "2025-09-29T20:01:27+0300",
+   "mediasLastUpdated": "2025-10-07T20:00:41+0300",
+   "countriesOfOrigin": [
+    "246"
+   ],
+   "names": [
+    {
+     "value": "Valio Hyvä suomalainen Arki® Eila® semi skimmed milk drink 1 l lactose free",
+     "language": "en"
+    },
+    {
+     "value": "Valio Hyvä suomalainen Arki® Eila® kevytmaitojuoma 1 l laktoositon",
+     "language": "fi"
+    },
+    {
+     "value": "Valio Hyvä suomalainen Arki® Eila® lättmjölksdryck 1 l laktosfri",
+     "language": "sv"
+    }
+   ],
+   "materialAdditionalDescriptions": [],
+   "marketingTexts": [
+    {
+     "value": "Valio Hyvä suomalainen Arki® Eila® semi-skimmed milk drink is a refreshing and good lactose-free milk drink made from fresh Finnish milk. It is suitable as a drink with meals, for cooking and with coffee. Valio Hyvä suomalainen Arki® Eila® semi-skimmed milk drink is a tasty lactose-free alternative for the whole family. It has a fat content of 1.5%. All Valio Eila® products are suitable for a lactose-free diet.",
+     "language": "en"
+    },
+    {
+     "value": "Valio Hyvä suomalainen Arki® Eila® kevytmaitojuoma on suomalaisesta tuoreesta maidosta valmistettua raikkaan makuista ja hyvää laktoositonta maitojuomaa. Se sopii ruokajuomaksi, ruoanlaittoon ja kahvimaidoksi. Valio Hyvä suomalainen Arki® Eila®kevytmaitojuoma on maistuva laktoositon vaihtoehto koko perheelle. Sen rasvapitoisuus on 1,5 %. Kaikki Valio Eila® tuotteet sopivat laktoosittomaan ruokavalioon.",
+     "language": "fi"
+    },
+    {
+     "value": "Valio Hyvä suomalainen Arki® Eila® lättmjölksdryck är en frisk och god laktosfri mjölkdryck tillverkad av färsk mjölk från Finland. Den passar som måltidsdryck, i matlagning och som kaffemjölk. Valio Hyvä Suomalainen Arki® Eila® lättmjölksdryck är ett gott laktosfritt alternativ för hela familjen. Den har en fetthalt på 1,5 %. Alla Valio Eila®-produkter passar för en laktosfri kost.",
+     "language": "sv"
+    }
+   ],
+   "keyIngredients": [
+    {
+     "value": "MILK, vitamin D.",
+     "language": "en"
+    },
+    {
+     "value": "MAITO, D-vitamiini.",
+     "language": "fi"
+    },
+    {
+     "value": "MJÖLK, vitamin D.",
+     "language": "sv"
+    }
+   ],
+   "storageInstructions": [
+    {
+     "value": "Keep refrigerated 0 to +6 °C and protect from light. Once opened, consume within 3 to 4 days.",
+     "language": "en"
+    },
+    {
+     "value": "Säilytettävä valolta suojattuna 0 – +6 °C:ssa. Säilyy avattuna jääkaapissa 3–4 päivää.",
+     "language": "fi"
+    },
+    {
+     "value": "Förvaras skyddad för ljus vid 0 – +6 °C. Öppnad förpackning är hållbar 3–4 dagar i kylskåp.",
+     "language": "sv"
+    }
+   ],
+   "preparationInstructions": [],
+   "disposalInformations": [
+    {
+     "value": "Rinse and compress. Recycle package as carton.",
+     "language": "en"
+    },
+    {
+     "value": "Huuhtele ja litistä. Kierrätä pakkaus kartonkina.",
+     "language": "fi"
+    },
+    {
+     "value": "Skölj och platta till. Återvinn förpacknignen som kartong.",
+     "language": "sv"
+    }
+   ],
+   "usageInstructions": [],
+   "classifications": [
+    {
+     "type": "DECIMAL",
+     "name": "composition",
+     "values": []
+    },
+    {
+     "type": "DECIMAL",
+     "name": "gda",
+     "values": [
+      {
+       "id": "CHOAVL",
+       "value": 3.1,
+       "unit": "GRM"
+      },
+      {
+       "id": "ENER-E14",
+       "value": 38.0,
+       "unit": "E14"
+      },
+      {
+       "id": "ENER-KJO",
+       "value": 159.0,
+       "unit": "KJO"
+      },
+      {
+       "id": "FASAT",
+       "value": 0.9,
+       "unit": "GRM"
+      },
+      {
+       "id": "FAT",
+       "value": 1.5,
+       "unit": "GRM"
+      },
+      {
+       "id": "FIBTG",
+       "value": 0.0,
+       "unit": "GRM"
+      },
+      {
+       "id": "LACS",
+       "value": 0.0,
+       "unit": "GRM"
+      },
+      {
+       "id": "PRO-",
+       "value": 3.0,
+       "unit": "GRM"
+      },
+      {
+       "id": "SALTEQ",
+       "value": 0.1,
+       "unit": "GRM"
+      },
+      {
+       "id": "SUGAR-",
+       "value": 3.1,
+       "unit": "GRM"
+      }
+     ]
+    },
+    {
+     "type": "DECIMAL",
+     "name": "mineral",
+     "values": [
+      {
+       "id": "CA",
+       "value": 110.0,
+       "unit": "MGM"
+      },
+      {
+       "id": "NA",
+       "value": 40.0,
+       "unit": "MGM"
+      }
+     ]
+    },
+    {
+     "type": "DECIMAL",
+     "name": "nutritionFact",
+     "values": [
+      {
+       "id": "CHOAVL",
+       "value": 3.1,
+       "unit": "GRM"
+      },
+      {
+       "id": "ENER-E14",
+       "value": 38.0,
+       "unit": "E14"
+      },
+      {
+       "id": "ENER-KJO",
+       "value": 159.0,
+       "unit": "KJO"
+      },
+      {
+       "id": "FAPUCIS",
+       "value": 0.0,
+       "unit": "GRM"
+      },
+      {
+       "id": "FASAT",
+       "value": 0.9,
+       "unit": "GRM"
+      },
+      {
+       "id": "FAT",
+       "value": 1.5,
+       "unit": "GRM"
+      },
+      {
+       "id": "FIBTG",
+       "value": 0.0,
+       "unit": "GRM"
+      },
+      {
+       "id": "LACS",
+       "value": 0.0,
+       "unit": "GRM"
+      },
+      {
+       "id": "POLYL",
+       "value": 0.0,
+       "unit": "GRM"
+      },
+      {
+       "id": "PRO-",
+       "value": 3.0,
+       "unit": "GRM"
+      },
+      {
+       "id": "SALTEQ",
+       "value": 0.1,
+       "unit": "GRM"
+      },
+      {
+       "id": "STARCH",
+       "value": 0.0,
+       "unit": "GRM"
+      },
+      {
+       "id": "SUGAR-",
+       "value": 3.1,
+       "unit": "GRM"
+      }
+     ]
+    },
+    {
+     "type": "DECIMAL",
+     "name": "vitamin",
+     "values": [
+      {
+       "id": "VITB12",
+       "value": 0.4,
+       "unit": "MC"
+      }
+     ]
+    },
+    {
+     "type": "ENUM",
+     "name": "packagingMarkedLabel",
+     "values": [
+      {
+       "id": "GOODS_FROM_FINLAND_BLUE_SWAN",
+       "synkkaId": "GOODS_FROM_FINLAND_BLUE_SWAN"
+      },
+      {
+       "id": "coolTemperature"
+      }
+     ]
+    },
+    {
+     "type": "ENUM",
+     "name": "allergen",
+     "values": [
+      {
+       "id": "AM",
+       "unit": "CONTAINS"
+      }
+     ]
+    },
+    {
+     "type": "ENUM",
+     "name": "nonAllergen",
+     "values": []
+    },
+    {
+     "type": "ENUM",
+     "name": "nutritionalClaim",
+     "values": [
+      {
+       "id": "FREE_FROM_ADDITIVES",
+       "synkkaId": "ADDITIVES",
+       "unit": "FREE_FROM"
+      },
+      {
+       "id": "FREE_FROM_COLOURING_AGENTS",
+       "synkkaId": "COLOURING_AGENTS",
+       "unit": "FREE_FROM"
+      },
+      {
+       "id": "FREE_FROM_LACTOSE",
+       "synkkaId": "LACTOSE",
+       "unit": "FREE_FROM"
+      },
+      {
+       "id": "FREE_FROM_PRESERVATIVES",
+       "synkkaId": "PRESERVATIVES",
+       "unit": "FREE_FROM"
+      },
+      {
+       "id": "FREE_FROM_SWEETENERS",
+       "synkkaId": "SWEETENERS",
+       "unit": "FREE_FROM"
+      },
+      {
+       "id": "LOW_FAT",
+       "synkkaId": "FAT",
+       "unit": "LOW"
+      },
+      {
+       "id": "LOW_SODIUM_SALT",
+       "synkkaId": "SODIUM_SALT",
+       "unit": "LOW"
+      },
+      {
+       "id": "NO_ADDED_SUGARS",
+       "synkkaId": "SUGARS",
+       "unit": "NO_ADDED"
+      },
+      {
+       "id": "VEGETARIAN",
+       "synkkaId": "VEGETARIAN",
+       "unit": "DIET"
+      }
+     ]
+    },
+    {
+     "type": "ENUM",
+     "name": "packaging",
+     "values": []
+    }
+   ],
+   "nutritionalContent": [
+    {
+     "id": "CA",
+     "value": 110.0,
+     "unit": "MGM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM",
+     "dailyValueIntakePercent": 13.0
+    },
+    {
+     "id": "CHOAVL",
+     "value": 3.1,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "ENER-E14",
+     "value": 38.0,
+     "unit": "E14",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "ENER-KJO",
+     "value": 159.0,
+     "unit": "KJO",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "FAMSCIS",
+     "value": 0.3,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "FAPUCIS",
+     "value": 0.0,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "FASAT",
+     "value": 0.9,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "FAT",
+     "value": 1.5,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "FIBTG",
+     "value": 0.0,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "ID",
+     "value": 16.0,
+     "unit": "MC",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM",
+     "dailyValueIntakePercent": 10.0
+    },
+    {
+     "id": "LACS",
+     "value": 0.0,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "NA",
+     "value": 40.0,
+     "unit": "MGM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "POLYL",
+     "value": 0.0,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "PRO-",
+     "value": 3.0,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "RIBF",
+     "value": 0.2,
+     "unit": "MGM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM",
+     "dailyValueIntakePercent": 14.0
+    },
+    {
+     "id": "SALTEQ",
+     "value": 0.1,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "STARCH",
+     "value": 0.0,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "SUGAR-",
+     "value": 3.1,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "VITB12",
+     "value": 0.4,
+     "unit": "MC",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM",
+     "dailyValueIntakePercent": 16.0
+    },
+    {
+     "id": "VITD-",
+     "value": 1.0,
+     "unit": "MC",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM",
+     "dailyValueIntakePercent": 20.0
+    }
+   ],
+   "ingredients": [
+    {
+     "sequence": 1,
+     "names": [
+      {
+       "value": "Milk",
+       "language": "en"
+      },
+      {
+       "value": "Maito",
+       "language": "fi"
+      },
+      {
+       "value": "Mjölk",
+       "language": "sv"
+      }
+     ],
+     "origins": [
+      {
+       "type": "MILKING",
+       "country": "246"
+      }
+     ]
+    }
+   ],
+   "medias": [
+    {
+     "id": 967084,
+     "primary": true
+    },
+    {
+     "id": 2453053,
+     "primary": true
+    }
+   ],
+   "fishingReports": [],
+   "safetyData": [],
+   "brand": "Valio",
+   "variableUnit": false,
+   "vatCode": "MEDIUM",
+   "producers": [
+    {
+     "id": "6408439999997",
+     "name": "Valio Oy"
+    }
+   ],
+   "unitConversions": [
+    {
+     "synkkaPackagingType": "BASE_UNIT_OR_EACH",
+     "width": {
+      "unit": "MMT",
+      "value": 74.0
+     },
+     "length": {
+      "unit": "MMT",
+      "value": 74.0
+     },
+     "height": {
+      "unit": "MMT",
+      "value": 235.0
+     },
+     "volume": {
+      "unit": "LTR",
+      "value": 1.0
+     },
+     "netWeight": {
+      "unit": "GRM",
+      "value": 1025.0
+     },
+     "grossWeight": {
+      "unit": "GRM",
+      "value": 1052.5
+     }
+    }
+   ]
+  },
+  "units": [
+   {
+    "unitId": "KRS",
+    "sizeInBaseUnits": 160.0
+   },
+   {
+    "unitId": "PAL",
+    "gtin": "6408430101016",
+    "sizeInBaseUnits": 160.0
+   },
+   {
+    "unitId": "KI",
+    "gtin": "6408430101009",
+    "sizeInBaseUnits": 20.0
+   },
+   {
+    "unitId": "ST",
+    "gtin": "6408430000487",
+    "sizeInBaseUnits": 1.0
+   }
+  ],
+  "deposits": [],
+  "substitutions": [
+   {
+    "product": "464306",
+    "substituteProduct": "465039"
+   },
+   {
+    "product": "464306",
+    "substituteProduct": "464398"
+   },
+   {
+    "product": "464306",
+    "substituteProduct": "469363"
+   },
+   {
+    "product": "464306",
+    "substituteProduct": "464201"
+   }
+  ]
+ },
+ {
+  "id": "465039",
+  "salesUnitGtin": "6408430100248",
+  "salesUnit": "KI",
+  "baseUnit": "ST",
+  "category": "10400",
+  "allowedLotSize": 0.01,
+  "deleted": false,
+  "temperatureCondition": 3,
+  "vendorName": "VALIO OY TUORE",
+  "countryOfOrigin": "fi",
+  "synkkaData": {
+   "gtin": "6408430000258",
+   "lastUpdated": "2025-09-29T20:01:26+0300",
+   "mediasLastUpdated": "2025-09-15T09:55:55+0300",
+   "countriesOfOrigin": [
+    "246"
+   ],
+   "names": [
+    {
+     "value": "Valio Eila® semi skimmed milk drink 1 l lactose free",
+     "language": "en"
+    },
+    {
+     "value": "Valio Eila® kevytmaitojuoma 1 l laktoositon",
+     "language": "fi"
+    },
+    {
+     "value": "Valio Eila® lättmjölksdryck 1 l laktosfri",
+     "language": "sv"
+    }
+   ],
+   "materialAdditionalDescriptions": [],
+   "marketingTexts": [
+    {
+     "value": "Valio Eila® lactose-free semi-skimmed milk drink tastes like ordinary fresh milk without any sweetness. Valio Eila® milk drinks were chosen as the best in a taste test*. Enjoy with food or use in cooking and baking. All Valio Eila® products are suitable for a lactose-free diet. Lactose has been removed with Valio’s patented technology. *Product test of lactose-free milk drinks, Makery Oy (4/2018, n=243).",
+     "language": "en"
+    },
+    {
+     "value": "Valio Eila® laktoositon kevytmaitojuoma maistuu tavalliselta, raikkaalta maidolta ilman makeutta. Valio Eila® maitojuomat onkin valittu makutestin parhaiksi*. Nauti ruokajuomana tai käytä ruoanlaitossa ja leivonnassa! Kaikki Valio Eila® tuotteet sopivat laktoosittomaan ruokavalioon. Laktoosi on poistettu Valion patentoimalla teknologialla. *Laktoosittomien maitojuomien tuotetesti, Makery Oy (4/2018, n=243).",
+     "language": "fi"
+    },
+    {
+     "value": "Valio Eila® laktosfri lättmjölksdryck smakar som vanlig, frisk mjölk utan sötma. Valio Eila®-mjölkdryckerna har korats till vinnare i ett smaktest*. Avnjut som måltidsdryck eller använd till matlagning och bakning! Alla Valio Eila®-produkter passar för en laktosfri kost. Laktosen har tagits bort med Valios patenterade teknik. * Produkttest för laktosfria mjölkdrycker, Makery Oy (4/2018, n=243).",
+     "language": "sv"
+    }
+   ],
+   "keyIngredients": [
+    {
+     "value": "MILK, vitamin D.",
+     "language": "en"
+    },
+    {
+     "value": "MAITO, D-vitamiini.",
+     "language": "fi"
+    },
+    {
+     "value": "MJÖLK, vitamin D.",
+     "language": "sv"
+    }
+   ],
+   "storageInstructions": [
+    {
+     "value": "Keep refrigerated 0 to +6 °C and protect from light. Once opened, consume within 3 to 4 days.",
+     "language": "en"
+    },
+    {
+     "value": "Säilytettävä valolta suojattuna 0 – +6 °C:ssa. Säilyy avattuna jääkaapissa 3–4 päivää.",
+     "language": "fi"
+    },
+    {
+     "value": "Förvaras skyddad för ljus vid 0 – +6 °C. Öppnad förpackning är hållbar 3–4 dagar i kylskåp.",
+     "language": "sv"
+    }
+   ],
+   "preparationInstructions": [],
+   "disposalInformations": [
+    {
+     "value": "Rinse and compress. Recycle package as carton.",
+     "language": "en"
+    },
+    {
+     "value": "Huuhtele ja litistä. Kierrätä pakkaus kartonkina.",
+     "language": "fi"
+    },
+    {
+     "value": "Skölj och platta till. Återvinn förpacknignen som kartong.",
+     "language": "sv"
+    }
+   ],
+   "usageInstructions": [],
+   "classifications": [
+    {
+     "type": "DECIMAL",
+     "name": "composition",
+     "values": []
+    },
+    {
+     "type": "DECIMAL",
+     "name": "gda",
+     "values": [
+      {
+       "id": "CHOAVL",
+       "value": 3.1,
+       "unit": "GRM"
+      },
+      {
+       "id": "ENER-E14",
+       "value": 39.0,
+       "unit": "E14"
+      },
+      {
+       "id": "ENER-KJO",
+       "value": 164.0,
+       "unit": "KJO"
+      },
+      {
+       "id": "FASAT",
+       "value": 0.9,
+       "unit": "GRM"
+      },
+      {
+       "id": "FAT",
+       "value": 1.5,
+       "unit": "GRM"
+      },
+      {
+       "id": "FIBTG",
+       "value": 0.0,
+       "unit": "GRM"
+      },
+      {
+       "id": "LACS",
+       "value": 0.0,
+       "unit": "GRM"
+      },
+      {
+       "id": "PRO-",
+       "value": 3.3,
+       "unit": "GRM"
+      },
+      {
+       "id": "SALTEQ",
+       "value": 0.1,
+       "unit": "GRM"
+      },
+      {
+       "id": "SUGAR-",
+       "value": 3.1,
+       "unit": "GRM"
+      }
+     ]
+    },
+    {
+     "type": "DECIMAL",
+     "name": "mineral",
+     "values": [
+      {
+       "id": "CA",
+       "value": 120.0,
+       "unit": "MGM"
+      },
+      {
+       "id": "NA",
+       "value": 40.0,
+       "unit": "MGM"
+      }
+     ]
+    },
+    {
+     "type": "DECIMAL",
+     "name": "nutritionFact",
+     "values": [
+      {
+       "id": "CHOAVL",
+       "value": 3.1,
+       "unit": "GRM"
+      },
+      {
+       "id": "ENER-E14",
+       "value": 39.0,
+       "unit": "E14"
+      },
+      {
+       "id": "ENER-KJO",
+       "value": 164.0,
+       "unit": "KJO"
+      },
+      {
+       "id": "FAPUCIS",
+       "value": 0.0,
+       "unit": "GRM"
+      },
+      {
+       "id": "FASAT",
+       "value": 0.9,
+       "unit": "GRM"
+      },
+      {
+       "id": "FAT",
+       "value": 1.5,
+       "unit": "GRM"
+      },
+      {
+       "id": "FIBTG",
+       "value": 0.0,
+       "unit": "GRM"
+      },
+      {
+       "id": "LACS",
+       "value": 0.0,
+       "unit": "GRM"
+      },
+      {
+       "id": "PRO-",
+       "value": 3.3,
+       "unit": "GRM"
+      },
+      {
+       "id": "SALTEQ",
+       "value": 0.1,
+       "unit": "GRM"
+      },
+      {
+       "id": "SUGAR-",
+       "value": 3.1,
+       "unit": "GRM"
+      }
+     ]
+    },
+    {
+     "type": "DECIMAL",
+     "name": "vitamin",
+     "values": [
+      {
+       "id": "VITB12",
+       "value": 0.4,
+       "unit": "MC"
+      }
+     ]
+    },
+    {
+     "type": "ENUM",
+     "name": "packagingMarkedLabel",
+     "values": [
+      {
+       "id": "GOODS_FROM_FINLAND_BLUE_SWAN",
+       "synkkaId": "GOODS_FROM_FINLAND_BLUE_SWAN"
+      },
+      {
+       "id": "coolTemperature"
+      }
+     ]
+    },
+    {
+     "type": "ENUM",
+     "name": "allergen",
+     "values": [
+      {
+       "id": "AM",
+       "unit": "CONTAINS"
+      }
+     ]
+    },
+    {
+     "type": "ENUM",
+     "name": "nonAllergen",
+     "values": []
+    },
+    {
+     "type": "ENUM",
+     "name": "nutritionalClaim",
+     "values": [
+      {
+       "id": "FREE_FROM_ADDITIVES",
+       "synkkaId": "ADDITIVES",
+       "unit": "FREE_FROM"
+      },
+      {
+       "id": "FREE_FROM_COLOURING_AGENTS",
+       "synkkaId": "COLOURING_AGENTS",
+       "unit": "FREE_FROM"
+      },
+      {
+       "id": "FREE_FROM_LACTOSE",
+       "synkkaId": "LACTOSE",
+       "unit": "FREE_FROM"
+      },
+      {
+       "id": "FREE_FROM_PRESERVATIVES",
+       "synkkaId": "PRESERVATIVES",
+       "unit": "FREE_FROM"
+      },
+      {
+       "id": "FREE_FROM_SWEETENERS",
+       "synkkaId": "SWEETENERS",
+       "unit": "FREE_FROM"
+      },
+      {
+       "id": "LOW_FAT",
+       "synkkaId": "FAT",
+       "unit": "LOW"
+      },
+      {
+       "id": "LOW_SODIUM_SALT",
+       "synkkaId": "SODIUM_SALT",
+       "unit": "LOW"
+      },
+      {
+       "id": "NO_ADDED_SUGARS",
+       "synkkaId": "SUGARS",
+       "unit": "NO_ADDED"
+      },
+      {
+       "id": "VEGETARIAN",
+       "synkkaId": "VEGETARIAN",
+       "unit": "DIET"
+      }
+     ]
+    },
+    {
+     "type": "ENUM",
+     "name": "packaging",
+     "values": []
+    }
+   ],
+   "nutritionalContent": [
+    {
+     "id": "CA",
+     "value": 120.0,
+     "unit": "MGM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM",
+     "dailyValueIntakePercent": 15.0
+    },
+    {
+     "id": "CHOAVL",
+     "value": 3.1,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "ENER-E14",
+     "value": 39.0,
+     "unit": "E14",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "ENER-KJO",
+     "value": 164.0,
+     "unit": "KJO",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "FAMSCIS",
+     "value": 0.3,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "FAPUCIS",
+     "value": 0.0,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "FASAT",
+     "value": 0.9,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "FAT",
+     "value": 1.5,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "FIBTG",
+     "value": 0.0,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "ID",
+     "value": 16.0,
+     "unit": "MC",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM",
+     "dailyValueIntakePercent": 10.0
+    },
+    {
+     "id": "LACS",
+     "value": 0.0,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "NA",
+     "value": 40.0,
+     "unit": "MGM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "PRO-",
+     "value": 3.3,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "RIBF",
+     "value": 0.18,
+     "unit": "MGM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM",
+     "dailyValueIntakePercent": 12.0
+    },
+    {
+     "id": "SALTEQ",
+     "value": 0.1,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "SUGAR-",
+     "value": 3.1,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "VITB12",
+     "value": 0.4,
+     "unit": "MC",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM",
+     "dailyValueIntakePercent": 16.0
+    },
+    {
+     "id": "VITD-",
+     "value": 2.0,
+     "unit": "MC",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM",
+     "dailyValueIntakePercent": 40.0
+    }
+   ],
+   "ingredients": [
+    {
+     "sequence": 1,
+     "names": [
+      {
+       "value": "Milk",
+       "language": "en"
+      },
+      {
+       "value": "Maito",
+       "language": "fi"
+      },
+      {
+       "value": "Mjölk",
+       "language": "sv"
+      }
+     ],
+     "origins": [
+      {
+       "type": "MILKING",
+       "country": "246"
+      }
+     ]
+    }
+   ],
+   "medias": [
+    {
+     "id": 42265,
+     "primary": true
+    },
+    {
+     "id": 3807878,
+     "primary": true
+    }
+   ],
+   "fishingReports": [],
+   "safetyData": [],
+   "brand": "Valio",
+   "variableUnit": false,
+   "vatCode": "MEDIUM",
+   "producers": [
+    {
+     "id": "6408439999997",
+     "name": "Valio Oy"
+    }
+   ],
+   "unitConversions": [
+    {
+     "synkkaPackagingType": "CASE",
+     "width": {
+      "unit": "MMT",
+      "value": 342.0
+     },
+     "length": {
+      "unit": "MMT",
+      "value": 432.0
+     },
+     "height": {
+      "unit": "MMT",
+      "value": 280.0
+     },
+     "grossWeight": {
+      "unit": "GRM",
+      "value": 5262.5
+     }
+    }
+   ]
+  },
+  "units": [
+   {
+    "unitId": "PAL",
+    "gtin": "6408430010806",
+    "sizeInBaseUnits": 160.0
+   },
+   {
+    "unitId": "KI",
+    "gtin": "6408430100248",
+    "sizeInBaseUnits": 5.0
+   },
+   {
+    "unitId": "ST",
+    "gtin": "6408430000258",
+    "sizeInBaseUnits": 1.0
+   }
+  ],
+  "deposits": []
+ },
+ {
+  "id": "464398",
+  "salesUnitGtin": "6408430011681",
+  "salesUnit": "ST",
+  "baseUnit": "ST",
+  "category": "10400",
+  "allowedLotSize": 0.01,
+  "deleted": false,
+  "temperatureCondition": 8,
+  "vendorName": "VALIO OY TUORE",
+  "countryOfOrigin": "fi",
+  "synkkaData": {
+   "gtin": "6408430011681",
+   "lastUpdated": "2025-10-03T08:59:25+0300",
+   "mediasLastUpdated": "2025-09-15T09:55:55+0300",
+   "countriesOfOrigin": [
+    "246"
+   ],
+   "names": [
+    {
+     "value": "Valio Eila® semi skimmed milk drink 1 l UHT lactose free",
+     "language": "en"
+    },
+    {
+     "value": "Valio Eila® kevytmaitojuoma 1 l UHT laktoositon",
+     "language": "fi"
+    },
+    {
+     "value": "Valio Eila® lättmjölksdryck 1 l UHT laktosfri",
+     "language": "sv"
+    }
+   ],
+   "materialAdditionalDescriptions": [],
+   "marketingTexts": [
+    {
+     "value": "Valio Eila® lactose-free semi-skimmed milk drink UHT is suitable for dining, cooking and baking. UHT-treated milk has been ultra-heat treated for two seconds at a temperature of at least +135°C. Thanks to the heat treatment, the product keeps for a long time at room temperature when unopened, and it is handy to have at a cottage, on a boat or as coffee milk on a trip. Valio Eila® products are suitable for a lactose-free diet.",
+     "language": "en"
+    },
+    {
+     "value": "Valio Eila® Laktoositon kevytmaitojuoma UHT sopii monipuolisesti ruokajuomaksi, ruoanlaittoon ja leivontaan. UHT-käsitelty maito on iskukuumennettu kahden sekunnin ajaksi vähintään +135°C:seen. Lämpökäsittelyn ansiosta tuote säilyy avaamattomana pitkään huoneenlämmössä, ja se onkin kätevä napata mukaan mökille, veneelle tai kahvimaidoksi retkelle. Valio Eila® tuotteet sopivat laktoosittomaan ruokavalioon.",
+     "language": "fi"
+    },
+    {
+     "value": "Valio Eila® Laktosfri lättmjölksdryck UHT är mångsidig och passar som måltidsdryck, till matlagning och bakning. UHT-behandlad mjölk har ultrapastöriserats i två sekunder till minst +135 °C. Tack vare värmebehandlingen kan produkten förvaras länge oöppnad i rumstemperatur och den är praktisk att ta med till stugan, i båten eller som kaffemjölk på en utflykt. Valio Eila®-produkter passar för en laktosfri kost.",
+     "language": "sv"
+    }
+   ],
+   "keyIngredients": [
+    {
+     "value": "MILK and vitamin D.",
+     "language": "en"
+    },
+    {
+     "value": "MAITO ja D-vitamiini.",
+     "language": "fi"
+    },
+    {
+     "value": "MJÖLK och vitamin D.",
+     "language": "sv"
+    }
+   ],
+   "storageInstructions": [
+    {
+     "value": "Can be stored in room temperature until best before date but preserves its taste best when stored cool. Once opened, keep refrigerated 0 to +6 °C and consume within 5 days.",
+     "language": "en"
+    },
+    {
+     "value": "Avaamaton pakkaus säilyy huomenlämmössä. Säilyy avattuna 0–+6 °C:ssa n. 5 vrk.",
+     "language": "fi"
+    },
+    {
+     "value": "Oöppnad förpackning kan förvaras i rumstemperatur ända till bäst före -datum, men mjölkens smak bibehålls bäst i kyla. Hållbar öppnad i kylskåp vid 0–+6 °C ca 5 dagar.",
+     "language": "sv"
+    }
+   ],
+   "preparationInstructions": [],
+   "disposalInformations": [
+    {
+     "value": "Rince and compress. Recycle as carton packaging.",
+     "language": "en"
+    },
+    {
+     "value": "Huuhtele ja litistä. Kierrätä tölkki kartonkina.",
+     "language": "fi"
+    },
+    {
+     "value": "Skölj och platta till. Återvinn burken som kartong.",
+     "language": "sv"
+    }
+   ],
+   "usageInstructions": [],
+   "classifications": [
+    {
+     "type": "DECIMAL",
+     "name": "composition",
+     "values": []
+    },
+    {
+     "type": "DECIMAL",
+     "name": "gda",
+     "values": [
+      {
+       "id": "CHOAVL",
+       "value": 3.1,
+       "unit": "GRM"
+      },
+      {
+       "id": "ENER-E14",
+       "value": 39.0,
+       "unit": "E14"
+      },
+      {
+       "id": "ENER-KJO",
+       "value": 164.0,
+       "unit": "KJO"
+      },
+      {
+       "id": "FASAT",
+       "value": 0.9,
+       "unit": "GRM"
+      },
+      {
+       "id": "FAT",
+       "value": 1.5,
+       "unit": "GRM"
+      },
+      {
+       "id": "FIBTG",
+       "value": 0.0,
+       "unit": "GRM"
+      },
+      {
+       "id": "LACS",
+       "value": 0.0,
+       "unit": "GRM"
+      },
+      {
+       "id": "PRO-",
+       "value": 3.3,
+       "unit": "GRM"
+      },
+      {
+       "id": "SALTEQ",
+       "value": 0.1,
+       "unit": "GRM"
+      },
+      {
+       "id": "SUGAR-",
+       "value": 3.1,
+       "unit": "GRM"
+      }
+     ]
+    },
+    {
+     "type": "DECIMAL",
+     "name": "mineral",
+     "values": [
+      {
+       "id": "CA",
+       "value": 120.0,
+       "unit": "MGM"
+      },
+      {
+       "id": "NA",
+       "value": 45.0,
+       "unit": "MGM"
+      }
+     ]
+    },
+    {
+     "type": "DECIMAL",
+     "name": "nutritionFact",
+     "values": [
+      {
+       "id": "CHOAVL",
+       "value": 3.1,
+       "unit": "GRM"
+      },
+      {
+       "id": "ENER-E14",
+       "value": 39.0,
+       "unit": "E14"
+      },
+      {
+       "id": "ENER-KJO",
+       "value": 164.0,
+       "unit": "KJO"
+      },
+      {
+       "id": "FAPUCIS",
+       "value": 0.0,
+       "unit": "GRM"
+      },
+      {
+       "id": "FASAT",
+       "value": 0.9,
+       "unit": "GRM"
+      },
+      {
+       "id": "FAT",
+       "value": 1.5,
+       "unit": "GRM"
+      },
+      {
+       "id": "FIBTG",
+       "value": 0.0,
+       "unit": "GRM"
+      },
+      {
+       "id": "LACS",
+       "value": 0.0,
+       "unit": "GRM"
+      },
+      {
+       "id": "PRO-",
+       "value": 3.3,
+       "unit": "GRM"
+      },
+      {
+       "id": "SALTEQ",
+       "value": 0.1,
+       "unit": "GRM"
+      },
+      {
+       "id": "SUGAR-",
+       "value": 3.1,
+       "unit": "GRM"
+      }
+     ]
+    },
+    {
+     "type": "DECIMAL",
+     "name": "vitamin",
+     "values": [
+      {
+       "id": "VITB12",
+       "value": 0.4,
+       "unit": "MC"
+      }
+     ]
+    },
+    {
+     "type": "ENUM",
+     "name": "packagingMarkedLabel",
+     "values": [
+      {
+       "id": "GOODS_FROM_FINLAND_BLUE_SWAN",
+       "synkkaId": "GOODS_FROM_FINLAND_BLUE_SWAN"
+      },
+      {
+       "id": "warmTemperature"
+      }
+     ]
+    },
+    {
+     "type": "ENUM",
+     "name": "allergen",
+     "values": [
+      {
+       "id": "AM",
+       "unit": "CONTAINS"
+      }
+     ]
+    },
+    {
+     "type": "ENUM",
+     "name": "nonAllergen",
+     "values": []
+    },
+    {
+     "type": "ENUM",
+     "name": "nutritionalClaim",
+     "values": [
+      {
+       "id": "FREE_FROM_ADDITIVES",
+       "synkkaId": "ADDITIVES",
+       "unit": "FREE_FROM"
+      },
+      {
+       "id": "FREE_FROM_COLOURING_AGENTS",
+       "synkkaId": "COLOURING_AGENTS",
+       "unit": "FREE_FROM"
+      },
+      {
+       "id": "FREE_FROM_LACTOSE",
+       "synkkaId": "LACTOSE",
+       "unit": "FREE_FROM"
+      },
+      {
+       "id": "FREE_FROM_PRESERVATIVES",
+       "synkkaId": "PRESERVATIVES",
+       "unit": "FREE_FROM"
+      },
+      {
+       "id": "LOW_FAT",
+       "synkkaId": "FAT",
+       "unit": "LOW"
+      },
+      {
+       "id": "LOW_SODIUM_SALT",
+       "synkkaId": "SODIUM_SALT",
+       "unit": "LOW"
+      },
+      {
+       "id": "NO_ADDED_SUGARS",
+       "synkkaId": "SUGARS",
+       "unit": "NO_ADDED"
+      },
+      {
+       "id": "VEGETARIAN",
+       "synkkaId": "VEGETARIAN",
+       "unit": "DIET"
+      }
+     ]
+    },
+    {
+     "type": "ENUM",
+     "name": "packaging",
+     "values": []
+    }
+   ],
+   "nutritionalContent": [
+    {
+     "id": "CA",
+     "value": 120.0,
+     "unit": "MGM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM",
+     "dailyValueIntakePercent": 15.0
+    },
+    {
+     "id": "CHOAVL",
+     "value": 3.1,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "ENER-E14",
+     "value": 39.0,
+     "unit": "E14",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "ENER-KJO",
+     "value": 164.0,
+     "unit": "KJO",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "FAMSCIS",
+     "value": 0.3,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "FAPUCIS",
+     "value": 0.0,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "FASAT",
+     "value": 0.9,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "FAT",
+     "value": 1.5,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "FIBTG",
+     "value": 0.0,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "ID",
+     "value": 16.0,
+     "unit": "MC",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM",
+     "dailyValueIntakePercent": 10.0
+    },
+    {
+     "id": "LACS",
+     "value": 0.0,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "NA",
+     "value": 45.0,
+     "unit": "MGM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "PRO-",
+     "value": 3.3,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "RIBF",
+     "value": 0.2,
+     "unit": "MGM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM",
+     "dailyValueIntakePercent": 14.0
+    },
+    {
+     "id": "SALTEQ",
+     "value": 0.1,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "SUGAR-",
+     "value": 3.1,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "VITB12",
+     "value": 0.4,
+     "unit": "MC",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM",
+     "dailyValueIntakePercent": 16.0
+    },
+    {
+     "id": "VITD-",
+     "value": 2.0,
+     "unit": "MC",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM",
+     "dailyValueIntakePercent": 40.0
+    }
+   ],
+   "ingredients": [
+    {
+     "sequence": 1,
+     "names": [
+      {
+       "value": "Milk",
+       "language": "en"
+      },
+      {
+       "value": "Maito",
+       "language": "fi"
+      },
+      {
+       "value": "Mjölk",
+       "language": "sv"
+      }
+     ],
+     "origins": [
+      {
+       "type": "MILKING",
+       "country": "246"
+      }
+     ]
+    }
+   ],
+   "medias": [
+    {
+     "id": 42278,
+     "primary": true
+    }
+   ],
+   "fishingReports": [],
+   "safetyData": [],
+   "brand": "Valio",
+   "variableUnit": false,
+   "vatCode": "MEDIUM",
+   "producers": [
+    {
+     "id": "6408439999997",
+     "name": "Valio Oy"
+    }
+   ],
+   "unitConversions": [
+    {
+     "synkkaPackagingType": "BASE_UNIT_OR_EACH",
+     "width": {
+      "unit": "MMT",
+      "value": 76.7
+     },
+     "length": {
+      "unit": "MMT",
+      "value": 76.8
+     },
+     "height": {
+      "unit": "MMT",
+      "value": 211.0
+     },
+     "volume": {
+      "unit": "LTR",
+      "value": 1.0
+     },
+     "netWeight": {
+      "unit": "GRM",
+      "value": 1031.0
+     },
+     "grossWeight": {
+      "unit": "GRM",
+      "value": 1063.4
+     }
+    }
+   ]
+  },
+  "units": [
+   {
+    "unitId": "KRS",
+    "sizeInBaseUnits": 150.0
+   },
+   {
+    "unitId": "PAL",
+    "gtin": "6408431420673",
+    "sizeInBaseUnits": 600.0
+   },
+   {
+    "unitId": "KI",
+    "gtin": "6408430100958",
+    "sizeInBaseUnits": 10.0
+   },
+   {
+    "unitId": "ST",
+    "gtin": "6408430011681",
+    "sizeInBaseUnits": 1.0
+   }
+  ],
+  "deposits": []
+ },
+ {
+  "id": "469363",
+  "salesUnitGtin": "6413300011517",
+  "salesUnit": "ST",
+  "baseUnit": "ST",
+  "category": "10400",
+  "allowedLotSize": 0.01,
+  "deleted": false,
+  "temperatureCondition": 8,
+  "vendorName": "ARLA OY",
+  "countryOfOrigin": "fi",
+  "synkkaData": {
+   "gtin": "6413300011517",
+   "lastUpdated": "2025-09-29T20:31:32+0300",
+   "mediasLastUpdated": "2025-05-18T04:21:27+0300",
+   "countriesOfOrigin": [
+    "246"
+   ],
+   "names": [
+    {
+     "value": "Arla Semi skimmed milkdrink 1 L UHT lactose free Suomesta",
+     "language": "en"
+    },
+    {
+     "value": "Arla Kevytmaitojuoma 1 L UHT laktoositon Suomesta",
+     "language": "fi"
+    },
+    {
+     "value": "Arla Lättmjölkdryck 1 L UHT laktosfri Suomesta",
+     "language": "sv"
+    }
+   ],
+   "materialAdditionalDescriptions": [],
+   "marketingTexts": [
+    {
+     "value": "Arla Lactose-free skimmed milk drink from Finland (UHT) is made from Finnish milk in Finland. Milk drink is a versatile source of nutrients. The milk drink is rich in protein and calcium, the absorption of which is improved by adding vitamin D to the milk drink. UHT lactose-free skimmed milk drink has a fresh milk taste and can be used like a regular milk drink, baking or cooking. 1.5% fat.",
+     "language": "en"
+    },
+    {
+     "value": "Arla Laktoositonta kevytmaitojuomaa Suomesta (UHT) on valmistettu Suomessa suomalaisesta maidosta. Maitojuoma on monipuolinen ravintoaineiden lähde. Maitojuoma sisältää runsaasti proteiinia ja kalsiumia, jonka imeytymistä parannetaan lisäämällä maitojuomaan D-vitamiinia. UHT laktoosittomassa kevytmaitojuomassa on raikas maidon maku ja sitä voi käyttää tavallisen maidon tapaan juomana, leivonnassa tai ruoanlaitossa. Rasvaa 1,5 %. UHT-maitojuoma voidaan säilyttää avaamattomana huoneenlämmössä, minkä ansiosta se sopiikin hyvin esimerkiksi mökille.",
+     "language": "fi"
+    },
+    {
+     "value": "Arla Laktosfri lättmjölkdryck från Finland(UHT) är tillverkad i Finland av finsk mjölk. Mjölkdrycken är en mångsidig näringskälla. Mjölkdrycken innehåller rikligt med protein och kalsium vilkas upptagning i kroppen förbättras genom att tillsätta D-vitamin i mjölkdrycken. Den UHT laktosfria lättmjölkdrycken har en frisk mjölk smak och den kan också användas som en normal mjölk både som dryck samt i bakning och matlagning. Fett 1,5% UHT mjölkdrycken kan förvaras oöppnad i rumstemperatur och därför passar den bra i tex sommarstugan.",
+     "language": "sv"
+    }
+   ],
+   "keyIngredients": [
+    {
+     "value": "MILK, MILK PRODUCT and vitamin D",
+     "language": "en"
+    },
+    {
+     "value": "MAITO, MAITOVALMISTE ja D-vitamiini.",
+     "language": "fi"
+    },
+    {
+     "value": "MJÖLK, MJÖLKPREPARAT och D-vitamin.",
+     "language": "sv"
+    }
+   ],
+   "storageInstructions": [
+    {
+     "value": "Could be stored unopened in room temperature. Store opened in fridge 3-5 days 0 - + 6 C",
+     "language": "en"
+    },
+    {
+     "value": "Säilyy avaamattomana huoneenlämmössä. Säilyy avattuna jääkaapissa 3-5 vrk 0 - +6 C:ssä.",
+     "language": "fi"
+    },
+    {
+     "value": "Kan förvaras oöppnad i rumstemperatur. Håller öppnad i kylskåp i kylskåp 3-5 dygn 0 - + 6 C",
+     "language": "sv"
+    }
+   ],
+   "preparationInstructions": [],
+   "disposalInformations": [
+    {
+     "value": "The package to the carton collection.",
+     "language": "en"
+    },
+    {
+     "value": "Pakkaus kartonkikeräykseen.",
+     "language": "fi"
+    },
+    {
+     "value": "Förpackningen till kartonginsamlingen.",
+     "language": "sv"
+    }
+   ],
+   "usageInstructions": [
+    {
+     "value": "The taste is best as cold. Lactose free milk works great with coffee. This milk is well suited for cooking and will keep for a long time unopened without a refrigerator.",
+     "language": "en"
+    },
+    {
+     "value": "Maku on parhaimmillaan kylmänä. Laktoosinen maito toimii mainiosti kahvin kanssa. Tämä maito sopii hyvin kokkauksen ja säilyy pitkään avaamattomana ilman jääkaappia.",
+     "language": "fi"
+    },
+    {
+     "value": "Smaken är som bäst kall. Laktosfri mjölk passar utmärkt till kaffet. Denna mjölk passar bra till matlagning och håller länge oöppnad utan kylskåp.",
+     "language": "sv"
+    }
+   ],
+   "classifications": [
+    {
+     "type": "DECIMAL",
+     "name": "composition",
+     "values": []
+    },
+    {
+     "type": "DECIMAL",
+     "name": "gda",
+     "values": [
+      {
+       "id": "CHOAVL",
+       "value": 3.0,
+       "unit": "GRM"
+      },
+      {
+       "id": "ENER-E14",
+       "value": 38.0,
+       "unit": "E14"
+      },
+      {
+       "id": "ENER-KJO",
+       "value": 161.0,
+       "unit": "KJO"
+      },
+      {
+       "id": "FASAT",
+       "value": 1.0,
+       "unit": "GRM"
+      },
+      {
+       "id": "FAT",
+       "value": 1.5,
+       "unit": "GRM"
+      },
+      {
+       "id": "LACS",
+       "value": 0.0,
+       "unit": "GRM"
+      },
+      {
+       "id": "PRO-",
+       "value": 3.2,
+       "unit": "GRM"
+      },
+      {
+       "id": "SALTEQ",
+       "value": 0.09,
+       "unit": "GRM"
+      },
+      {
+       "id": "SUGAR-",
+       "value": 3.0,
+       "unit": "GRM"
+      }
+     ]
+    },
+    {
+     "type": "DECIMAL",
+     "name": "mineral",
+     "values": [
+      {
+       "id": "CA",
+       "value": 110.0,
+       "unit": "MGM"
+      }
+     ]
+    },
+    {
+     "type": "DECIMAL",
+     "name": "nutritionFact",
+     "values": [
+      {
+       "id": "CHOAVL",
+       "value": 3.0,
+       "unit": "GRM"
+      },
+      {
+       "id": "ENER-E14",
+       "value": 38.0,
+       "unit": "E14"
+      },
+      {
+       "id": "ENER-KJO",
+       "value": 161.0,
+       "unit": "KJO"
+      },
+      {
+       "id": "FASAT",
+       "value": 1.0,
+       "unit": "GRM"
+      },
+      {
+       "id": "FAT",
+       "value": 1.5,
+       "unit": "GRM"
+      },
+      {
+       "id": "LACS",
+       "value": 0.0,
+       "unit": "GRM"
+      },
+      {
+       "id": "PRO-",
+       "value": 3.2,
+       "unit": "GRM"
+      },
+      {
+       "id": "SALTEQ",
+       "value": 0.09,
+       "unit": "GRM"
+      },
+      {
+       "id": "SUGAR-",
+       "value": 3.0,
+       "unit": "GRM"
+      }
+     ]
+    },
+    {
+     "type": "DECIMAL",
+     "name": "vitamin",
+     "values": [
+      {
+       "id": "VITB12",
+       "value": 0.4,
+       "unit": "MC"
+      }
+     ]
+    },
+    {
+     "type": "ENUM",
+     "name": "packagingMarkedLabel",
+     "values": [
+      {
+       "id": "GOODS_FROM_FINLAND_BLUE_SWAN",
+       "synkkaId": "GOODS_FROM_FINLAND_BLUE_SWAN"
+      },
+      {
+       "id": "warmTemperature"
+      }
+     ]
+    },
+    {
+     "type": "ENUM",
+     "name": "allergen",
+     "values": [
+      {
+       "id": "AM",
+       "unit": "CONTAINS"
+      }
+     ]
+    },
+    {
+     "type": "ENUM",
+     "name": "nonAllergen",
+     "values": [
+      {
+       "id": "ML",
+       "unit": "FREE_FROM"
+      }
+     ]
+    },
+    {
+     "type": "ENUM",
+     "name": "nutritionalClaim",
+     "values": [
+      {
+       "id": "FREE_FROM_LACTOSE",
+       "synkkaId": "LACTOSE",
+       "unit": "FREE_FROM"
+      }
+     ]
+    },
+    {
+     "type": "ENUM",
+     "name": "packaging",
+     "values": []
+    }
+   ],
+   "nutritionalContent": [
+    {
+     "id": "CA",
+     "value": 110.0,
+     "unit": "MGM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM",
+     "dailyValueIntakePercent": 14.0
+    },
+    {
+     "id": "CHOAVL",
+     "value": 3.0,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "ENER-E14",
+     "value": 38.0,
+     "unit": "E14",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "ENER-KJO",
+     "value": 161.0,
+     "unit": "KJO",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "FASAT",
+     "value": 1.0,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "FAT",
+     "value": 1.5,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "ID",
+     "value": 13.0,
+     "unit": "MC",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM",
+     "dailyValueIntakePercent": 9.0
+    },
+    {
+     "id": "LACS",
+     "value": 0.0,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "PRO-",
+     "value": 3.2,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "RIBF",
+     "value": 0.11,
+     "unit": "MGM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM",
+     "dailyValueIntakePercent": 8.0
+    },
+    {
+     "id": "SALTEQ",
+     "value": 0.09,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "SUGAR-",
+     "value": 3.0,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "VITB12",
+     "value": 0.4,
+     "unit": "MC",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM",
+     "dailyValueIntakePercent": 16.0
+    },
+    {
+     "id": "VITD-",
+     "value": 1.0,
+     "unit": "MC",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM",
+     "dailyValueIntakePercent": 20.0
+    }
+   ],
+   "ingredients": [
+    {
+     "sequence": 1,
+     "names": [
+      {
+       "value": "MIlk",
+       "language": "en"
+      },
+      {
+       "value": "Maito",
+       "language": "fi"
+      },
+      {
+       "value": "Mjölk",
+       "language": "sv"
+      }
+     ],
+     "origins": [
+      {
+       "type": "MILKING",
+       "country": "246"
+      }
+     ]
+    }
+   ],
+   "medias": [
+    {
+     "id": 1864835,
+     "primary": false
+    },
+    {
+     "id": 3116274,
+     "primary": true
+    }
+   ],
+   "fishingReports": [],
+   "safetyData": [],
+   "brand": "Arla ",
+   "variableUnit": false,
+   "vatCode": "MEDIUM",
+   "producers": [
+    {
+     "id": "6405417999994",
+     "name": "Arla Oy"
+    }
+   ],
+   "unitConversions": [
+    {
+     "synkkaPackagingType": "BASE_UNIT_OR_EACH",
+     "width": {
+      "unit": "MMT",
+      "value": 70.0
+     },
+     "length": {
+      "unit": "MMT",
+      "value": 72.0
+     },
+     "height": {
+      "unit": "MMT",
+      "value": 214.0
+     },
+     "volume": {
+      "unit": "LTR",
+      "value": 1.0
+     },
+     "netWeight": {
+      "unit": "GRM",
+      "value": 1024.0
+     },
+     "grossWeight": {
+      "unit": "GRM",
+      "value": 1054.0
+     }
+    }
+   ],
+   "minTemperature": 2.0,
+   "maxTemperature": 22.0
+  },
+  "units": [
+   {
+    "unitId": "PAL",
+    "gtin": "6413300511512",
+    "sizeInBaseUnits": 576.0
+   },
+   {
+    "unitId": "KI",
+    "gtin": "6413300911510",
+    "sizeInBaseUnits": 12.0
+   },
+   {
+    "unitId": "ST",
+    "gtin": "6413300011517",
+    "sizeInBaseUnits": 1.0
+   }
+  ],
+  "deposits": []
+ },
+ {
+  "id": "464201",
+  "salesUnitGtin": "6408430011667",
+  "salesUnit": "ST",
+  "baseUnit": "ST",
+  "category": "10400",
+  "allowedLotSize": 0.01,
+  "deleted": false,
+  "temperatureCondition": 4,
+  "vendorName": "VALIO OY TUORE",
+  "countryOfOrigin": "fi",
+  "synkkaData": {
+   "gtin": "6408430011667",
+   "lastUpdated": "2025-08-07T05:01:56+0300",
+   "mediasLastUpdated": "2025-09-15T09:55:55+0300",
+   "countriesOfOrigin": [
+    "246"
+   ],
+   "names": [
+    {
+     "value": "Valio semi skimmed milk 1 l lactose free UHT",
+     "language": "en"
+    },
+    {
+     "value": "Valio kevytmaito 1 l laktoositon UHT",
+     "language": "fi"
+    },
+    {
+     "value": "Valio lättmjölk 1 l laktosfri UHT",
+     "language": "sv"
+    }
+   ],
+   "materialAdditionalDescriptions": [],
+   "marketingTexts": [
+    {
+     "value": "Lactose free semi-skimmed milk UHT is a milk that has many uses. It can be enjoyed with food or used in cooking and baking. UHT-treated milk has been ultra-heat treated for two seconds at a temperature of at least +135°C. Thanks to the heat treatment, the product keeps for a long time at room temperature when unopened, and it is handy to have at a cottage, on a boat or as coffee milk on a trip. Valio UHT milks are suitable for a lactose free diet.",
+     "language": "en"
+    },
+    {
+     "value": "Laktoositon kevytmaito UHT on monikäyttöinen maito, jota voi nauttia ruokajuomana tai käyttää ruoanlaitossa ja leivonnassa. UHT-käsitelty maito on iskukuumennettu kahden sekunnin ajaksi vähintään +135°C:seen. Lämpökäsittelyn ansiosta tuote säilyy avaamattomana pitkään huoneenlämmössä, ja se onkin kätevä napata mukaan mökille, veneelle tai kahvimaidoksi retkelle. Valio UHT maidot sopivat laktoosittomaan ruokavalioon.",
+     "language": "fi"
+    },
+    {
+     "value": "Laktosfri lättmjölk UHT är en mångsidig mjölk som kan avnjutas som måltidsdryck eller användas till matlagning och bakning. UHT-behandlad mjölk har ultrapastöriserats i två sekunder till minst +135 °C. Tack vare värmebehandlingen kan produkten förvaras länge oöppnad i rumstemperatur och den är praktisk att ta med till stugan, i båten eller som kaffemjölk på en utflykt. Valio UHT mjölk passar för en laktosfri kost.",
+     "language": "sv"
+    }
+   ],
+   "keyIngredients": [
+    {
+     "value": "MILK and vitamin D.",
+     "language": "en"
+    },
+    {
+     "value": "MAITO ja D-vitamiini.",
+     "language": "fi"
+    },
+    {
+     "value": "MJÖLK och vitamin D.",
+     "language": "sv"
+    }
+   ],
+   "storageInstructions": [
+    {
+     "value": "Can be stored in room temperature but preserves its taste best when stored cool. Once opened, keep refrigerated 0 to +6 °C and consume within 5 days.",
+     "language": "en"
+    },
+    {
+     "value": "Säilyy avaamattomana huoneenlämmössä, mutta kylmäsäilytys pitää tuotteen maun raikkaimpana. Avattuna säilyy jääkaapissa 0 – +6 °C:ssa n. 5 päivää.",
+     "language": "fi"
+    },
+    {
+     "value": "Oöppnad förpackning kan förvaras i rumstemperatur, men mjölkens smak bibehålls bäst i kyla. Hållbar öppnad i kylskåp vid 0 – +6 °C ca 5 dagar.",
+     "language": "sv"
+    }
+   ],
+   "preparationInstructions": [],
+   "disposalInformations": [
+    {
+     "value": "Rince and compress. Recycle as carton packaging.",
+     "language": "en"
+    },
+    {
+     "value": "Huuhtele ja litistä. Kierrätä tölkki kartonkina.",
+     "language": "fi"
+    },
+    {
+     "value": "Skölj och platta till. Återvinn burken som kartong.",
+     "language": "sv"
+    }
+   ],
+   "usageInstructions": [],
+   "classifications": [
+    {
+     "type": "DECIMAL",
+     "name": "composition",
+     "values": []
+    },
+    {
+     "type": "DECIMAL",
+     "name": "gda",
+     "values": [
+      {
+       "id": "CHOAVL",
+       "value": 4.8,
+       "unit": "GRM"
+      },
+      {
+       "id": "ENER-E14",
+       "value": 46.0,
+       "unit": "E14"
+      },
+      {
+       "id": "ENER-KJO",
+       "value": 192.0,
+       "unit": "KJO"
+      },
+      {
+       "id": "FASAT",
+       "value": 0.9,
+       "unit": "GRM"
+      },
+      {
+       "id": "FAT",
+       "value": 1.5,
+       "unit": "GRM"
+      },
+      {
+       "id": "LACS",
+       "value": 0.0,
+       "unit": "GRM"
+      },
+      {
+       "id": "PRO-",
+       "value": 3.2,
+       "unit": "GRM"
+      },
+      {
+       "id": "SALTEQ",
+       "value": 0.1,
+       "unit": "GRM"
+      },
+      {
+       "id": "SUGAR-",
+       "value": 4.8,
+       "unit": "GRM"
+      }
+     ]
+    },
+    {
+     "type": "DECIMAL",
+     "name": "mineral",
+     "values": [
+      {
+       "id": "CA",
+       "value": 120.0,
+       "unit": "MGM"
+      },
+      {
+       "id": "NA",
+       "value": 40.0,
+       "unit": "MGM"
+      }
+     ]
+    },
+    {
+     "type": "DECIMAL",
+     "name": "nutritionFact",
+     "values": [
+      {
+       "id": "CHOAVL",
+       "value": 4.8,
+       "unit": "GRM"
+      },
+      {
+       "id": "ENER-E14",
+       "value": 46.0,
+       "unit": "E14"
+      },
+      {
+       "id": "ENER-KJO",
+       "value": 192.0,
+       "unit": "KJO"
+      },
+      {
+       "id": "FAPUCIS",
+       "value": 0.0,
+       "unit": "GRM"
+      },
+      {
+       "id": "FASAT",
+       "value": 0.9,
+       "unit": "GRM"
+      },
+      {
+       "id": "FAT",
+       "value": 1.5,
+       "unit": "GRM"
+      },
+      {
+       "id": "LACS",
+       "value": 0.0,
+       "unit": "GRM"
+      },
+      {
+       "id": "PRO-",
+       "value": 3.2,
+       "unit": "GRM"
+      },
+      {
+       "id": "SALTEQ",
+       "value": 0.1,
+       "unit": "GRM"
+      },
+      {
+       "id": "SUGAR-",
+       "value": 4.8,
+       "unit": "GRM"
+      }
+     ]
+    },
+    {
+     "type": "DECIMAL",
+     "name": "vitamin",
+     "values": [
+      {
+       "id": "VITB12",
+       "value": 0.4,
+       "unit": "MC"
+      }
+     ]
+    },
+    {
+     "type": "ENUM",
+     "name": "packagingMarkedLabel",
+     "values": [
+      {
+       "id": "GOODS_FROM_FINLAND_BLUE_SWAN",
+       "synkkaId": "GOODS_FROM_FINLAND_BLUE_SWAN"
+      },
+      {
+       "id": "coolTemperature"
+      }
+     ]
+    },
+    {
+     "type": "ENUM",
+     "name": "allergen",
+     "values": [
+      {
+       "id": "AM",
+       "unit": "CONTAINS"
+      }
+     ]
+    },
+    {
+     "type": "ENUM",
+     "name": "nonAllergen",
+     "values": []
+    },
+    {
+     "type": "ENUM",
+     "name": "nutritionalClaim",
+     "values": [
+      {
+       "id": "FREE_FROM_ADDITIVES",
+       "synkkaId": "ADDITIVES",
+       "unit": "FREE_FROM"
+      },
+      {
+       "id": "FREE_FROM_COLOURING_AGENTS",
+       "synkkaId": "COLOURING_AGENTS",
+       "unit": "FREE_FROM"
+      },
+      {
+       "id": "FREE_FROM_LACTOSE",
+       "synkkaId": "LACTOSE",
+       "unit": "FREE_FROM"
+      },
+      {
+       "id": "FREE_FROM_PRESERVATIVES",
+       "synkkaId": "PRESERVATIVES",
+       "unit": "FREE_FROM"
+      },
+      {
+       "id": "FREE_FROM_SWEETENERS",
+       "synkkaId": "SWEETENERS",
+       "unit": "FREE_FROM"
+      },
+      {
+       "id": "LOW_FAT",
+       "synkkaId": "FAT",
+       "unit": "LOW"
+      },
+      {
+       "id": "LOW_SODIUM_SALT",
+       "synkkaId": "SODIUM_SALT",
+       "unit": "LOW"
+      },
+      {
+       "id": "NO_ADDED_SUGARS",
+       "synkkaId": "SUGARS",
+       "unit": "NO_ADDED"
+      },
+      {
+       "id": "VEGETARIAN",
+       "synkkaId": "VEGETARIAN",
+       "unit": "DIET"
+      }
+     ]
+    },
+    {
+     "type": "ENUM",
+     "name": "packaging",
+     "values": []
+    }
+   ],
+   "nutritionalContent": [
+    {
+     "id": "CA",
+     "value": 120.0,
+     "unit": "MGM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM",
+     "dailyValueIntakePercent": 15.0
+    },
+    {
+     "id": "CHOAVL",
+     "value": 4.8,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "ENER-E14",
+     "value": 46.0,
+     "unit": "E14",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "ENER-KJO",
+     "value": 192.0,
+     "unit": "KJO",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "FAMSCIS",
+     "value": 0.3,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "FAPUCIS",
+     "value": 0.0,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "FASAT",
+     "value": 0.9,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "FAT",
+     "value": 1.5,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "ID",
+     "value": 16.0,
+     "unit": "MC",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM",
+     "dailyValueIntakePercent": 10.0
+    },
+    {
+     "id": "LACS",
+     "value": 0.0,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "NA",
+     "value": 40.0,
+     "unit": "MGM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "PRO-",
+     "value": 3.2,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "RIBF",
+     "value": 0.2,
+     "unit": "MGM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM",
+     "dailyValueIntakePercent": 14.0
+    },
+    {
+     "id": "SALTEQ",
+     "value": 0.1,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "SUGAR-",
+     "value": 4.8,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "VITB12",
+     "value": 0.4,
+     "unit": "MC",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM",
+     "dailyValueIntakePercent": 16.0
+    },
+    {
+     "id": "VITD-",
+     "value": 1.0,
+     "unit": "MC",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM",
+     "dailyValueIntakePercent": 20.0
+    }
+   ],
+   "ingredients": [
+    {
+     "sequence": 1,
+     "names": [
+      {
+       "value": "Milk",
+       "language": "en"
+      },
+      {
+       "value": "Maito",
+       "language": "fi"
+      },
+      {
+       "value": "Mjölk",
+       "language": "sv"
+      }
+     ],
+     "origins": [
+      {
+       "type": "MILKING",
+       "country": "246"
+      }
+     ]
+    }
+   ],
+   "medias": [
+    {
+     "id": 2286026,
+     "primary": true
+    }
+   ],
+   "fishingReports": [],
+   "safetyData": [],
+   "brand": "Valio",
+   "variableUnit": false,
+   "vatCode": "MEDIUM",
+   "producers": [
+    {
+     "id": "6408439999997",
+     "name": "Valio Oy"
+    }
+   ],
+   "unitConversions": [
+    {
+     "synkkaPackagingType": "BASE_UNIT_OR_EACH",
+     "width": {
+      "unit": "MMT",
+      "value": 76.7
+     },
+     "length": {
+      "unit": "MMT",
+      "value": 76.8
+     },
+     "height": {
+      "unit": "MMT",
+      "value": 211.0
+     },
+     "volume": {
+      "unit": "LTR",
+      "value": 1.0
+     },
+     "netWeight": {
+      "unit": "GRM",
+      "value": 1031.0
+     },
+     "grossWeight": {
+      "unit": "GRM",
+      "value": 1063.4
+     }
+    }
+   ]
+  },
+  "units": [
+   {
+    "unitId": "PAL",
+    "sizeInBaseUnits": 600.0
+   },
+   {
+    "unitId": "KI",
+    "gtin": "6408430100873",
+    "sizeInBaseUnits": 10.0
+   },
+   {
+    "unitId": "ST",
+    "gtin": "6408430011667",
+    "sizeInBaseUnits": 1.0
+   }
+  ],
+  "deposits": [],
+  "substitutions": [
+   {
+    "product": "464201",
+    "substituteProduct": "464440"
+   }
+  ]
+ },
+ {
+  "id": "464179",
+  "salesUnitGtin": "6413300017656",
+  "salesUnit": "ST",
+  "baseUnit": "ST",
+  "category": "10400",
+  "allowedLotSize": 0.01,
+  "deleted": false,
+  "temperatureCondition": 3,
+  "vendorName": "ARLA OY",
+  "countryOfOrigin": "fi",
+  "synkkaData": {
+   "gtin": "6413300017656",
+   "lastUpdated": "2025-09-29T20:29:29+0300",
+   "mediasLastUpdated": "2025-06-17T20:33:56+0300",
+   "countriesOfOrigin": [
+    "246"
+   ],
+   "names": [
+    {
+     "value": "Arla 10 L Novobox Suomi semi skimmed lactose free milk drink ESL",
+     "language": "en"
+    },
+    {
+     "value": "Arla 10 L Novobox Suomi laktoositon kevytmaitojuoma ESL",
+     "language": "fi"
+    },
+    {
+     "value": "Arla 10 L Novobox Suomi laktosfri lättmjölkdryck ESL",
+     "language": "sv"
+    }
+   ],
+   "materialAdditionalDescriptions": [],
+   "marketingTexts": [
+    {
+     "value": "High temperature pasteurized lactose free skimmed milk drink. 1.5% fat.",
+     "language": "en"
+    },
+    {
+     "value": "Korkeassa lämpötilassa pastöroitu laktoositon kevytmaitojuoma. Rasvaa 1,5%",
+     "language": "fi"
+    },
+    {
+     "value": "I hög temperatur pastöriserad laktosfri lättmjölkdryck. Fett 1,5%",
+     "language": "sv"
+    }
+   ],
+   "keyIngredients": [
+    {
+     "value": "MILK, MILK PRODUCT, vitamin D.",
+     "language": "en"
+    },
+    {
+     "value": "MAITO, MAITOVALMISTE, D-vitamiini.",
+     "language": "fi"
+    },
+    {
+     "value": "MJÖLK, MJÖLKPREPARAT, D-vitamin.",
+     "language": "sv"
+    }
+   ],
+   "storageInstructions": [
+    {
+     "value": "Store protect from light at 0 - +6°C.",
+     "language": "en"
+    },
+    {
+     "value": "Säilytetään valolta suojattuna 0 - +6°C.",
+     "language": "fi"
+    },
+    {
+     "value": "Förvaras skyddad för ljus vid 0 - +6°C.",
+     "language": "sv"
+    }
+   ],
+   "preparationInstructions": [],
+   "disposalInformations": [
+    {
+     "value": "Cardboard box for cardboard collection, inner bag for energy waste.",
+     "language": "en"
+    },
+    {
+     "value": "Kartonkilaatikko kartonkikeräykseen, sisäpussi energiajätteeseen.",
+     "language": "fi"
+    },
+    {
+     "value": "Kartonglådan till kartonginsamlingen, påsen innanför till energiavfall.",
+     "language": "sv"
+    }
+   ],
+   "usageInstructions": [],
+   "classifications": [
+    {
+     "type": "DECIMAL",
+     "name": "composition",
+     "values": []
+    },
+    {
+     "type": "DECIMAL",
+     "name": "gda",
+     "values": [
+      {
+       "id": "CHOAVL",
+       "value": 3.0,
+       "unit": "GRM"
+      },
+      {
+       "id": "ENER-E14",
+       "value": 38.0,
+       "unit": "E14"
+      },
+      {
+       "id": "ENER-KJO",
+       "value": 161.0,
+       "unit": "KJO"
+      },
+      {
+       "id": "FASAT",
+       "value": 1.0,
+       "unit": "GRM"
+      },
+      {
+       "id": "FAT",
+       "value": 1.5,
+       "unit": "GRM"
+      },
+      {
+       "id": "LACS",
+       "value": 0.0,
+       "unit": "GRM"
+      },
+      {
+       "id": "PRO-",
+       "value": 3.2,
+       "unit": "GRM"
+      },
+      {
+       "id": "SALTEQ",
+       "value": 0.09,
+       "unit": "GRM"
+      },
+      {
+       "id": "SUGAR-",
+       "value": 3.0,
+       "unit": "GRM"
+      }
+     ]
+    },
+    {
+     "type": "DECIMAL",
+     "name": "mineral",
+     "values": [
+      {
+       "id": "CA",
+       "value": 110.0,
+       "unit": "MGM"
+      }
+     ]
+    },
+    {
+     "type": "DECIMAL",
+     "name": "nutritionFact",
+     "values": [
+      {
+       "id": "CHOAVL",
+       "value": 3.0,
+       "unit": "GRM"
+      },
+      {
+       "id": "ENER-E14",
+       "value": 38.0,
+       "unit": "E14"
+      },
+      {
+       "id": "ENER-KJO",
+       "value": 161.0,
+       "unit": "KJO"
+      },
+      {
+       "id": "FASAT",
+       "value": 1.0,
+       "unit": "GRM"
+      },
+      {
+       "id": "FAT",
+       "value": 1.5,
+       "unit": "GRM"
+      },
+      {
+       "id": "LACS",
+       "value": 0.0,
+       "unit": "GRM"
+      },
+      {
+       "id": "PRO-",
+       "value": 3.2,
+       "unit": "GRM"
+      },
+      {
+       "id": "SALTEQ",
+       "value": 0.09,
+       "unit": "GRM"
+      },
+      {
+       "id": "SUGAR-",
+       "value": 3.0,
+       "unit": "GRM"
+      }
+     ]
+    },
+    {
+     "type": "DECIMAL",
+     "name": "vitamin",
+     "values": [
+      {
+       "id": "VITB12",
+       "value": 0.4,
+       "unit": "MC"
+      }
+     ]
+    },
+    {
+     "type": "ENUM",
+     "name": "packagingMarkedLabel",
+     "values": [
+      {
+       "id": "GOODS_FROM_FINLAND_BLUE_SWAN",
+       "synkkaId": "GOODS_FROM_FINLAND_BLUE_SWAN"
+      },
+      {
+       "id": "coolTemperature"
+      }
+     ]
+    },
+    {
+     "type": "ENUM",
+     "name": "allergen",
+     "values": [
+      {
+       "id": "AM",
+       "unit": "CONTAINS"
+      }
+     ]
+    },
+    {
+     "type": "ENUM",
+     "name": "nonAllergen",
+     "values": [
+      {
+       "id": "AC",
+       "unit": "FREE_FROM"
+      },
+      {
+       "id": "AE",
+       "unit": "FREE_FROM"
+      },
+      {
+       "id": "AF",
+       "unit": "FREE_FROM"
+      },
+      {
+       "id": "AN",
+       "unit": "FREE_FROM"
+      },
+      {
+       "id": "AP",
+       "unit": "FREE_FROM"
+      },
+      {
+       "id": "AS",
+       "unit": "FREE_FROM"
+      },
+      {
+       "id": "AU",
+       "unit": "FREE_FROM"
+      },
+      {
+       "id": "AW",
+       "unit": "FREE_FROM"
+      },
+      {
+       "id": "AY",
+       "unit": "FREE_FROM"
+      },
+      {
+       "id": "BC",
+       "unit": "FREE_FROM"
+      },
+      {
+       "id": "BM",
+       "unit": "FREE_FROM"
+      },
+      {
+       "id": "ML",
+       "unit": "FREE_FROM"
+      },
+      {
+       "id": "NL",
+       "unit": "FREE_FROM"
+      },
+      {
+       "id": "UM",
+       "unit": "FREE_FROM"
+      }
+     ]
+    },
+    {
+     "type": "ENUM",
+     "name": "nutritionalClaim",
+     "values": [
+      {
+       "id": "FREE_FROM_LACTOSE",
+       "synkkaId": "LACTOSE",
+       "unit": "FREE_FROM"
+      }
+     ]
+    },
+    {
+     "type": "ENUM",
+     "name": "packaging",
+     "values": []
+    }
+   ],
+   "nutritionalContent": [
+    {
+     "id": "CA",
+     "value": 110.0,
+     "unit": "MGM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM",
+     "dailyValueIntakePercent": 14.0
+    },
+    {
+     "id": "CHOAVL",
+     "value": 3.0,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "ENER-E14",
+     "value": 38.0,
+     "unit": "E14",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "ENER-KJO",
+     "value": 161.0,
+     "unit": "KJO",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "FASAT",
+     "value": 1.0,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "FAT",
+     "value": 1.5,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "ID",
+     "value": 13.0,
+     "unit": "MC",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM",
+     "dailyValueIntakePercent": 9.0
+    },
+    {
+     "id": "LACS",
+     "value": 0.0,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "PRO-",
+     "value": 3.2,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "RIBF",
+     "value": 0.11,
+     "unit": "MGM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM",
+     "dailyValueIntakePercent": 8.0
+    },
+    {
+     "id": "SALTEQ",
+     "value": 0.09,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "SUGAR-",
+     "value": 3.0,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "VITB12",
+     "value": 0.4,
+     "unit": "MC",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM",
+     "dailyValueIntakePercent": 16.0
+    },
+    {
+     "id": "VITD-",
+     "value": 1.0,
+     "unit": "MC",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM",
+     "dailyValueIntakePercent": 20.0
+    }
+   ],
+   "ingredients": [
+    {
+     "sequence": 1,
+     "names": [
+      {
+       "value": "Milk",
+       "language": "en"
+      },
+      {
+       "value": "Maito",
+       "language": "fi"
+      },
+      {
+       "value": "Mjölk",
+       "language": "sv"
+      }
+     ],
+     "origins": [
+      {
+       "type": "MILKING",
+       "country": "246"
+      }
+     ]
+    }
+   ],
+   "medias": [
+    {
+     "id": 17594,
+     "primary": true
+    }
+   ],
+   "fishingReports": [],
+   "safetyData": [],
+   "brand": "Arla",
+   "variableUnit": false,
+   "vatCode": "MEDIUM",
+   "producers": [
+    {
+     "id": "6405417999994",
+     "name": "Arla Oy"
+    }
+   ],
+   "unitConversions": [
+    {
+     "synkkaPackagingType": "BASE_UNIT_OR_EACH",
+     "width": {
+      "unit": "MMT",
+      "value": 130.0
+     },
+     "length": {
+      "unit": "MMT",
+      "value": 237.0
+     },
+     "height": {
+      "unit": "MMT",
+      "value": 373.0
+     },
+     "volume": {
+      "unit": "LTR",
+      "value": 10.0
+     },
+     "netWeight": {
+      "unit": "GRM",
+      "value": 10300.0
+     },
+     "grossWeight": {
+      "unit": "GRM",
+      "value": 10555.0
+     }
+    }
+   ],
+   "minTemperature": 2.0,
+   "maxTemperature": 6.0
+  },
+  "units": [
+   {
+    "unitId": "ST",
+    "gtin": "6413300017656",
+    "sizeInBaseUnits": 1.0
+   }
+  ],
+  "deposits": []
+ },
+ {
+  "id": "463038",
+  "salesUnitGtin": "6408430100330",
+  "salesUnit": "KI",
+  "baseUnit": "ST",
+  "category": "10400",
+  "allowedLotSize": 0.01,
+  "deleted": false,
+  "temperatureCondition": 4,
+  "vendorName": "VALIO OY TUORE",
+  "countryOfOrigin": "fi",
+  "synkkaData": {
+   "gtin": "6408430000760",
+   "lastUpdated": "2025-09-29T20:01:27+0300",
+   "mediasLastUpdated": "2025-09-15T09:55:55+0300",
+   "countriesOfOrigin": [
+    "246"
+   ],
+   "names": [
+    {
+     "value": "Valio Eila® semi skimmed milk drink 10 l novobox lactose free",
+     "language": "en"
+    },
+    {
+     "value": "Valio Eila® kevytmaitojuoma 10 l novobox laktoositon",
+     "language": "fi"
+    },
+    {
+     "value": "Valio Eila® lättmjölksdryck 10 l novobox laktosfri",
+     "language": "sv"
+    }
+   ],
+   "materialAdditionalDescriptions": [],
+   "marketingTexts": [],
+   "keyIngredients": [
+    {
+     "value": "MILK, vitamin D.",
+     "language": "en"
+    },
+    {
+     "value": "MAITO, D-vitamiini.",
+     "language": "fi"
+    },
+    {
+     "value": "MJÖLK, vitamin D.",
+     "language": "sv"
+    }
+   ],
+   "storageInstructions": [
+    {
+     "value": "Keep refrigerated 0 to +6 °C and protect from light. Once opened, consume within 3 to 4 days.",
+     "language": "en"
+    },
+    {
+     "value": "Säilytettävä valolta suojattuna 0 – +6 °C:ssa.",
+     "language": "fi"
+    },
+    {
+     "value": "Förvaras skyddad för ljus vid 0 – +6 °C. Öppnad förpackning är hållbar 3–4 dagar i kylskåp.",
+     "language": "sv"
+    }
+   ],
+   "preparationInstructions": [],
+   "disposalInformations": [
+    {
+     "value": "Recycle box as carton, inner bag as plastic.",
+     "language": "en"
+    },
+    {
+     "value": "Kierrätä laatikko kartonkina, sisäpussi muovina.",
+     "language": "fi"
+    },
+    {
+     "value": "Återvinn låda som kartong, inre påse som plast",
+     "language": "sv"
+    }
+   ],
+   "usageInstructions": [],
+   "classifications": [
+    {
+     "type": "DECIMAL",
+     "name": "composition",
+     "values": []
+    },
+    {
+     "type": "DECIMAL",
+     "name": "gda",
+     "values": [
+      {
+       "id": "CHOAVL",
+       "value": 3.1,
+       "unit": "GRM"
+      },
+      {
+       "id": "ENER-E14",
+       "value": 39.0,
+       "unit": "E14"
+      },
+      {
+       "id": "ENER-KJO",
+       "value": 164.0,
+       "unit": "KJO"
+      },
+      {
+       "id": "FASAT",
+       "value": 0.9,
+       "unit": "GRM"
+      },
+      {
+       "id": "FAT",
+       "value": 1.5,
+       "unit": "GRM"
+      },
+      {
+       "id": "FIBTG",
+       "value": 0.0,
+       "unit": "GRM"
+      },
+      {
+       "id": "LACS",
+       "value": 0.0,
+       "unit": "GRM"
+      },
+      {
+       "id": "PRO-",
+       "value": 3.3,
+       "unit": "GRM"
+      },
+      {
+       "id": "SALTEQ",
+       "value": 0.1,
+       "unit": "GRM"
+      },
+      {
+       "id": "SUGAR-",
+       "value": 3.1,
+       "unit": "GRM"
+      }
+     ]
+    },
+    {
+     "type": "DECIMAL",
+     "name": "mineral",
+     "values": [
+      {
+       "id": "CA",
+       "value": 120.0,
+       "unit": "MGM"
+      },
+      {
+       "id": "NA",
+       "value": 40.0,
+       "unit": "MGM"
+      }
+     ]
+    },
+    {
+     "type": "DECIMAL",
+     "name": "nutritionFact",
+     "values": [
+      {
+       "id": "CHOAVL",
+       "value": 3.1,
+       "unit": "GRM"
+      },
+      {
+       "id": "ENER-E14",
+       "value": 39.0,
+       "unit": "E14"
+      },
+      {
+       "id": "ENER-KJO",
+       "value": 164.0,
+       "unit": "KJO"
+      },
+      {
+       "id": "FAPUCIS",
+       "value": 0.0,
+       "unit": "GRM"
+      },
+      {
+       "id": "FASAT",
+       "value": 0.9,
+       "unit": "GRM"
+      },
+      {
+       "id": "FAT",
+       "value": 1.5,
+       "unit": "GRM"
+      },
+      {
+       "id": "FIBTG",
+       "value": 0.0,
+       "unit": "GRM"
+      },
+      {
+       "id": "LACS",
+       "value": 0.0,
+       "unit": "GRM"
+      },
+      {
+       "id": "PRO-",
+       "value": 3.3,
+       "unit": "GRM"
+      },
+      {
+       "id": "SALTEQ",
+       "value": 0.1,
+       "unit": "GRM"
+      },
+      {
+       "id": "SUGAR-",
+       "value": 3.1,
+       "unit": "GRM"
+      }
+     ]
+    },
+    {
+     "type": "DECIMAL",
+     "name": "vitamin",
+     "values": [
+      {
+       "id": "VITB12",
+       "value": 0.4,
+       "unit": "MC"
+      }
+     ]
+    },
+    {
+     "type": "ENUM",
+     "name": "packagingMarkedLabel",
+     "values": [
+      {
+       "id": "GOODS_FROM_FINLAND_BLUE_SWAN",
+       "synkkaId": "GOODS_FROM_FINLAND_BLUE_SWAN"
+      },
+      {
+       "id": "coolTemperature"
+      }
+     ]
+    },
+    {
+     "type": "ENUM",
+     "name": "allergen",
+     "values": [
+      {
+       "id": "AM",
+       "unit": "CONTAINS"
+      }
+     ]
+    },
+    {
+     "type": "ENUM",
+     "name": "nonAllergen",
+     "values": []
+    },
+    {
+     "type": "ENUM",
+     "name": "nutritionalClaim",
+     "values": [
+      {
+       "id": "FREE_FROM_ADDITIVES",
+       "synkkaId": "ADDITIVES",
+       "unit": "FREE_FROM"
+      },
+      {
+       "id": "FREE_FROM_COLOURING_AGENTS",
+       "synkkaId": "COLOURING_AGENTS",
+       "unit": "FREE_FROM"
+      },
+      {
+       "id": "FREE_FROM_LACTOSE",
+       "synkkaId": "LACTOSE",
+       "unit": "FREE_FROM"
+      },
+      {
+       "id": "FREE_FROM_PRESERVATIVES",
+       "synkkaId": "PRESERVATIVES",
+       "unit": "FREE_FROM"
+      },
+      {
+       "id": "FREE_FROM_SWEETENERS",
+       "synkkaId": "SWEETENERS",
+       "unit": "FREE_FROM"
+      },
+      {
+       "id": "LOW_FAT",
+       "synkkaId": "FAT",
+       "unit": "LOW"
+      },
+      {
+       "id": "LOW_SODIUM_SALT",
+       "synkkaId": "SODIUM_SALT",
+       "unit": "LOW"
+      },
+      {
+       "id": "NO_ADDED_SUGARS",
+       "synkkaId": "SUGARS",
+       "unit": "NO_ADDED"
+      },
+      {
+       "id": "VEGETARIAN",
+       "synkkaId": "VEGETARIAN",
+       "unit": "DIET"
+      }
+     ]
+    },
+    {
+     "type": "ENUM",
+     "name": "packaging",
+     "values": []
+    }
+   ],
+   "nutritionalContent": [
+    {
+     "id": "CA",
+     "value": 120.0,
+     "unit": "MGM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM",
+     "dailyValueIntakePercent": 15.0
+    },
+    {
+     "id": "CHOAVL",
+     "value": 3.1,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "ENER-E14",
+     "value": 39.0,
+     "unit": "E14",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "ENER-KJO",
+     "value": 164.0,
+     "unit": "KJO",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "FAMSCIS",
+     "value": 0.3,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "FAPUCIS",
+     "value": 0.0,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "FASAT",
+     "value": 0.9,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "FAT",
+     "value": 1.5,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "FIBTG",
+     "value": 0.0,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "ID",
+     "value": 16.0,
+     "unit": "MC",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM",
+     "dailyValueIntakePercent": 10.0
+    },
+    {
+     "id": "LACS",
+     "value": 0.0,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "NA",
+     "value": 40.0,
+     "unit": "MGM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "PRO-",
+     "value": 3.3,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "RIBF",
+     "value": 0.18,
+     "unit": "MGM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM",
+     "dailyValueIntakePercent": 12.0
+    },
+    {
+     "id": "SALTEQ",
+     "value": 0.1,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "SUGAR-",
+     "value": 3.1,
+     "unit": "GRM",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM"
+    },
+    {
+     "id": "VITB12",
+     "value": 0.4,
+     "unit": "MC",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM",
+     "dailyValueIntakePercent": 16.0
+    },
+    {
+     "id": "VITD-",
+     "value": 2.0,
+     "unit": "MC",
+     "unitPrecision": "APPROXIMATELY",
+     "basisQuantity": 100.0,
+     "basisQuantityUnit": "GRM",
+     "dailyValueIntakePercent": 40.0
+    }
+   ],
+   "ingredients": [
+    {
+     "sequence": 1,
+     "names": [
+      {
+       "value": "Milk",
+       "language": "en"
+      },
+      {
+       "value": "Maito",
+       "language": "fi"
+      },
+      {
+       "value": "Mjölk",
+       "language": "sv"
+      }
+     ],
+     "origins": [
+      {
+       "type": "MILKING",
+       "country": "246"
+      }
+     ]
+    }
+   ],
+   "medias": [
+    {
+     "id": 125178,
+     "primary": true
+    }
+   ],
+   "fishingReports": [],
+   "safetyData": [],
+   "brand": "Valio",
+   "variableUnit": false,
+   "vatCode": "MEDIUM",
+   "producers": [
+    {
+     "id": "6408439999997",
+     "name": "Valio Oy"
+    }
+   ],
+   "unitConversions": [
+    {
+     "synkkaPackagingType": "CASE",
+     "width": {
+      "unit": "MMT",
+      "value": 342.0
+     },
+     "length": {
+      "unit": "MMT",
+      "value": 432.0
+     },
+     "height": {
+      "unit": "MMT",
+      "value": 280.0
+     },
+     "grossWeight": {
+      "unit": "GRM",
+      "value": 22890.0
+     }
+    }
+   ]
+  },
+  "units": [
+   {
+    "unitId": "KI",
+    "gtin": "6408430100330",
+    "sizeInBaseUnits": 2.0
+   },
+   {
+    "unitId": "ST",
+    "gtin": "6408430000760",
+    "sizeInBaseUnits": 1.0
+   }
+  ],
+  "deposits": []
+ }
+]
