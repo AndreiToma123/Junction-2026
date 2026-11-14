@@ -72,6 +72,7 @@ rules:
   settings:
     brands:
     - Valio
+    usual_product_ok: true
   result: approve
 - id: C3
   type: max_brands

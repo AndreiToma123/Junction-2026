@@ -17,6 +17,7 @@ from datetime import date, datetime
 from . import agent, catalog, config, kitchen, llm, log, parse, rules, store, substitutes
 
 DIR = config.STATE / "events"
+# An event's lines keep ALL request ids ever made for an ingredient ("request_ids"), so the history stays visible.
 
 
 def _u(unit):
@@ -86,90 +87,200 @@ def read_description(text, today=None):
 
 # ---------------------------------------------------------------- planning
 
-def plan(name, event_date, dishes, by, today=None, scenario=None):
-    """dishes: [{"dish_id", "portions"}]. Creates the event, sends the purchase requests, returns the event."""
+def _menu(ev=None):
+    """Kitchen menu plus the event's own custom dishes."""
+    m = {d["dish_id"]: d for d in kitchen.load()["dishes"]}
+    for d in (ev or {}).get("custom_dishes", []):
+        m[d["dish_id"]] = d
+    return m
+
+
+def _needs(ev):
+    menu = _menu(ev)
+    need = {}
+    for d in ev["dishes"]:
+        for g in menu[d["dish_id"]]["ingredients"]:
+            n = need.setdefault(g["item_id"], {"amount": 0.0, "dishes": []})
+            n["amount"] += g["amount"] * d["portions"]
+            if d["dish_id"] not in n["dishes"]:
+                n["dishes"].append(d["dish_id"])
+    return need
+
+
+def _spare(item_id, event_date, today, doc):
+    """What the kitchen can spare by the event: stock + routine deliveries arriving in time - normal service until then."""
+    i = kitchen.ingredient(item_id, doc)
+    days = (date.fromisoformat(event_date) - today).days
+    arriving = sum(x["amount"] for x in doc["incoming"] if x["item_id"] == item_id and x["delivery_date"] <= event_date
+                   and not x.get("for_event"))
+    normal = kitchen.daily_use(doc).get(item_id, 0) * days
+    return i, round(arriving, 3), round(normal, 3), round(max(0.0, i["stock"] + arriving - normal), 3)
+
+
+def _requests(line):
+    """All requests for this line, including follow-ups (a substitute or 'only the usual product' replaces a request)."""
+    out, seen = [], set()
+    ids = line.get("request_ids") or [x for x in (line.get("request_id"), line.get("extra_request_id")) if x]  # older events
+    for rid in ids:
+        r = store.get(rid)
+        while r and r["id"] not in seen:
+            seen.add(r["id"])
+            out.append(r)
+            r = store.get(r["replaced_by"]) if r.get("replaced_by") else None
+    return out
+
+
+def _replan(ev, by, today=None):
+    """Bring every ingredient line in line with the event's current dishes:
+    order what is still missing, cancel open requests that are no longer right, keep what is already ordered."""
     today = today or date.today()
-    if not dishes:
-        raise ValueError("Choose at least one dish.")
+    doc = kitchen.load()
+    need = _needs(ev)
+    lines = {l["item_id"]: l for l in ev["lines"]}
+    for item_id, n in need.items():
+        i, arriving, normal, spare = _spare(item_id, ev["date"], today, doc)
+        line = lines.get(item_id) or {"item_id": item_id, "request_ids": [], "spare": spare, "stock": i["stock"],
+                                        "arriving": arriving, "normal_use": normal}
+        line.update(name=i["name"], unit=i["unit"], needed=round(n["amount"], 3), dishes=n["dishes"])
+        lines[item_id] = line
+    for item_id in list(lines):
+        if item_id not in need:  # no dish uses it any more
+            lines[item_id]["needed"] = 0.0
+            lines[item_id]["dishes"] = []
+
+    for line in lines.values():
+        reqs = _requests(line)
+        ordered = sum(r["parsed"]["amount"] for r in reqs if r["status"] == "ordered")
+        missing = round(max(0.0, line["needed"] - line["spare"] - ordered), 3)
+        open_ = [r for r in reqs if r["status"] in ("needs_approval", "ask_buyer")]
+        for r in open_:  # an open request for the wrong amount (or no longer needed) is replaced
+            if missing <= 0 or abs(r["parsed"]["amount"] - _round_up(line, missing)) > 1e-6:
+                agent.cancel(r["id"], by)
+                r["status"] = "cancelled"
+        open_ = [r for r in open_ if r["status"] != "cancelled"]
+        last = reqs[-1] if reqs else None
+        stuck_same = (last and last["status"] in ("cannot_fulfil", "rejected")
+                      and abs(last["parsed"]["amount"] - _round_up(line, missing)) < 1e-6)
+        if missing > 0 and not open_ and not stuck_same:
+            amount = _round_up(line, missing)
+            rec = agent.handle(
+                text=f"Event {ev['id']}: {rules.num(amount)} {_u(line['unit'])} of {line['name'].lower()} by {rules.nice_date(ev['date'])}",
+                parsed={"product": line["name"], "item_id": line["item_id"], "amount": amount, "unit": line["unit"],
+                        "deadline": ev["date"], "buyer_confirmed_amount": True, "parsed_by": f"event planner ({ev['id']})"},
+                scenario=ev.get("scenario"), origin="event", event_id=ev["id"],
+                trigger=(f"Event {ev['id']} needs {rules.num(line['needed'])} {_u(line['unit'])} of {line['name'].lower()}; the kitchen can spare "
+                         f"{rules.num(line['spare'])} after normal service until {rules.nice_date(ev['date'])}"
+                         + (f" and {rules.num(ordered)} is already ordered" if ordered else "")
+                         + f", so {rules.num(missing)} is missing"
+                         + (f"; ordering {rules.num(amount)} (whole packs, the rest goes into stock)." if amount > missing + 1e-9 else ".")))
+            line["request_ids"].append(rec["id"])
+            line.pop("fix", None)  # an old fix no longer applies
+        line["short"] = missing
+        line["to_order"] = _round_up(line, missing) if missing > 0 else 0.0
+    ev["lines"] = sorted([l for l in lines.values() if l["needed"] > 0 or l.get("request_ids")],
+                         key=lambda l: (_status(l) == "covered", _status(l) == "ordered", l["name"]))
+    return _refresh(ev)
+
+
+def _round_up(line, amount):
+    """Round up to whole packs of the usual product (the extra goes into stock)."""
+    if amount <= 0:
+        return 0.0
+    i = kitchen.ingredient(line["item_id"])
+    per = catalog.content_per_sales_unit(catalog.get(i["usual_product"]), i["unit"])
+    units = rules.units_for(i["usual_product"], amount, i["unit"])
+    return round(units * per, 3) if per and units else round(amount, 3)
+
+
+def _status(line):
+    reqs = _requests(line)
+    if line.get("short", 0) <= 0:
+        return "ordered" if any(r["status"] == "ordered" for r in reqs) else "covered"
+    if not reqs:
+        return "missing"  # short, and no request was sent (should not happen; shown honestly if it does)
+    for r in reversed(reqs):
+        if r["status"] != "cancelled":
+            return r["status"] if r["status"] != "superseded" else "cancelled"
+    return "cancelled" if reqs else "covered"
+
+
+def plan(name, event_date, dishes, by, today=None, scenario=None, budget=None, custom_dishes=None, add_to_menu=False):
+    """dishes: [{"dish_id", "portions"}]; custom_dishes: [{"name", "course", "ingredients": [{"item_id", "amount"}]}]
+    (a dish just for this event; its portions are in `dishes` under the id it gets here)."""
+    today = today or date.today()
     try:
         when = date.fromisoformat(event_date)
     except (TypeError, ValueError):
         raise ValueError("The event date must be YYYY-MM-DD.")
     if when <= today:
         raise ValueError("The event must be after today: Valio Aimo can't deliver today.")
-    doc = kitchen.load()
-    menu = {d["dish_id"]: d for d in doc["dishes"]}
+    if budget is not None and (budget < 0 or budget > 1_000_000):
+        raise ValueError("The event budget must be between €0 and €1,000,000.")
+    ev = {"id": _new_id(), "name": name or "Event", "date": event_date, "budget": budget,
+          "created_at": datetime.now().astimezone().isoformat(timespec="seconds"), "created_by": by,
+          "dishes": [], "custom_dishes": [], "lines": [], "changes": [], "scenario": scenario}
+    known = {i["item_id"] for i in kitchen.ingredients()}
+    for n, c in enumerate(custom_dishes or [], 1):
+        ings = [g for g in c.get("ingredients", []) if g.get("item_id") in known and 0 < float(g.get("amount", 0)) <= 5]
+        if not c.get("name") or not ings:
+            raise ValueError("A custom dish needs a name and at least one ingredient from the kitchen list.")
+        dish = {"dish_id": c.get("dish_id") or f"{ev['id'].lower()}-custom-{n}", "name": c["name"].strip()[:80],
+                "course": c.get("course") or "main", "custom": True, "portions_per_day": 0,
+                "ingredients": [{"item_id": g["item_id"], "amount": float(g["amount"])} for g in ings]}
+        ev["custom_dishes"].append(dish)
+        if add_to_menu or c.get("add_to_menu"):
+            kitchen.save_dish(by, {"name": dish["name"], "course": dish["course"], "portions_per_day": 0, "ingredients": dish["ingredients"]})
+    menu = _menu(ev)
+    if not dishes:
+        raise ValueError("Choose at least one dish.")
     for d in dishes:
         if d["dish_id"] not in menu or not (0 < d["portions"] <= 5000):
             raise ValueError(f"Unknown dish or bad portion count: {d}")
-    days = (when - today).days
-    use = kitchen.daily_use(doc)
-
-    need = {}
-    for d in dishes:
-        for g in menu[d["dish_id"]]["ingredients"]:
-            n = need.setdefault(g["item_id"], {"amount": 0.0, "dishes": []})
-            n["amount"] += g["amount"] * d["portions"]
-            n["dishes"].append(d["dish_id"])
-    ev = {"id": _new_id(), "name": name or "Event", "date": event_date, "created_at": datetime.now().astimezone().isoformat(timespec="seconds"),
-          "created_by": by, "dishes": [{**d, "name": menu[d["dish_id"]]["name"]} for d in dishes], "lines": [], "changes": [],
-          "scenario": scenario}
-    portions = sum(d["portions"] for d in dishes)
+        ev["dishes"].append({"dish_id": d["dish_id"], "portions": int(d["portions"]), "name": menu[d["dish_id"]]["name"]})
+    save(ev)
+    portions = sum(d["portions"] for d in ev["dishes"])
     log.write("event", f"Event {ev['id']} '{ev['name']}' on {rules.nice_date(event_date)}: {portions} extra portions of "
-              + ", ".join(f"{d['portions']} × {menu[d['dish_id']]['name']}" for d in dishes) + ".",
+              + ", ".join(f"{d['portions']} × {d['name']}" for d in ev["dishes"])
+              + (f". Event budget €{budget:,.0f}." if budget is not None else ". No event budget set.")
+              + (" Custom dish(es): " + ", ".join(c["name"] for c in ev["custom_dishes"]) + "." if ev["custom_dishes"] else ""),
               "event planner", actor=f"person:{by}", data={"event_id": ev["id"]})
-
-    for item_id, n in need.items():
-        i = kitchen.ingredient(item_id, doc)
-        arriving = sum(x["amount"] for x in doc["incoming"] if x["item_id"] == item_id and x["delivery_date"] <= event_date)
-        normal = use.get(item_id, 0) * days  # normal service until (and including) the event day
-        spare = max(0.0, i["stock"] + arriving - normal)
-        short = round(max(0.0, n["amount"] - spare), 3)
-        to_order = short
-        if short > 0:  # round up to the usual product's pack / order step; the rest goes into kitchen stock
-            per = catalog.content_per_sales_unit(catalog.get(i["usual_product"]), i["unit"])
-            units = rules.units_for(i["usual_product"], short, i["unit"])
-            if per and units:
-                to_order = round(units * per, 3)
-        line = {"item_id": item_id, "name": i["name"], "unit": i["unit"], "needed": round(n["amount"], 3),
-                "stock": i["stock"], "arriving": round(arriving, 3), "normal_use": round(normal, 3), "spare": round(spare, 3),
-                "short": short, "to_order": to_order, "dishes": n["dishes"], "request_id": None, "status": "covered"}
-        if short > 0:
-            rec = agent.handle(
-                text=f"Event {ev['id']}: {rules.num(to_order)} {_u(i['unit'])} of {i['name'].lower()} by {rules.nice_date(event_date)}",
-                parsed={"product": i["name"], "item_id": item_id, "amount": to_order, "unit": i["unit"], "deadline": event_date,
-                        "buyer_confirmed_amount": True, "parsed_by": f"event planner ({ev['id']})"},
-                scenario=scenario, origin="event",
-                trigger=(f"Event {ev['id']} needs {rules.num(n['amount'])} {_u(i['unit'])} of {i['name'].lower()}; the kitchen can spare "
-                         f"{rules.num(spare)} after normal service until {rules.nice_date(event_date)}, so {rules.num(short)} is missing"
-                         + (f"; ordering {rules.num(to_order)} (whole packs, the rest goes into stock)." if to_order > short + 1e-9 else ".")))
-            rec["event_id"] = ev["id"]
-            store.save(rec)
-            line.update(request_id=rec["id"], status=rec["status"])
-        ev["lines"].append(line)
-    ev["lines"].sort(key=lambda l: (l["status"] == "covered", l["status"] == "ordered", l["name"]))
-    _refresh(ev)
-    return save(ev)
+    return save(_replan(ev, by, today))
 
 
 def _refresh(ev):
-    """Update each line's status from its request, and attach recipe-aware fixes where something is stuck."""
+    """Update each line from its requests, and the event's cost against its budget."""
+    from . import budgets
+    pending_cost = 0.0
+    if any(not l.get("request_ids") for l in ev["lines"]):
+        # Older events: rebuild the links from the requests themselves (each request knows its event and ingredient).
+        mine = [r for r in store.all_records() if r.get("event_id") == ev["id"]]
+        for line in ev["lines"]:
+            if not line.get("request_ids"):
+                line["request_ids"] = [r["id"] for r in mine if (r.get("parsed") or {}).get("item_id") == line["item_id"]
+                                       and not r.get("follow_up_of")]
     for line in ev["lines"]:
-        rid = line.get("request_id")
-        rec = store.get(rid) if rid else None
-        while rec and rec.get("replaced_by"):  # follow substitutes / follow-ups
-            rec = store.get(rec["replaced_by"])
-        if rec:
-            line["request_id"], line["status"] = rec["id"], rec["status"]
-            line["order_id"] = rec.get("order_id")
-            line["problem"] = rec.get("reason") or (" ".join(r["detail"] for o in rec.get("options", []) if o["option_id"] == rec.get("chosen")
-                                                              for r in o["results"] if r["result"] != "pass") or None)
+        reqs = _requests(line)
+        line["status"] = _status(line)
+        current = next((r for r in reversed(reqs) if r["status"] not in ("cancelled", "superseded")), reqs[-1] if reqs else None)
+        line["request_id"] = current["id"] if current else None
+        line["order_ids"] = [r["order_id"] for r in reqs if r["status"] == "ordered"]
+        line["problem"] = None
+        if current and current["status"] in ("cannot_fulfil", "rejected", "needs_approval", "ask_buyer"):
+            o = next((o for o in current.get("options", []) if o["option_id"] == current.get("chosen")), None)
+            line["problem"] = current.get("reason") or current.get("question") or (
+                " ".join(r["detail"] for r in o["results"] if r["result"] != "pass") if o else None)
+            if current["status"] == "needs_approval" and o:
+                pending_cost += o["total_with_tax"]
     ev["summary"] = {
         "covered_from_stock": sum(1 for l in ev["lines"] if l["status"] == "covered"),
         "ordered": sum(1 for l in ev["lines"] if l["status"] == "ordered"),
         "waiting_for_person": sum(1 for l in ev["lines"] if l["status"] in ("needs_approval", "ask_buyer")),
-        "cannot_source": sum(1 for l in ev["lines"] if l["status"] == "cannot_fulfil"),
+        "cannot_source": sum(1 for l in ev["lines"] if l["status"] in ("cannot_fulfil", "rejected", "cancelled", "missing")),
     }
+    b = budgets.status(f"event:{ev['id']}")
+    ev["cost"] = {"ordered": b["spent"], "waiting_for_approval": round(pending_cost, 2),
+                  "total": round(b["spent"] + pending_cost, 2), "budget": ev.get("budget"),
+                  "left": round(ev["budget"] - b["spent"] - pending_cost, 2) if ev.get("budget") is not None else None}
     return ev
 
 
@@ -180,61 +291,104 @@ def view(eid):
     return save(_refresh(ev))
 
 
-def fixes(eid, item_id):
-    """Recipe-aware fixes for one stuck ingredient of an event."""
+def set_budget(eid, budget, by):
+    ev = get(eid)
+    if not ev:
+        raise ValueError("Unknown event")
+    if budget is not None and (budget < 0 or budget > 1_000_000):
+        raise ValueError("The event budget must be between €0 and €1,000,000.")
+    old = ev.get("budget")
+    ev["budget"] = budget
+    log.write("budget", f"Event {eid} budget changed by {by}: "
+              + (f"€{old:,.0f}" if old is not None else "none") + " → " + (f"€{budget:,.0f}" if budget is not None else "none") + ".",
+              "event planner", actor=f"person:{by}", data={"event_id": eid})
+    return save(_refresh(ev))
+
+
+# ---------------------------------------------------------------- fixing what can't be sourced
+
+def fixes(eid, item_id, today=None):
+    """Recipe-aware fixes for one stuck ingredient, SAVED on the event so they are still there later."""
+    today = today or date.today()
     ev = get(eid)
     line = next((l for l in (ev or {}).get("lines", []) if l["item_id"] == item_id), None)
     if not line:
         raise ValueError("Unknown event or ingredient")
-    portions = max(d["portions"] for d in ev["dishes"] if d["dish_id"] in line["dishes"])
+    menu = _menu(ev)
     rec = store.get(line["request_id"]) if line.get("request_id") else None
+    missing = line.get("short") or line["needed"]
     if rec and rec.get("status") in ("needs_approval", "rejected", "cannot_fulfil"):
         out = substitutes.for_request(rec)
     else:
-        out = substitutes.propose(item_id, line["short"] or line["needed"], ev["date"], dishes=line["dishes"])
-    out["dish_swaps"] = substitutes._dish_swaps(item_id, [d["dish_id"] for d in ev["dishes"]], portions, ev["date"])
-    out["affected_dishes"] = [d for d in ev["dishes"] if d["dish_id"] in line["dishes"]]
+        out = substitutes.propose(item_id, missing, ev["date"], dishes=line["dishes"])
+        out["usual_available"] = substitutes.usual_available(item_id, ev["date"], ev.get("scenario"))
+    have = out.get("usual_available")
+    ordered = sum(r["parsed"]["amount"] for r in _requests(line) if r["status"] == "ordered")
+    can_get = line["spare"] + ordered + (have if have else 0)
+
+    # How many portions of each affected dish can still be made, and which dish could take the rest.
+    doc = kitchen.load()
+    leftover = {}
+    for i in doc["ingredients"]:
+        _, _, _, sp = _spare(i["item_id"], ev["date"], today, doc)
+        used = next((l["needed"] for l in ev["lines"] if l["item_id"] == i["item_id"]), 0.0)
+        leftover[i["item_id"]] = max(0.0, sp - used)
+    partial = []
+    for d in ev["dishes"]:
+        if d["dish_id"] not in line["dishes"]:
+            continue
+        per = next(g["amount"] for g in menu[d["dish_id"]]["ingredients"] if g["item_id"] == item_id)
+        others = line["needed"] - per * d["portions"]
+        keep = int(max(0, min(d["portions"], (can_get - others) // per))) if per else d["portions"]
+        move = d["portions"] - keep
+        if move <= 0:
+            continue
+        course = menu[d["dish_id"]].get("course")
+        cands = []
+        for alt in list(menu.values()):
+            if alt["dish_id"] == d["dish_id"] or alt.get("course", "main") != (course or "main"):
+                continue
+            if any(g["item_id"] == item_id for g in alt["ingredients"]):
+                continue
+            short = [kitchen.ingredient(g["item_id"], doc)["name"] for g in alt["ingredients"]
+                     if g["amount"] * move > leftover.get(g["item_id"], 0) + 1e-9]
+            cands.append({"dish_id": alt["dish_id"], "name": alt["name"], "already_on_event": any(x["dish_id"] == alt["dish_id"] for x in ev["dishes"]),
+                          "from_stock_only": not short, "short": short})
+        cands.sort(key=lambda c: (not c["from_stock_only"], not c["already_on_event"], len(c["short"])))
+        partial.append({"dish_id": d["dish_id"], "name": d["name"], "portions": d["portions"], "can_make": keep, "move": move,
+                        "per_portion": per, "alternatives": cands[:4]})
+    out["portion_plan"] = partial
+    out["can_get"] = round(can_get, 3)
+    out["checked_at"] = datetime.now().astimezone().isoformat(timespec="seconds")
+    line["fix"] = out
+    save(ev)
     return out
 
 
-def swap_dish(eid, from_dish, to_dish, by):
-    """A person replaces a dish on the event menu. Open requests for ingredients no longer needed are cancelled;
-    the event is re-planned for the new dish (its ingredients go through the same steps)."""
+def swap_dish(eid, from_dish, to_dish, by, move=None, today=None):
+    """Move `move` portions (default: all) of one dish to another (on the menu, or already on the event).
+    Then re-plan: open requests that no longer fit are cancelled, missing amounts are ordered."""
     ev = get(eid)
     if not ev:
         raise ValueError("Unknown event")
+    menu = _menu(ev)
     old = next((d for d in ev["dishes"] if d["dish_id"] == from_dish), None)
-    menu = {d["dish_id"]: d for d in kitchen.load()["dishes"]}
-    if not old or to_dish not in menu:
+    if not old or to_dish not in menu or to_dish == from_dish:
         raise ValueError("Unknown dish")
-    portions = old["portions"]
-    still = {g["item_id"] for d in ev["dishes"] if d["dish_id"] != from_dish for g in menu[d["dish_id"]]["ingredients"]}
-    for line in ev["lines"]:
-        if from_dish in line["dishes"] and line["item_id"] not in still and line["status"] in ("needs_approval", "ask_buyer"):
-            agent.cancel(line["request_id"], by)
-    ev["dishes"] = [d for d in ev["dishes"] if d["dish_id"] != from_dish]
-    ev["changes"].append({"time": datetime.now().astimezone().isoformat(timespec="seconds"), "by": by,
-                          "change": f"{menu[from_dish]['name']} replaced by {menu[to_dish]['name']} ({portions} portions)"})
-    log.write("event", f"Event {eid}: {by} replaced {menu[from_dish]['name']} with {menu[to_dish]['name']} for {portions} portions.",
-              "event planner", actor=f"person:{by}", data={"event_id": eid})
-    keep = [l for l in ev["lines"] if l["item_id"] in still]
-    extra = plan(f"{ev['name']} (dish change)", ev["date"], [{"dish_id": to_dish, "portions": portions}], by, scenario=ev.get("scenario"))
-    # merge the new dish's lines into this event, then drop the helper event file
-    merged = {l["item_id"]: l for l in keep}
-    for l in extra["lines"]:
-        if l["item_id"] in merged:
-            merged[l["item_id"]]["needed"] += l["needed"]
-            merged[l["item_id"]]["dishes"] += l["dishes"]
-            if l.get("request_id"):
-                merged[l["item_id"]]["extra_request_id"] = l["request_id"]
-        else:
-            merged[l["item_id"]] = l
-    ev["dishes"].append({"dish_id": to_dish, "portions": portions, "name": menu[to_dish]["name"]})
-    ev["lines"] = sorted(merged.values(), key=lambda l: (l["status"] == "covered", l["status"] == "ordered", l["name"]))
-    (DIR / f"{extra['id']}.json").unlink(missing_ok=True)
-    for rid in [l.get("request_id") for l in extra["lines"] if l.get("request_id")]:
-        r = store.get(rid)
-        if r:
-            r["event_id"] = eid
-            store.save(r)
-    return save(_refresh(ev))
+    move = old["portions"] if move is None else int(move)
+    if not (0 < move <= old["portions"]):
+        raise ValueError("Bad number of portions to move")
+    old["portions"] -= move
+    ev["dishes"] = [d for d in ev["dishes"] if d["portions"] > 0]
+    tgt = next((d for d in ev["dishes"] if d["dish_id"] == to_dish), None)
+    if tgt:
+        tgt["portions"] += move
+    else:
+        ev["dishes"].append({"dish_id": to_dish, "portions": move, "name": menu[to_dish]["name"]})
+    text = (f"{move} portions of {menu[from_dish]['name']} moved to {menu[to_dish]['name']}"
+            + (f" ({old['portions']} of {menu[from_dish]['name']} kept)" if old["portions"] else ""))
+    ev["changes"].append({"time": datetime.now().astimezone().isoformat(timespec="seconds"), "by": by, "change": text})
+    log.write("event", f"Event {eid}: {by} changed the menu: {text}.", "event planner", actor=f"person:{by}", data={"event_id": eid})
+    for l in ev["lines"]:
+        l.pop("fix", None)
+    return save(_replan(ev, by, today))

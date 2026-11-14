@@ -30,6 +30,10 @@ def _nice_time(iso):
     return f"{_nice_date(iso)} {iso[11:16]}"
 
 
+def _ul(unit):
+    return "kg" if unit == "KG" else unit
+
+
 RESULT_WORDS = {"approve": "needs approval", "ask": "ask the buyer", "blocked": "can't be used"}
 
 
@@ -51,15 +55,15 @@ def _check_usual_size(rule, req, ctx):
     if not item:
         return s["if_new_item"], f"'{req['product']}' is not in the kitchen's usual orders (new item).", {"product": req["product"]}
     if req["unit"] != item["unit"]:
-        return "ask", f"Request is in {req['unit']} but the usual order is in {item['unit']}.", {}
+        return "ask", f"Request is in {req['unit']} but the usual order is in {_ul(item['unit'])}.", {}
     ratio = req["amount"] / item["usual_amount"]
     facts = {"requested": req["amount"], "usual": item["usual_amount"], "unit": item["unit"],
              "ratio": round(ratio, 2), "max_ratio": s["max_ratio"]}
     times = NUM(round(ratio, 1))
     if ratio > s["max_ratio"] and round(ratio, 1) <= s["max_ratio"]:
         times = f"just over {NUM(s['max_ratio'])}"  # e.g. 3,001 L against a 3× limit
-    base = (f"{NUM(req['amount'])} {item['unit']} is {times}× the usual "
-            f"{NUM(item['usual_amount'])} {item['unit']} per {item['per']} (limit {NUM(s['max_ratio'])}×)")
+    base = (f"{NUM(req['amount'])} {_ul(item['unit'])} is {times}× the usual "
+            f"{NUM(item['usual_amount'])} {_ul(item['unit'])} per {item['per']} (limit {NUM(s['max_ratio'])}×)")
     if ratio > s["max_ratio"] and req.get("buyer_confirmed_amount"):
         if s["if_buyer_confirms"] == "pass":
             return "pass", base + ". The buyer confirmed the amount.", facts

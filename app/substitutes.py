@@ -157,7 +157,15 @@ def propose(item_id, amount, deadline, dishes=None, portions=None, use_ai=True):
                             "note": "Same product group as the usual product. Nobody has checked it suits the recipe: the chef decides.",
                             "needs_chef": True})
     usable = [o for o in options if o["ok"]]
-    usable.sort(key=lambda o: (not o["pre_approved"], o["source"] != "chef's swap list", o.get("fit") == "poor"))
+    fit_order = {"good": 0, "ok": 1, None: 2}
+    usable.sort(key=lambda o: (not o["pre_approved"], o["source"] != "chef's swap list", fit_order.get(o.get("fit"), 2), o["price_per"] or 1e9))
+    for n, o in enumerate(usable, 1):
+        o["rank"] = n
+        why = ("on the chef's list and pre-approved: the agent may order it alone" if o["pre_approved"] else
+               "on the chef's list of recipe swaps" if o["source"] == "chef's swap list" else
+               f"picked by the AI as a {o.get('fit', 'possible')} fit for the recipe" if o["source"] == "suggested by AI" else
+               "same product group only, not checked against the recipe")
+        o["rank_reason"] = why[0].upper() + why[1:] + f"; €{o['price_per']:,.2f}/{_u(unit)}."
     not_usable = [o for o in options if not o["ok"]]
     return {"item_id": item_id, "name": item["name"], "unit": unit, "needed": amount, "deadline": deadline,
             "dishes": [d for d in kitchen.load()["dishes"] if d["dish_id"] in dishes],

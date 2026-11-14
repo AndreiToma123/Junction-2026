@@ -79,12 +79,12 @@ Substitutes come from the chef's own swap list, or are picked by the AI from Aim
 already checked (deliverable in time, in stock, priced). The AI never invents a product.
 
 ```bash
-.venv/bin/python -m scripts.try_events     # 16 checks: dates, "as much as possible", stock-out, events (sandbox)
+.venv/bin/python -m scripts.try_events     # 30 checks: dates, unclear requests, stock-out, duplicates, events, budgets, ranking, menu editing (sandbox)
 ```
 
 ## The dashboard
 
-Screens: New request · Requests · Events · Kitchen · Audit log · Rules.
+Screens: New request · Requests · Events · Kitchen · Audit log · Rules. Dark mode: the ◐ button.
 
 1. **New request**: type what you need, or tap "Your usual". Watch the agent's steps, then a clear result.
 2. **Requests**: what needs action, with summary boxes (decision, reason, total, delivery), the order,
@@ -178,7 +178,7 @@ No proprietary formats: every file opens in a text editor.
 
 ## Assumptions
 
-All 41 decisions, with reasons, are in **[DECISIONS.md](DECISIONS.md)**. Progress and what could come next: **[roadmap.md](roadmap.md)**. The ones that matter most:
+All 55 decisions, with reasons, are in **[DECISIONS.md](DECISIONS.md)**. Progress and what could come next: **[roadmap.md](roadmap.md)**. The ones that matter most:
 
 - **Stock numbers.** `999999` on a supplier ("Terminal") product means *unknown* (documented by Aimo).
   `9999999999` and `666666666` on stocked products mean *no limit* (our reading, not documented).

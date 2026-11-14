@@ -2,7 +2,7 @@
 
 Junction 2026 · Valio Aimo "Trusted Trade Agents" · final submission **Sunday 15 Nov, 10:00**
 
-Last updated: Sat 14 Nov 2026, evening.
+Last updated: Sat 14 Nov 2026, late evening.
 
 ---
 
@@ -28,8 +28,8 @@ Everything in the original build plan is done and tested with live Valio Aimo da
 |---|---|---|
 | B1 | Re-check price and stock at approval (story 6) | ✅ Done |
 | B2 | Menu (11 dishes), 18 ingredients, kitchen stock, automatic restock with duplicate guard, Kitchen screen, kg support | ✅ Done |
-| B3 | Menu editing: edit / add / remove dishes, shared-ingredient view, rules for new ingredients | ⏸ Paused (14 Nov) |
-| B4 | Wallets: recurring budgets per category, event wallets (charged by purpose) | ⏸ Paused |
+| B3 | Menu editing: edit / add / remove dishes, shared-ingredient view, new ingredients | ✅ Done |
+| B4 | Wallets: recurring budgets per category, event wallets (charged by purpose) | ✅ Done (informative, not blocking) |
 | B5 | "Order what is available now" (partial order) | ✅ Done as "Order only the usual product" |
 
 ### Challenge scenarios (agreed 14 Nov, evening)
@@ -54,7 +54,7 @@ run in a sandbox and can't touch real data.
 
 ## 2. Decisions so far (short version)
 
-Full list with reasons: [DECISIONS.md](DECISIONS.md) (41 decisions).
+Full list with reasons: [DECISIONS.md](DECISIONS.md) (55 decisions).
 
 **Scope and data**
 - Ordering is our own mock order service; nothing is sent to Aimo (1).

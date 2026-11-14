@@ -33,7 +33,8 @@ def _name(pid):
 
 
 def _as_much_as_possible(rec, req, scenario):
-    """Work out the amount for 'as much as possible'. Returns a finished record if it has to ask, else None."""
+    """'As much as possible' is never bought blindly: the agent looks up what Valio Aimo can deliver
+    and asks the buyer for a number, showing that amount. Always returns a finished record (asking)."""
     item = rules.find_usual_item(req["item_id"])
     pid, unit = item["usual_product"], item["unit"]
     p = catalog.get(pid)
@@ -57,17 +58,14 @@ def _as_much_as_possible(rec, req, scenario):
                     f"Tell me an amount and I will look for other products, or choose a later date.")
     else:
         units = rules.whole_steps_within(p, stock)
-        if req.get("max_amount"):  # follow-up: never more than was first asked for
-            units = min(units, rules.units_for(pid, req["max_amount"], unit))
-        req["amount"] = round(units * per, 3)
-        req["buyer_confirmed_amount"] = True  # the buyer asked for everything: not a typo
-        req["amount_reason"] = "everything available"
-        rec["current_request"] = (f"{rules.num(req['amount'])} {unit.lower() if unit == 'KG' else unit} of {item['name'].lower()} "
-                                  f"by {rules.nice_date(req['deadline'])} (everything available)")
-        _step(rec, "lookup", f"'As much as possible': Valio Aimo has {rules.num(stock)} {p['sales_unit']} of {name} ({pid}) "
-              f"for {rules.nice_date(req['deadline'])}" + (" (demo stock)" if q.get("demo_stock_override") else "")
-              + f". The agent will ask for {rules.num(req['amount'])} {unit}.", "Aimo API", amount=req["amount"])
-        return None
+        most = round(units * per, 3)
+        u = unit.lower() if unit == "KG" else unit
+        step = rules.order_step(p) * per
+        question = (f"Valio Aimo can deliver up to {rules.num(most)} {u} of {name} ({pid}) by {rules.nice_date(req['deadline'])}"
+                    + (f", in steps of {rules.num(step)} {u}" if step > 1 else "")
+                    + (" (demo stock)" if q.get("demo_stock_override") else "")
+                    + f". How much do you need? (Usual order: {rules.num(item['usual_amount'])} {u}.)")
+        rec["available_hint"] = {"amount": most, "unit": unit, "product_id": pid}
     rec["request_checks"] = []
     rec.update(status="ask_buyer", outcome="ask_buyer", options=[], chosen=None, ask_kind="missing", ask_fields=["amount"],
                question=question)
@@ -205,11 +203,13 @@ def _first_problem(o):
 
 # ---------------------------------------------------------------- main entry
 
-def handle(text=None, parsed=None, scenario=None, today=None, record=None, origin="typed", trigger=None):
+def handle(text=None, parsed=None, scenario=None, today=None, record=None, origin="typed", trigger=None, event_id=None):
     """Run the whole flow for one request. Returns the saved record.
     origin: "typed" (a person wrote it) or "auto" (the stock monitor sent it; `trigger` says why)."""
     rec = record or {"id": store.new_id(), "received_at": _now(), "text": text, "scenario": scenario,
                      "origin": origin, "steps": [], "history": []}
+    if event_id and not record:
+        rec["event_id"] = event_id
     if trigger and not record:
         rec["trigger"] = trigger
         _step(rec, "trigger", trigger, "stock monitor", actor="system")
@@ -304,7 +304,10 @@ def handle(text=None, parsed=None, scenario=None, today=None, record=None, origi
     usable = sorted([o for o in options if o["outcome"] != "blocked"], key=lambda o: _rank_key(o, usual))
     blocked = [o for o in options if o["outcome"] == "blocked"]
     _step(rec, "options", f"Built {len(options)} options: {len(usable)} usable, {len(blocked)} blocked.", "rules.yaml")
+    blocked.sort(key=lambda o: o["total_with_tax"])
+    _rank(usable, blocked, usual, req)
     rec["options"] = usable[:5] + blocked[:3]  # keep the record readable
+    rec["options_compared"] = {"usable": len(usable), "blocked": len(blocked)}
 
     if not usable:
         # Count, per rule, how many options it blocked: "8 options: B3 Arrives by the deadline".
@@ -323,6 +326,7 @@ def handle(text=None, parsed=None, scenario=None, today=None, record=None, origi
     best = usable[0]
     rec["chosen"] = best["option_id"]
     rec["why_chosen"] = _why(best, usable, usual)
+    rec["situation"] = _situation(best, usual, req, quote)
     rec["alternatives"] = [f"{' + '.join(str(int(l['quantity'])) + ' × ' + l['product_id'] for l in o['lines'])}: "
                            f"€{o['total_with_tax']:,.2f}, {_first_problem(o)}" for o in (usable[1:4] + blocked[:2])]
     rec["alternatives_detail"] = [
@@ -348,6 +352,52 @@ def handle(text=None, parsed=None, scenario=None, today=None, record=None, origi
     return _finish(rec)
 
 
+def _rank(usable, blocked, usual, req):
+    """Give every option a place and one plain reason for it (rulebook section D: fewest approvals,
+    most of the usual product, lowest price). Blocked options come last, with what blocked them."""
+    unit = "kg" if req["unit"] == "KG" else req["unit"]
+    best = usable[0] if usable else None
+    for n, o in enumerate(usable, 1):
+        o["rank"] = n
+        o["price_per"] = round(o["total_with_tax"] / o["litres"], 2) if o.get("litres") else None
+        appr = [r["name"] for r in o["results"] if r["result"] == "approve"]
+        if n == 1:
+            o["rank_reason"] = ("Needs no approval" if not appr else "Fewest approvals (" + ", ".join(appr) + ")") + (
+                ", uses the usual product" if usual and any(l["product_id"] == usual["usual_product"] for l in o["lines"]) else "") + ", cheapest of those."
+            continue
+        a, b = _rank_key(o, usual), _rank_key(best, usual)
+        if a[0] > b[0]:
+            why = "needs approval: " + ", ".join(appr)
+        elif a[1] > b[1]:
+            why = "uses less of the usual product" if a[1] < 0 else "not the usual product"
+        else:
+            why = f"€{o['total_with_tax'] - best['total_with_tax']:,.2f} more expensive"
+        o["rank_reason"] = why[0].upper() + why[1:] + f" (€{o['price_per']:,.2f}/{unit})." if o["price_per"] else why
+    for n, o in enumerate(blocked, len(usable) + 1):
+        o["rank"] = n
+        o["price_per"] = round(o["total_with_tax"] / o["litres"], 2) if o.get("litres") else None
+        o["rank_reason"] = "Can't be used: " + _first_problem(o)
+
+
+def _situation(best, usual, req, quote):
+    """One plain sentence saying WHAT the order is, before any rule talk. Built from data only."""
+    unit = "kg" if req["unit"] == "KG" else req["unit"]
+    lines = best["lines"]
+    if usual and len(lines) > 1:
+        u = next((l for l in lines if l["product_id"] == usual["usual_product"]), None)
+        others = [l for l in lines if l is not u]
+        if u:
+            q = quote["products"].get(u["product_id"]) or {}
+            have = f"{rules.num(q['stock_amount'] * (u.get('litres_per_sales_unit') or 1))} {unit}" if q.get("stock_status") == "known" else "not enough"
+            return (f"Split order: Valio Aimo has only {have} of the usual {u['name']} ({u['product_id']}), so the agent takes "
+                    f"{rules.num(u['litres'])} {unit} of it and fills the remaining "
+                    + " + ".join(f"{rules.num(l['litres'])} {unit} with {l['name']} ({l['product_id']}, {l['role']})" for l in others) + ".")
+    if usual and lines[0]["product_id"] != usual["usual_product"]:
+        return (f"The usual product ({usual['usual_product']}) can't be used for this order, so the agent chose "
+                f"{rules.num(lines[0]['litres'])} {unit} of {lines[0]['name']} ({lines[0]['product_id']}, {lines[0]['role']}).")
+    return f"{rules.num(best['litres'])} {unit} of {lines[0]['name']} ({lines[0]['product_id']})" + (", the usual product." if usual else ".")
+
+
 def _why(best, usable, usual):
     if len(usable) == 1:
         return "It is the only usable option."
@@ -363,13 +413,17 @@ def _why(best, usable, usual):
 
 
 def _place(rec, option, req, placed_by):
+    from . import budgets
+    wallet = budgets.wallet_for(rec)
     order = orders.place_order(option["lines"], req["deadline"], placed_by, rec["id"],
-                               note=f"demo scenario: {rec['scenario']}" if rec.get("scenario") else None)
-    rec.update(status="ordered", outcome="ordered", order_id=order["order_id"])
+                               note=f"demo scenario: {rec['scenario']}" if rec.get("scenario") else None, wallet=wallet)
+    rec.update(status="ordered", outcome="ordered", order_id=order["order_id"], wallet=wallet)
     if req.get("item_id"):
         from . import kitchen  # so the kitchen knows this is on its way and does not reorder
         kitchen.add_incoming(req["item_id"], sum(l["litres"] for l in option["lines"]), order["order_id"],
-                             req["deadline"], rec["id"])
+                             req["deadline"], rec["id"], for_event=rec.get("event_id") or (rec.get("origin") == "event"))
+        if rec.get("origin") != "event":
+            tidy_duplicates(req["item_id"], f"order {order['order_id']} ({rec['id']})")
     _step(rec, "order", f"Placed mock order {order['order_id']}, €{order['total_with_tax']:,.2f} incl. tax, "
           f"delivery {rules.nice_date(req['deadline'])}. Placed by {placed_by}.", "mock order service", order_id=order["order_id"])
 
@@ -444,7 +498,7 @@ def decide(rid, decision, by):
     return _finish(rec)
 
 
-def answer(rid, confirm=False, new_amount=None, new_deadline=None, new_unit=None):
+def answer(rid, confirm=False, new_amount=None, new_deadline=None, new_unit=None, new_item_id=None):
     """The buyer answers a question: 'is 10,000 L right?', or fills in what was missing (amount, date)."""
     rec = store.get(rid)
     if not rec or rec.get("status") != "ask_buyer":
@@ -459,7 +513,15 @@ def answer(rid, confirm=False, new_amount=None, new_deadline=None, new_unit=None
         req["deadline"] = new_deadline
         _step(rec, "answer", f"The buyer set the deadline to {rules.nice_date(new_deadline)}.", "buyer", actor="buyer")
         if new_amount is None and not confirm:
-            confirm = None  # only the date was missing
+            confirm = None  # only the date was missing (or several fields were filled in at once)
+    if new_item_id:
+        item = rules.find_usual_item(new_item_id)
+        if not item:
+            raise ValueError("Unknown product.")
+        req.update(item_id=new_item_id, product=item["name"], unit=item["unit"])
+        _step(rec, "answer", f"The buyer chose the product: {item['name']}.", "buyer", actor="buyer")
+        if new_amount is None and not confirm and not new_deadline:
+            confirm = None
     if new_unit and not req.get("unit"):
         req["unit"] = new_unit
     if new_amount is not None and float(new_amount) <= 0:
@@ -489,7 +551,7 @@ def answer(rid, confirm=False, new_amount=None, new_deadline=None, new_unit=None
     req["parsed_by"] = rec["parsed"].get("parsed_by", "parser") + " + buyer answer"
     # What the request is NOW, in plain words (the dashboard shows this, with the original text below it).
     if req.get("amount") is not None and req.get("unit"):
-        rec["current_request"] = (f"{rules.num(req['amount'])} {req['unit']} of {(req.get('product') or 'product').lower()}"
+        rec["current_request"] = (f"{rules.num(req['amount'])} {'kg' if req['unit'] == 'KG' else req['unit']} of {(req.get('product') or 'product').lower()}"
                               + (f" by {rules.nice_date(req['deadline'])}" if req.get("deadline") else ""))
     return handle(parsed=req, scenario=rec.get("scenario"), record=rec)
 
@@ -513,12 +575,18 @@ def usual_only(rid, by):
     else:
         _step(rec, "decision", f"{by} asked for only the usual product instead.", "dashboard", actor=f"person:{by}")
         store.save(rec)
+    from . import substitutes
     item = rules.find_usual_item(old["item_id"])
-    new = handle(text=f"Only the usual product, as much as is available (instead of {rid})",
-                 parsed={"product": old.get("product"), "item_id": old["item_id"], "amount": None, "unit": old.get("unit") or item["unit"],
-                         "deadline": old["deadline"], "as_much_as_possible": True, "max_amount": old.get("amount"),
-                         "parsed_by": f"follow-up of {rid} by {by}"},
-                 scenario=rec.get("scenario"), origin=rec.get("origin", "typed"))
+    have = substitutes.usual_available(old["item_id"], old["deadline"], rec.get("scenario"))
+    amount = old["amount"] if have is None else min(have, old["amount"])
+    if not amount:
+        raise ValueError(f"Valio Aimo can't deliver any of the usual product by {rules.nice_date(old['deadline'])}.")
+    u = old["unit"].lower() if old["unit"] == "KG" else old["unit"]
+    new = handle(text=f"Only the usual product: {rules.num(amount)} {u} of {item['name'].lower()} (instead of {rid})",
+                 parsed={"product": old.get("product"), "item_id": old["item_id"], "amount": float(amount), "unit": old["unit"],
+                         "deadline": old["deadline"], "buyer_confirmed_amount": True, "only_products": [item["usual_product"]],
+                         "parsed_by": f"follow-up of {rid} by {by} (amount shown on the button)"},
+                 scenario=rec.get("scenario"), origin=rec.get("origin", "typed"), event_id=rec.get("event_id"))
     new["follow_up_of"] = rid
     rec["replaced_by"] = new["id"]
     store.save(rec)
@@ -575,7 +643,7 @@ def order_substitute(rid, product_id, by):
                          "deadline": old["deadline"], "only_products": products, "substitute_for": old["item_id"],
                          "person_approved_products": [product_id], "chosen_by": by,
                          "buyer_confirmed_amount": True, "parsed_by": f"substitute chosen by {by}"},
-                 scenario=rec.get("scenario"), origin=rec.get("origin", "typed"))
+                 scenario=rec.get("scenario"), origin=rec.get("origin", "typed"), event_id=rec.get("event_id"))
     new["follow_up_of"] = rid
     new["substitute_note"] = swap["note"] if swap else None
     if rec.get("event_id"):
@@ -583,3 +651,35 @@ def order_substitute(rid, product_id, by):
     rec["replaced_by"] = new["id"]
     store.save(rec)
     return store.save(new)
+
+
+def tidy_duplicates(item_id, because):
+    """After an order is placed or a delivery arrives for an ingredient, look at OTHER requests for the
+    same ingredient that are still waiting for a person:
+      - automatic restock requests (sent by the stock monitor) are closed IF the kitchen is now above its
+        reorder level counting what is on its way: their reason no longer exists. Logged, nothing deleted.
+      - requests a person typed, and event requests, are never closed automatically: they are only marked
+        "possible duplicate" so a person can close them with one click.
+    """
+    from . import kitchen
+    i = kitchen.ingredient(item_id)
+    if not i:
+        return
+    doc = kitchen.load()
+    on_way = sum(x["amount"] for x in doc["incoming"] if x["item_id"] == item_id and not x.get("for_event"))
+    healthy = i["stock"] + on_way > i["reorder_level"]
+    for r in store.all_records():
+        if (r.get("parsed") or {}).get("item_id") != item_id or r.get("status") not in ("needs_approval", "ask_buyer"):
+            continue
+        if r.get("origin") == "auto" and healthy:
+            r.update(status="superseded", outcome="superseded", decided_by="the agent")
+            _step(r, "decision", f"Closed automatically: {i['name']} is back above its reorder level "
+                  f"({rules.num(i['stock'])} in stock + {rules.num(on_way)} on its way > {rules.num(i['reorder_level'])}) "
+                  f"after {because}. Nothing was ordered for this request.", "stock monitor", actor="system")
+            _finish(r)
+        elif r.get("origin") != "auto" and not r.get("possible_duplicate"):
+            r["possible_duplicate"] = {"because": because, "stock": i["stock"], "on_way": on_way,
+                                       "reorder_level": i["reorder_level"]}
+            _step(r, "note", f"Possible duplicate: {i['name']} was ordered since this request ({because}). "
+                  f"Not closed automatically because a person asked for it.", "agent")
+            store.save(r)

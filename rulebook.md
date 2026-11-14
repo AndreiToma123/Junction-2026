@@ -2,7 +2,7 @@
 
 > **Generated from `rules.yaml`. Don't edit this file by hand.** Change the rules on the dashboard's
 > Rules screen (or edit `rules.yaml`); this file is rewritten automatically after every change.
-> Last generated: Sat 14 Nov 2026 14:59
+> Last generated: Sat 14 Nov 2026 18:00
 
 The agent checks **every** option against these rules. The checks are plain code, no AI.
 When a rule is not met, it gives one of these results:
@@ -47,7 +47,7 @@ When a rule is not met, it gives one of these results:
 - One order may cost at most €2,000.00 (including tax). Over the limit: needs approval.
 
 ### C2 - Approved brands
-- Only these brands without asking: Valio. Any other brand: needs approval.
+- Only these brands without asking: Valio, plus the kitchen's usual product for each item. Anything else: needs approval.
 
 ### C3 - Brands per split
 - One order may mix at most 2 brands. More: can't be used.

@@ -108,9 +108,13 @@ def list_requests(full: bool = False):
 
 @app.get("/api/requests/{rid}")
 def get_request(rid: str):
+    from . import budgets
     rec = store.get(rid)
     if not rec:
         raise HTTPException(404, "Unknown request")
+    chosen = next((o for o in rec.get("options") or [] if o["option_id"] == rec.get("chosen")), None)
+    pending = rec.get("status") == "needs_approval"
+    rec["budget"] = budgets.status(rec.get("wallet") or budgets.wallet_for(rec), chosen["total_with_tax"] if chosen and pending else 0)
     return rec
 
 
@@ -181,12 +185,14 @@ class BuyerAnswer(BaseModel):
     new_amount: Optional[float] = None
     new_deadline: Optional[str] = Field(None, description="YYYY-MM-DD")
     new_unit: Optional[str] = Field(None, pattern="^(L|KG)$")
+    new_item_id: Optional[str] = None
 
 
 @app.post("/api/requests/{rid}/answer")
 def answer(rid: str, a: BuyerAnswer):
     try:
-        return agent.answer(rid, confirm=a.confirm, new_amount=a.new_amount, new_deadline=a.new_deadline, new_unit=a.new_unit)
+        return agent.answer(rid, confirm=a.confirm, new_amount=a.new_amount, new_deadline=a.new_deadline, new_unit=a.new_unit,
+                            new_item_id=a.new_item_id)
     except ValueError as e:
         raise HTTPException(409, str(e))
 
@@ -335,6 +341,140 @@ def kitchen_receive():
     return kitchen.receive_deliveries()
 
 
+# ---------------------------------------------------------------- clearing and resetting
+
+class ClearBody(BaseModel):
+    by: str = Field(..., min_length=1)
+    confirm: str = Field(..., description='Must be "CLEAR"')
+
+
+@app.post("/api/admin/clear-requests")
+def clear_requests(body: ClearBody):
+    from . import admin
+    if body.confirm != "CLEAR":
+        raise HTTPException(422, 'Type CLEAR to confirm.')
+    return admin.clear_requests(body.by)
+
+
+class ResetBody(BaseModel):
+    by: str = Field(..., min_length=1)
+    confirm: str = Field(..., description='Must be "RESET"')
+    with_history: bool = False
+
+
+@app.post("/api/admin/reset")
+def reset_everything(body: ResetBody):
+    from . import admin
+    if body.confirm != "RESET":
+        raise HTTPException(422, 'Type RESET to confirm.')
+    return admin.reset_all(body.by, body.with_history)
+
+
+# ---------------------------------------------------------------- budgets
+
+@app.get("/api/budgets")
+def get_budgets():
+    from . import budgets
+    return budgets.overview()
+
+
+class WeeklyBudgets(BaseModel):
+    weekly: dict
+    by: str = Field(..., min_length=1)
+
+
+@app.put("/api/budgets")
+def set_budgets(body: WeeklyBudgets):
+    from . import budgets
+    clean = {}
+    for k, v in body.weekly.items():
+        if k not in budgets.limits() or not isinstance(v, (int, float)) or v < 0 or v > 1_000_000:
+            raise HTTPException(422, f"Bad budget for {k}")
+        clean[k] = float(v)
+    doc = kitchen.load()
+    old = doc["budgets"]["weekly"]
+    doc["budgets"]["weekly"] = {**old, **clean}
+    kitchen.save(doc)
+    changed = {k: (old.get(k), v) for k, v in clean.items() if old.get(k) != v}
+    if changed:
+        log.write("budget", f"Weekly budgets changed by {body.by}: " + "; ".join(f"{k} €{a:,.0f} → €{b:,.0f}" for k, (a, b) in changed.items()) + ".",
+                  "dashboard", actor=f"person:{body.by}", data={"changed": changed})
+    return budgets.overview()
+
+
+# ---------------------------------------------------------------- editing the menu and ingredients
+
+class DishIngredient(BaseModel):
+    item_id: str
+    amount: float = Field(..., gt=0, le=5)
+
+
+class DishBody(BaseModel):
+    by: str = Field(..., min_length=1)
+    dish_id: Optional[str] = None
+    name: str = Field(..., min_length=1, max_length=80)
+    course: str = "main"
+    portions_per_day: int = Field(0, ge=0, le=5000)
+    ingredients: List[DishIngredient]
+
+
+def _kitchen_call(fn, *a):
+    try:
+        return fn(*a)
+    except kitchen.KitchenError as e:
+        raise HTTPException(422, str(e))
+
+
+@app.post("/api/kitchen/dishes")
+def save_dish(body: DishBody):
+    d = body.model_dump()
+    return _kitchen_call(kitchen.save_dish, d.pop("by"), d)
+
+
+@app.post("/api/kitchen/dishes/{dish_id}/remove")
+def remove_dish(dish_id: str, body: ByWhom):
+    return _kitchen_call(kitchen.remove_dish, body.by, dish_id)
+
+
+class IngredientAmounts(BaseModel):
+    by: str = Field(..., min_length=1)
+    amounts: dict
+
+
+@app.post("/api/kitchen/ingredients/{item_id}/amounts")
+def set_amounts(item_id: str, body: IngredientAmounts):
+    return _kitchen_call(kitchen.set_ingredient_amounts, body.by, item_id, body.amounts)
+
+
+class IngredientBody(BaseModel):
+    by: str = Field(..., min_length=1)
+    item_id: Optional[str] = None
+    name: Optional[str] = None
+    unit: Optional[str] = Field(None, pattern="^(L|KG)$")
+    usual_product: Optional[str] = None
+    usual_amount: Optional[float] = None
+    reorder_level: Optional[float] = None
+    stock: Optional[float] = None
+    category: Optional[str] = None
+
+
+@app.post("/api/kitchen/ingredients")
+def save_ingredient(body: IngredientBody):
+    d = body.model_dump()
+    return _kitchen_call(kitchen.save_ingredient, d.pop("by"), d)
+
+
+@app.post("/api/kitchen/ingredients/{item_id}/remove")
+def remove_ingredient(item_id: str, body: ByWhom):
+    return _kitchen_call(kitchen.remove_ingredient, body.by, item_id)
+
+
+@app.get("/api/kitchen/find-products")
+def find_products(q: str = Query(..., min_length=2), unit: str = Query("KG", pattern="^(L|KG)$")):
+    """Valio Aimo products to link a new ingredient to (live price and stock for the matches only)."""
+    return kitchen.find_products(q, unit)
+
+
 # ---------------------------------------------------------------- last-minute events
 
 class EventText(BaseModel):
@@ -352,18 +492,35 @@ class EventDish(BaseModel):
     portions: int = Field(..., gt=0, le=5000)
 
 
+class CustomIngredient(BaseModel):
+    item_id: str
+    amount: float = Field(..., gt=0, le=5, description="per portion, in kg or litres")
+
+
+class CustomDish(BaseModel):
+    dish_id: str
+    name: str = Field(..., min_length=1, max_length=80)
+    course: str = "main"
+    ingredients: List[CustomIngredient]
+    add_to_menu: bool = False
+
+
 class NewEvent(BaseModel):
     name: str = "Event"
     date: str = Field(..., examples=["2026-11-16"])
     dishes: List[EventDish]
     by: str = Field(..., min_length=1)
     scenario: Optional[str] = None
+    budget: Optional[float] = Field(None, ge=0)
+    custom_dishes: List[CustomDish] = []
+    add_to_menu: bool = False
 
 
 @app.post("/api/events")
 def new_event(body: NewEvent):
     try:
-        return events.plan(body.name, body.date, [d.model_dump() for d in body.dishes], body.by, scenario=body.scenario)
+        return events.plan(body.name, body.date, [d.model_dump() for d in body.dishes], body.by, scenario=body.scenario,
+                           budget=body.budget, custom_dishes=[c.model_dump() for c in body.custom_dishes], add_to_menu=body.add_to_menu)
     except ValueError as e:
         raise HTTPException(422, str(e))
 
@@ -393,12 +550,26 @@ class DishSwap(BaseModel):
     from_dish: str
     to_dish: str
     by: str = Field(..., min_length=1)
+    move: Optional[int] = Field(None, gt=0, description="portions to move; default all")
+
+
+class EventBudget(BaseModel):
+    budget: Optional[float] = Field(None, ge=0)
+    by: str = Field(..., min_length=1)
+
+
+@app.put("/api/events/{eid}/budget")
+def event_budget(eid: str, body: EventBudget):
+    try:
+        return events.set_budget(eid, body.budget, body.by)
+    except ValueError as e:
+        raise HTTPException(409, str(e))
 
 
 @app.post("/api/events/{eid}/swap-dish")
 def event_swap_dish(eid: str, body: DishSwap):
     try:
-        return events.swap_dish(eid, body.from_dish, body.to_dish, body.by)
+        return events.swap_dish(eid, body.from_dish, body.to_dish, body.by, move=body.move)
     except ValueError as e:
         raise HTTPException(409, str(e))
 

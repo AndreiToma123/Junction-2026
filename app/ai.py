@@ -120,7 +120,8 @@ def summarize(rec):
     if not llm.available() or rec.get("status") not in ("needs_approval", "cannot_fulfil"):
         return fallback  # simple outcomes don't need AI wording
     system = ("Write a summary of at most 2 short sentences for a kitchen manager who must approve or reject a purchase. "
-              "Say why a decision is needed and the one or two facts that matter most. Use ONLY the facts in the JSON. "
+              "Sentence 1: what the order is, from 'situation' (e.g. that it is a split and why). Sentence 2: the exact reason "
+              "a person must decide, from 'rules_not_passed'. Use ONLY the facts in the JSON. "
               "Do not list products or repeat the order lines. Do not add numbers that are not in the JSON. "
               "'delivery_date' is the day the goods will be delivered (not a deadline). "
               "Plain words, no jargon. Return JSON: {\"summary\": \"...\"}")
@@ -140,7 +141,7 @@ def _summary_facts(rec):
     o = next((x for x in rec.get("options") or [] if x["option_id"] == rec.get("chosen")), None)
     results = o["results"] if o else rec.get("request_checks", [])
     return {
-        "status": rec.get("status"), "request": rec.get("text"),
+        "status": rec.get("status"), "request": rec.get("text"), "situation": rec.get("situation"),
         "total_with_tax_eur": o["total_with_tax"] if o else None,
         "kind": o["kind"] if o else None,
         "delivery_date": o["lines"][0].get("available_date") if o else None,
@@ -157,7 +158,7 @@ def _template_summary(rec, f):
     st, n = f["status"], f["rules_passed_count"]
     bad = " ".join(r["detail"] for r in f["rules_not_passed"])
     if st == "needs_approval":
-        return f"Needs a person's approval: {bad} The other {n} checks passed."
+        return (f"{f['situation']} " if f.get("situation") else "") + f"A person must decide because: {bad}"
     if st == "ask_buyer":
         return f"Nothing was ordered. The agent asked the buyer: {f['question']}"
     if st == "ordered" and f["decided_by"]:

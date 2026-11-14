@@ -36,7 +36,7 @@ def get_order(order_id):
     return next((o for o in _all() if o["order_id"] == order_id), None)
 
 
-def place_order(lines, delivery_date, placed_by, request_id=None, note=None):
+def place_order(lines, delivery_date, placed_by, request_id=None, note=None, wallet=None):
     """lines: [{"product_id", "quantity" (in sales units), "price_per_unit_with_tax"}]
     placed_by: "agent" (inside the rules) or "human:<name>" (after approval)."""
     if not lines:
@@ -73,6 +73,7 @@ def place_order(lines, delivery_date, placed_by, request_id=None, note=None):
             "total_with_tax": round(sum(l["line_total_with_tax"] or 0 for l in checked), 2),
             "currency": "EUR",
             "note": note,
+            "wallet": wallet,
             "mock": True,
         }
         config.STATE.mkdir(parents=True, exist_ok=True)

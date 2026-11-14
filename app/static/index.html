@@ -7,9 +7,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#F5F5F2;--card:#fff;--ink:#1A1D21;--ink2:#3D4248;--mute:#5B6168;--line:#E3E4E6;--line2:#D5D7DA;
---blue:#1F4FD1;--blue-t:#E7EEFC;--blue-t2:#F1F5FE;--green:#1D5E3A;--green-t:#E3F1E8;--amber:#7A4300;--amber-t:#FCEFD9;
---red:#8B1D1D;--red-t:#F9E3E3;--grey-t:#EFEFEF}
+:root{--bg:#F5F5F2;--card:#fff;--soft:#FAFAF8;--soft2:#FBFBF9;--ink:#1A1D21;--ink2:#3D4248;--mute:#5B6168;--line:#E3E4E6;--line2:#D5D7DA;--line3:#B9BCC1;--shadow:none;
+--blue:#1F4FD1;--blue-t:#E7EEFC;--blue-t2:#F1F5FE;--blue-b:#C9D7F8;--green:#1D5E3A;--green-t:#E3F1E8;--green-t2:#F1F8F3;--green-b:#C6E2CF;--amber:#7A4300;--amber-t:#FCEFD9;--amber-t2:#FFF7EA;--amber-b:#F2D3A0;--amber-dot:#B86A00;--yellow:#E3B04B;
+--red:#8B1D1D;--red-t:#F9E3E3;--red-t2:#FDF1F1;--red-b:#EBC4C4;--grey-t:#EFEFEF;--focus:#9DB6F2;--on-blue:#fff;color-scheme:light}
+:root[data-theme="dark"]{--shadow:none;--bg:#111315;--card:#1B1E21;--soft:#202428;--soft2:#1E2125;--ink:#ECEDEE;--ink2:#C4C7CB;--mute:#9AA0A6;--line:#2E3338;--line2:#3A4046;--line3:#555C63;
+--blue:#7FA2FF;--blue-t:#1D2A4A;--blue-t2:#18223A;--blue-b:#2C3E6B;--green:#7ED3A0;--green-t:#163126;--green-t2:#14261E;--green-b:#24503B;--amber:#F2C27A;--amber-t:#3A2A12;--amber-t2:#2E2312;--amber-b:#5C4420;--amber-dot:#E3A33F;--yellow:#B8892F;
+--red:#FF9C9C;--red-t:#3D1C1C;--red-t2:#311818;--red-b:#5E2C2C;--grey-t:#2A2E33;--focus:#3E5EB8;--on-blue:#0B1020;color-scheme:dark}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,sans-serif;font-size:15px;line-height:1.45}
 h1,h2,h3{font-family:'Space Grotesk',Inter,sans-serif;font-weight:600;margin:0}
@@ -20,76 +23,76 @@ button{cursor:pointer}
 .wrap{max-width:1280px;margin:0 auto;padding:0 16px}
 nav{background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
 nav .wrap{display:flex;flex-wrap:wrap;align-items:center;gap:8px 20px;min-height:64px}
-.brand{font-family:'Space Grotesk',Inter,sans-serif;font-weight:600;font-size:18px;margin-right:auto}
+.brand{white-space:nowrap;font-family:'Space Grotesk',Inter,sans-serif;font-weight:600;font-size:18px;margin-right:auto}
 .tabs{display:flex;flex-wrap:wrap;gap:4px}
-.tabs a{display:flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;border-radius:8px;color:var(--ink2);text-decoration:none;font-weight:500}
+.tabs a{display:flex;align-items:center;gap:8px;min-height:44px;padding:0 12px;border-radius:8px;color:var(--ink2);text-decoration:none;font-weight:500}
 .tabs a.on{background:var(--blue-t);color:var(--blue);font-weight:600}
-.badge{background:var(--blue);color:#fff;border-radius:999px;padding:1px 8px;font-size:12px;font-weight:600}
+.badge{background:var(--blue);color:var(--on-blue);border-radius:999px;padding:1px 8px;font-size:12px;font-weight:600}
 .me{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--mute)}
-.me input{width:160px}
+.me input{width:130px}
 main{padding:28px 0 64px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px;box-shadow:var(--shadow)}
 .stack{display:flex;flex-direction:column;gap:20px}
 .row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
 .between{justify-content:space-between}
 .mute{color:var(--mute)}.small{font-size:13px}
 .label{font-size:12px;font-weight:600;color:var(--mute);text-transform:uppercase;letter-spacing:.05em}
-input[type=text],input[type=search],input[type=number],input[type=date],select,textarea{border:1px solid var(--line2);border-radius:10px;padding:0 12px;min-height:44px;background:#fff;max-width:100%}
+input[type=text],input[type=search],input[type=number],input[type=date],select,textarea{border:1px solid var(--line2);border-radius:10px;padding:0 12px;min-height:44px;background:var(--card);max-width:100%}
 textarea{padding:12px 14px;width:100%;resize:vertical}
-input:focus,select:focus,textarea:focus,button:focus-visible,a:focus-visible{outline:3px solid #9DB6F2;outline-offset:1px}
-.btn{min-height:44px;padding:0 18px;border-radius:10px;border:1px solid var(--line2);background:#fff;font-weight:600;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;color:var(--ink);white-space:nowrap}
-.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+input:focus,select:focus,textarea:focus,button:focus-visible,a:focus-visible{outline:3px solid var(--focus);outline-offset:1px}
+.btn{min-height:44px;padding:0 18px;border-radius:10px;border:1px solid var(--line2);background:var(--card);font-weight:600;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;color:var(--ink);white-space:nowrap}
+.btn.primary{background:var(--blue);border-color:var(--blue);color:var(--on-blue)}
 .btn.big{min-height:52px;padding:0 28px;font-size:16px}
 .btn.danger{color:var(--red)}
 .btn:disabled{opacity:.55;cursor:default}
 .pill{display:inline-block;font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px;white-space:nowrap}
 .t-approve{color:var(--amber);background:var(--amber-t)}.t-ask{color:var(--blue);background:var(--blue-t)}
 .t-ok{color:var(--green);background:var(--green-t)}.t-bad{color:var(--red);background:var(--red-t)}.t-grey{color:var(--mute);background:var(--grey-t)}
-.chip{min-height:40px;padding:0 14px;border-radius:999px;border:1px solid var(--line2);background:#FAFAF8;font-weight:500;font-size:14px}
+.chip{min-height:40px;padding:0 14px;border-radius:999px;border:1px solid var(--line2);background:var(--soft);font-weight:500;font-size:14px}
 .chip.on{background:var(--blue-t);border-color:var(--blue);color:var(--blue);font-weight:600}
 /* requests */
 .split{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start}
 .list{flex:1 1 290px;min-width:0;display:flex;flex-direction:column;gap:10px}
 .detail{flex:999 1 600px;min-width:0}
-.item{text-align:left;display:flex;flex-direction:column;gap:6px;padding:14px 16px;border-radius:12px;background:#FBFBF9;border:2px solid var(--line);width:100%}
-.item.on{background:#fff;border-color:var(--blue)}
+.item{text-align:left;display:flex;flex-direction:column;gap:6px;padding:14px 16px;border-radius:12px;background:var(--soft2);border:2px solid var(--line);width:100%}
+.item.on{background:var(--card);border-color:var(--blue)}
 .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
-.tile{display:flex;flex-direction:column;gap:4px;padding:14px 16px;border-radius:12px;background:#FAFAF8;border:1px solid var(--line)}
+.tile{display:flex;flex-direction:column;gap:4px;padding:14px 16px;border-radius:12px;background:var(--soft);border:1px solid var(--line)}
 .tile b{font-size:17px;font-weight:600;line-height:1.3}
-.tile.warn{background:#FFF7EA;border-color:#F2D3A0}.tile.warn b{color:var(--amber)}
-.tile.ask{background:var(--blue-t2);border-color:#C9D7F8}.tile.ask b{color:var(--blue)}
-.tile.ok{background:#F1F8F3;border-color:#C6E2CF}.tile.ok b{color:var(--green)}
-.tile.bad{background:#FDF1F1;border-color:#EBC4C4}.tile.bad b{color:var(--red)}
+.tile.warn{background:var(--amber-t2);border-color:var(--amber-b)}.tile.warn b{color:var(--amber)}
+.tile.ask{background:var(--blue-t2);border-color:var(--blue-b)}.tile.ask b{color:var(--blue)}
+.tile.ok{background:var(--green-t2);border-color:var(--green-b)}.tile.ok b{color:var(--green)}
+.tile.bad{background:var(--red-t2);border-color:var(--red-b)}.tile.bad b{color:var(--red)}
 .scroll{overflow-x:auto;border:1px solid var(--line);border-radius:12px}
 table{width:100%;border-collapse:collapse;font-size:14px}
-th{text-align:left;font-weight:600;color:var(--mute);padding:10px 12px;background:#FAFAF8;white-space:nowrap}
+th{text-align:left;font-weight:600;color:var(--mute);padding:10px 12px;background:var(--soft);white-space:nowrap}
 td{padding:10px 12px;border-top:1px solid var(--line);vertical-align:top}
 .num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 .rule{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:baseline;padding:10px 14px;border-radius:10px}
 .rule .k{font-size:12px;font-weight:700;min-width:112px}
-.passed{display:flex;gap:12px;padding:6px 2px;border-bottom:1px solid #EFEFEF;font-size:14px}
+.passed{display:flex;gap:12px;padding:6px 2px;border-bottom:1px solid var(--line);font-size:14px}
 .box{flex:1 1 280px;min-width:0;border:1px solid var(--line);border-radius:12px;padding:14px 16px}
-.box.dashed{border-style:dashed;border-color:#B9BCC1}
+.box.dashed{border-style:dashed;border-color:var(--line3)}
 .box ul{margin:8px 0 0;padding-left:18px}.box li{margin:4px 0}
 /* timeline */
 .step{display:flex;gap:14px}
-.dot{flex:none;width:26px;height:26px;border-radius:999px;background:var(--green);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
-.dot.warn{background:#B86A00}.dot.ask{background:var(--blue)}.dot.bad{background:var(--red)}
+.dot{flex:none;width:26px;height:26px;border-radius:999px;background:var(--green);color:var(--on-blue);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.dot.warn{background:var(--amber-dot)}.dot.ask{background:var(--blue)}.dot.bad{background:var(--red)}
 .rail{display:flex;flex-direction:column;align-items:center}.rail i{flex:1;width:2px;min-height:10px;background:var(--line)}
 .step .body{padding-bottom:14px;min-width:0;flex:1}
 .banner{padding:18px 20px;border-radius:12px;display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between}
 .banner h3{font-size:19px}
 /* log */
-tr.hist td{background:#FCFCFA;color:var(--ink2)}
+tr.hist td{background:var(--soft);color:var(--ink2)}
 /* rules */
 .rulecard{border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
-.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;padding:14px;background:#FAFAF8;border-radius:10px}
+.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;padding:14px;background:var(--soft);border-radius:10px}
 .form label{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:600;color:var(--ink2)}
 .checks{display:flex;flex-wrap:wrap;gap:10px;font-weight:400}
-.diff{border-radius:10px;padding:12px 14px;background:var(--blue-t2);border:1px solid #C9D7F8;display:flex;flex-direction:column;gap:8px}
+.diff{border-radius:10px;padding:12px 14px;background:var(--blue-t2);border:1px solid var(--blue-b);display:flex;flex-direction:column;gap:8px}
 .diff .b{color:var(--ink2);text-decoration:line-through}.diff .a{font-weight:500}
 .problem{border-radius:10px;padding:12px 14px;background:var(--red-t);color:var(--red);font-weight:500}
-#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 18px;border-radius:10px;font-weight:500;display:none;z-index:9;max-width:90vw}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--on-blue);padding:12px 18px;border-radius:10px;font-weight:500;display:none;z-index:9;max-width:90vw}
 @media (max-width:640px){h1{font-size:24px}.card{padding:16px}.me input{width:120px}nav{position:static}nav .wrap{padding-top:8px;padding-bottom:8px}.brand{flex-basis:100%}}
 </style>
 </head>
@@ -104,6 +107,7 @@ tr.hist td{background:#FCFCFA;color:var(--ink2)}
     <a href="#/log" data-tab="log">Audit log</a>
     <a href="#/rules" data-tab="rules">Rules</a>
   </div>
+  <button class="btn" id="themeBtn" style="min-height:36px;min-width:40px;padding:0 10px" aria-label="Switch light or dark mode" title="Switch light or dark mode">◐</button>
   <span class="pill t-grey" id="aiPill" title="">AI: …</span>
   <label class="me">You are <input type="text" id="me" placeholder="your name" autocomplete="name"></label>
 </div></nav>
@@ -137,7 +141,7 @@ api("/api/ai/status").then(a => { const el = $("#aiPill"); el.textContent = a.ge
 
 const STATUS = {
   needs_approval: ["Needs approval", "t-approve"], ask_buyer: ["Needs your answer", "t-ask"], ordered: ["Ordered", "t-ok"],
-  rejected: ["Rejected", "t-bad"], cannot_fulfil: ["Can't be done", "t-bad"], cancelled: ["Cancelled", "t-grey"]
+  rejected: ["Rejected", "t-bad"], cannot_fulfil: ["Can't be done", "t-bad"], cancelled: ["Cancelled", "t-grey"], superseded: ["Closed: not needed", "t-grey"]
 };
 const RESULT = { pass: ["Passed", "t-ok"], approve: ["Needs approval", "t-approve"], ask: ["Ask buyer", "t-ask"], blocked: ["Can't be used", "t-bad"] };
 const pill = (text, cls) => `<span class="pill ${cls}">${esc(text)}</span>`;
@@ -145,7 +149,13 @@ const statusPill = r => pill(...(STATUS[r.status] || [r.status, "t-grey"]));
 const chosen = r => (r.options || []).find(o => o.option_id === r.chosen);
 const needsAction = r => r.status === "needs_approval" || r.status === "ask_buyer";
 
-let REQS = [];
+// light / dark: follows the computer's setting until the person chooses (remembered in this browser)
+function applyTheme(t) { document.documentElement.dataset.theme = t; $("#themeBtn").textContent = t === "dark" ? "☀" : "◐"; }
+(() => { let t = null; try { t = localStorage.getItem("theme"); } catch (e) {}
+  applyTheme(t || (window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")); })();
+$("#themeBtn").onclick = () => { const t = document.documentElement.dataset.theme === "dark" ? "light" : "dark"; applyTheme(t); try { localStorage.setItem("theme", t); } catch (e) {} };
+let REQS = [], USUAL = [];
+api("/api/usual").then(u => { USUAL = u.items || []; }).catch(() => {});
 async function loadRequests() {
   REQS = (await api("/api/requests")).reverse();
   const n = REQS.filter(needsAction).length, b = $("#badge");
@@ -167,9 +177,11 @@ function answerButtons(r) {
     const tomorrow = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
     return `<form class="row" data-fill-form="${id}" style="gap:10px;align-items:flex-end">
       ${f.includes("amount") ? `<label class="small" style="font-weight:600">How much<br><input type="number" name="amount" min="0.1" step="any" style="width:120px" required></label>` : ""}
-      ${f.includes("unit") || (f.includes("amount") && !(r.parsed || {}).unit) ? `<label class="small" style="font-weight:600">Unit<br><select name="unit"><option value="KG">kg</option><option value="L">litres</option></select></label>` : ""}
+      ${(f.includes("unit") || (f.includes("amount") && !(r.parsed || {}).unit)) && !f.includes("product") ? `<label class="small" style="font-weight:600">Unit<br><select name="unit"><option value="KG">kg</option><option value="L">litres</option></select></label>` : ""}
       ${f.includes("deadline") ? `<label class="small" style="font-weight:600">Needed by<br><input type="date" name="deadline" min="${tomorrow}" value="${(r.parsed || {}).deadline || ""}" required></label>` : ""}
-      ${f.includes("product") ? `<a class="btn" href="#/new?text=${encodeURIComponent(r.text || "")}">Say which product</a>` : `<button class="btn primary">Continue</button>`}
+      ${f.includes("product") ? `<label class="small" style="font-weight:600">Which product<br><select name="item_id" required><option value="">Choose…</option>${USUAL.map(i => `<option value="${esc(i.item_id)}">${esc(i.name)}</option>`).join("")}</select></label>` : ""}
+      <button class="btn primary">Continue</button>
+      ${f.includes("product") ? `<a class="small" href="#/new?text=${encodeURIComponent(r.text || "")}">or write it again</a>` : ""}
     </form>`;
   }
   if (r.ask_kind === "understanding") return `<button class="btn primary" data-answer="${esc(r.id)}" data-confirm="1">Yes, that's right</button>
@@ -221,7 +233,7 @@ async function doAnswer(btn) {
   else if (btn.dataset.custom) { const v = parseFloat($("#amt-" + CSS.escape(id)).value); if (!(v > 0)) return toast("Type an amount first."); body = { new_amount: v }; }
   else body = { new_amount: parseFloat(btn.dataset.amount) };
   btn.disabled = true;
-  try { const r = await api(`/api/requests/${id}/answer`, { body }); await loadRequests(); FILTER = "all"; location.hash = "#/requests/" + r.id; if (CURRENT === "requests") route(); }
+  try { const r = await api(`/api/requests/${id}/answer`, { body }); await loadRequests(); location.hash = "#/requests/" + r.id; if (CURRENT === "requests") route(); }
   catch (e) { toast(e.message); btn.disabled = false; }
 }
 document.addEventListener("click", e => { const b = e.target.closest("[data-answer]"); if (b) doAnswer(b); });
@@ -231,14 +243,15 @@ document.addEventListener("submit", async e => {
   if (fd.get("amount")) body.new_amount = parseFloat(fd.get("amount"));
   if (fd.get("unit")) body.new_unit = fd.get("unit");
   if (fd.get("deadline")) body.new_deadline = fd.get("deadline");
+  if (fd.get("item_id")) body.new_item_id = fd.get("item_id");
   const btn = form.querySelector("button"); if (btn) { btn.disabled = true; btn.textContent = "Working…"; }
-  try { const r = await api(`/api/requests/${id}/answer`, { body }); await loadRequests(); FILTER = "all";
+  try { const r = await api(`/api/requests/${id}/answer`, { body }); await loadRequests();
     if (CURRENT === "new") showRun(r); else { location.hash = "#/requests/" + r.id; if (CURRENT === "requests") route(); } }
   catch (err) { toast(err.message); if (btn) { btn.disabled = false; btn.textContent = "Continue"; } }
 });
 async function personAction(btn, path, msg) {
   const by = me(); if (!by) return; btn.disabled = true; const old = btn.textContent; btn.textContent = "Working…";
-  try { const r = await api(path, { body: { by } }); await loadRequests(); FILTER = "all"; toast(msg(r)); location.hash = "#/requests/" + r.id; if (CURRENT === "requests") route(); }
+  try { const r = await api(path, { body: { by } }); await loadRequests(); toast(msg(r)); location.hash = "#/requests/" + r.id; if (CURRENT === "requests") route(); }
   catch (err) { toast(err.message); btn.disabled = false; btn.textContent = old; }
 }
 document.addEventListener("click", e => {
@@ -295,31 +308,58 @@ function showRun(r) {
 }
 
 // ---------- screen 2: requests & approvals
-let FILTER = "action";
+// Categories on the Requests screen. "approval" is the default: what a person must decide.
+const CATS = [
+  ["approval", "Needs approval", r => r.status === "needs_approval"],
+  ["answer", "Needs an answer", r => r.status === "ask_buyer"],
+  ["failed", "Can't be done", r => r.status === "cannot_fulfil"],
+  ["ordered", "Ordered", r => r.status === "ordered"],
+  ["closed", "Rejected / cancelled", r => ["rejected", "cancelled", "superseded"].includes(r.status)],
+  ["all", "All", r => true],
+];
+let FILTER = (() => { try { return localStorage.getItem("reqFilter") || "approval"; } catch (e) { return "approval"; } })();
+const ORDER = { needs_approval: 0, ask_buyer: 1, cannot_fulfil: 2, ordered: 3, rejected: 4, cancelled: 5, superseded: 6 };
+function itemHtml(r, cur) {
+  const o = chosen(r);
+  return `<button class="item ${cur && r.id === cur.id ? "on" : ""}" data-open="${esc(r.id)}">
+    <span class="row between" style="gap:6px;width:100%"><span class="small mute">${esc(r.id)} · ${esc(niceTime(r.received_at))}${r.origin === "auto" ? " · automatic" : r.origin === "event" ? " · event" : ""}</span>${statusPill(r)}</span>
+    <b>${esc(r.current_request ? r.current_request[0].toUpperCase() + r.current_request.slice(1) : r.text || "")}</b><span class="small" style="color:var(--ink2)">${esc(o ? eur(o.total_with_tax) + " · " + headline(r) : headline(r))}</span>
+    ${r.possible_duplicate && needsAction(r) ? `<span class="small" style="color:var(--amber)">Possible duplicate: already ordered since</span>` : ""}</button>`;
+}
 async function viewRequests(params, id) {
   await loadRequests();
-  const shown = REQS.filter(r => FILTER === "all" || needsAction(r));
-  let cur = REQS.find(r => r.id === id) || shown[0] || REQS[0];
+  const test = (CATS.find(c => c[0] === FILTER) || CATS[0])[2];
+  const shown = REQS.filter(test).sort((x, y) => (ORDER[x.status] ?? 9) - (ORDER[y.status] ?? 9) || (y.received_at || "").localeCompare(x.received_at || ""));
+  let cur = (id && REQS.find(r => r.id === id)) || shown[0];
   if (cur) cur = await api("/api/requests/" + encodeURIComponent(cur.id));  // the full record, only for the one on screen
-  const list = shown.length ? shown : [];
+  const open = shown.filter(r => ORDER[r.status] <= 2), done = shown.filter(r => ORDER[r.status] > 2);
+  const doneOpen = FILTER !== "all" || (cur && done.some(r => r.id === cur.id));
+  const listHtml = !shown.length ? `<div class="card small">Nothing here. ${FILTER !== "all" ? `<button class="chip" data-filter="all">Show all</button>` : ""}</div>`
+    : open.map(r => itemHtml(r, cur)).join("") + (done.length ? (FILTER === "all"
+      ? `<details ${doneOpen ? "open" : ""} class="card" style="padding:10px 12px"><summary style="cursor:pointer;font-weight:600;min-height:32px">Completed and closed (${done.length})</summary><div class="stack" style="gap:10px;margin-top:10px">${done.map(r => itemHtml(r, cur)).join("")}</div></details>`
+      : done.map(r => itemHtml(r, cur)).join("")) : "");
   $("#view").innerHTML = `<div class="stack">
-    <div class="row between"><h1>Requests</h1><div class="row" style="gap:8px">
-      <button class="chip ${FILTER === "action" ? "on" : ""}" data-filter="action">Needs action (${REQS.filter(needsAction).length})</button>
-      <button class="chip ${FILTER === "all" ? "on" : ""}" data-filter="all">All (${REQS.length})</button>
-      <a class="btn primary" href="#/new">New request</a></div></div>
+    <div class="row between"><h1>Requests</h1><div class="row" style="gap:8px"><a class="btn primary" href="#/new">New request</a>
+      <button class="btn danger" id="clearReqs" ${REQS.length ? "" : "disabled"}>Clear requests</button></div></div>
+    <div class="row" style="gap:8px">${CATS.map(([k, label, t]) => { const n = REQS.filter(t).length;
+      return `<button class="chip ${FILTER === k ? "on" : ""}" data-filter="${k}">${label} (${n})</button>`; }).join("")}</div>
     ${!REQS.length ? `<div class="card">No requests yet. <a href="#/new">Make the first one</a>.</div>` : `<div class="split">
-      <div class="list">${list.length ? list.map(r => { const o = chosen(r); return `<button class="item ${cur && r.id === cur.id ? "on" : ""}" data-open="${esc(r.id)}">
-        <span class="row between" style="gap:6px;width:100%"><span class="small mute">${esc(r.id)} · ${esc(niceTime(r.received_at))}${r.origin === "auto" ? " · automatic" : ""}</span>${statusPill(r)}</span>
-        <b>${esc(r.current_request ? r.current_request[0].toUpperCase() + r.current_request.slice(1) : r.text || "")}</b><span class="small" style="color:var(--ink2)">${esc(o ? eur(o.total_with_tax) + " · " + headline(r) : headline(r))}</span></button>`; }).join("")
-        : `<div class="card small">Nothing needs action. <button class="chip" data-filter="all">Show all</button></div>`}</div>
-      <div class="detail">${cur ? detail(cur) : ""}</div></div>`}</div>`;
-  $("#view").querySelectorAll("[data-filter]").forEach(b => b.onclick = () => { FILTER = b.dataset.filter; viewRequests(params, null); });
+      <div class="list">${listHtml}</div>
+      <div class="detail">${cur ? detail(cur) : `<div class="card mute">Choose a request on the left.</div>`}</div></div>`}</div>`;
+  $("#view").querySelectorAll("[data-filter]").forEach(b => b.onclick = () => { FILTER = b.dataset.filter; try { localStorage.setItem("reqFilter", FILTER); } catch (e) {}
+    if (location.hash !== "#/requests") location.hash = "#/requests"; else viewRequests(params, null); });
   $("#view").querySelectorAll("[data-open]").forEach(b => b.onclick = () => { location.hash = "#/requests/" + b.dataset.open; });
+  $("#clearReqs").onclick = async () => { const by = me(); if (!by) return;
+    const t = prompt(`This removes all ${REQS.length} requests and all events from the lists. Orders already placed, kitchen stock, rules and the audit log stay.\n\nType CLEAR to confirm.`);
+    if (t !== "CLEAR") return toast("Nothing was cleared.");
+    try { const r = await api("/api/admin/clear-requests", { body: { by, confirm: "CLEAR" } }); toast(`Cleared ${r.requests_removed} requests and ${r.events_removed} events.`); location.hash = "#/requests"; route(); }
+    catch (e) { toast(e.message); } };
   $("#view").querySelectorAll("[data-decide]").forEach(b => b.onclick = async () => {
-    const by = me(); if (!by) return; b.disabled = true; b.textContent = b.dataset.decide === "approve" ? "Re-checking with Valio Aimo…" : "Rejecting…";
-    try { const r = await api(`/api/requests/${cur.id}/decision`, { body: { decision: b.dataset.decide, by } }); FILTER = "all"; await viewRequests(params, cur.id); window.scrollTo(0, 0);
-      if (r.notice) toast(r.notice.kind === "ok" ? "Approved and ordered. Price and stock re-checked: unchanged." : r.notice.kind === "changed" ? "The price changed. Nothing was ordered. Please look again." : "This can no longer be ordered. Nothing was ordered."); }
-    catch (e) { toast(e.message); b.disabled = false; }
+    const by = me(); if (!by) return; b.disabled = true; const label = b.textContent; b.textContent = b.dataset.decide === "approve" ? "Re-checking with Valio Aimo…" : "Rejecting…";
+    try { const r = await api(`/api/requests/${cur.id}/decision`, { body: { decision: b.dataset.decide, by } }); await viewRequests(params, cur.id); window.scrollTo(0, 0);
+      if (r.notice) toast(r.notice.kind === "ok" ? "Approved and ordered. Price and stock re-checked: unchanged." : r.notice.kind === "changed" ? "The price changed. Nothing was ordered. Please look again." : "This can no longer be ordered. Nothing was ordered.");
+      else toast(r.status === "rejected" ? "Rejected. Nothing was ordered." : "Done."); }
+    catch (e) { toast(e.message); b.disabled = false; b.textContent = label; }
   });
   const tp = $("#togglePassed"); if (tp) tp.onclick = () => { const el = $("#passed"); el.hidden = !el.hidden; tp.textContent = (el.hidden ? "Show" : "Hide") + tp.dataset.rest; };
 }
@@ -330,6 +370,7 @@ function headline(r) {
   if (r.status === "ask_buyer") return "Waiting for the buyer's answer";
   if (r.status === "rejected") return "Rejected by " + r.decided_by;
   if (r.status === "cancelled") return "Cancelled by " + r.decided_by;
+  if (r.status === "superseded") return "Closed automatically: no longer needed";
   return "No usable option";
 }
 function tile(k, v, sub, tone) { return `<div class="tile ${tone || ""}"><span class="label">${esc(k)}</span><b>${esc(v)}</b>${sub ? `<span class="small" style="color:var(--ink2)">${esc(sub)}</span>` : ""}</div>`; }
@@ -338,67 +379,94 @@ function detail(r) {
   const problems = results.filter(x => x.result !== "pass"), passed = results.filter(x => x.result === "pass");
   const limit = results.find(x => x.facts && x.facts.limit != null)?.facts.limit;
   const cut = o ? o.lines.map(l => l.closing_time).filter(Boolean).sort()[0] : null;
+  const unit = o && o.lines[0] ? (o.lines[0].unit === "KG" ? "kg" : o.lines[0].unit || "L") : "";
+  // 1. key numbers (no repeats of the reason: that is in "What needs deciding" and in the rule checks)
   let tiles = "";
-  if (r.status === "needs_approval") tiles = tile("Decision needed", "Approve or reject", problems.map(p => p.name).join(", "), "warn") + tile("Reason", problems.map(p => p.rule + " - " + p.name).join(" · "), problems.map(p => p.detail).join(" "), "warn");
-  else if (r.status === "ask_buyer") tiles = tile("Decision needed", "Buyer must answer", "", "ask") + tile("Reason", problems.map(p => p.rule + " - " + p.name).join(" · "), r.question, "ask");
-  else if (r.status === "ordered") tiles = tile("Decision needed", "None", r.decided_by ? "Approved by " + r.decided_by : "Ordered automatically", "ok") + tile("Order", r.order_id, "Mock order, demo only", "ok");
-  else if (r.status === "rejected") tiles = tile("Decision", "Rejected", "By " + r.decided_by + ". Nothing was ordered.", "bad");
-  else if (r.status === "cancelled") tiles = tile("Decision", "Cancelled", "By " + r.decided_by + (r.order_id ? ". Mock order " + r.order_id + " cancelled." : ". Nothing was ordered."), "bad");
-  else tiles = tile("Result", "Can't be done", r.reason, "bad");
-  if (o) tiles += tile("Total incl. tax", eur(o.total_with_tax), limit != null ? "Limit " + eur(limit) : "") + tile("Delivery", niceDate(o.lines[0].available_date), cut ? "Order by " + niceTime(cut) : "")
-    + tile("Rules", `${passed.length} passed` + (problems.length ? ` · ${problems.length} ${r.status === "ordered" ? "approved by a person" : "not"}` : ""), "") + tile("Why this option", o.kind === "split" ? "Split order" : "Single product", r.why_chosen || "");
-  else if (r.status === "ask_buyer") tiles += tile("Searched", "Nothing yet", "Waits for the buyer's answer");
-  const lines = o ? `<section><div class="label" style="margin-bottom:8px">Order</div><div class="scroll"><table style="min-width:640px"><thead><tr>
-      <th>Product</th><th>Role</th><th>Stock</th><th class="num">Amount</th><th class="num">Price</th><th class="num">Total</th></tr></thead><tbody>
+  if (r.status === "ordered") tiles += tile("Order", r.order_id, r.decided_by ? "Approved by " + r.decided_by : "Ordered by the agent", "ok");
+  else if (r.status === "rejected") tiles += tile("Result", "Rejected", "By " + r.decided_by + ". Nothing was ordered.", "bad");
+  else if (r.status === "superseded") tiles += tile("Result", "Closed: not needed", "Ordered or delivered since; closed by the stock monitor.", "bad");
+  else if (r.status === "cancelled") tiles += tile("Result", "Cancelled", "By " + r.decided_by + (r.order_id ? ". Mock order " + r.order_id + " cancelled." : ". Nothing was ordered."), "bad");
+  else if (r.status === "cannot_fulfil") tiles += tile("Result", "Can't be done", "Nothing was ordered.", "bad");
+  if (o) tiles += tile("Total incl. tax", eur(o.total_with_tax), limit != null ? "Spend limit " + eur(limit) : "");
+  const bg = r.budget;
+  if (bg && bg.limit != null && ["needs_approval", "ordered"].includes(r.status)) {
+    tiles += r.status === "needs_approval"
+      ? tile("Budget: " + bg.label, eur(bg.left) + " left", `After this order: ${eur(bg.after)} (of ${eur(bg.limit)})`, bg.after < 0 ? "warn" : "")
+      : tile("Budget: " + bg.label, eur(bg.left) + " left", `${eur(bg.spent)} of ${eur(bg.limit)} used`);
+  } else if (bg && bg.limit == null && r.status === "needs_approval" && bg.wallet.startsWith("event:")) tiles += tile("Budget: " + bg.label, "No budget set", "Set one on the event page");
+  if (o) tiles += tile("Delivery", niceDate(o.lines[0].available_date), cut ? "Order by " + niceTime(cut) : "")
+    + tile("Rules", `${passed.length} passed` + (problems.length ? ` · ${problems.length} ${r.status === "ordered" ? "approved by a person" : "to decide"}` : ""), "");
+  // 2. the order
+  const lines = o ? `<section><div class="label" style="margin-bottom:8px">${o.kind === "split" ? "Order · split over " + o.lines.length + " products" : "Order"}</div><div class="scroll"><table style="min-width:640px"><thead><tr>
+      <th>Product</th><th>Role</th><th>Stock at Aimo</th><th class="num">Amount</th><th class="num">Price</th><th class="num">Total</th></tr></thead><tbody>
       ${o.lines.map(l => `<tr><td><div style="font-weight:500">${esc(l.name)}</div><div class="small mute">${esc(l.brand || "no brand")} · ${esc(l.product_id)}</div></td>
         <td>${esc(l.role[0].toUpperCase() + l.role.slice(1))}</td><td>${esc(stockText(l))}</td>
-        <td class="num">${num(l.quantity)} × ${num(l.litres_per_sales_unit)} ${esc((l.unit || "L").toLowerCase() === "kg" ? "kg" : "L")}</td><td class="num">${eur(l.price_per_unit_with_tax)}</td><td class="num"><b>${eur(l.line_total_with_tax)}</b></td></tr>`).join("")}
+        <td class="num">${num(l.litres)} ${esc(unit)}<div class="small mute">${num(l.quantity)} × ${num(l.litres_per_sales_unit)} ${esc(unit)}</div></td><td class="num">${eur(l.price_per_unit_with_tax)}</td><td class="num"><b>${eur(l.line_total_with_tax)}</b></td></tr>`).join("")}
       </tbody></table></div><div class="small mute" style="margin-top:6px">Prices include tax${o.lines[0].tax_rate != null ? ` (${o.lines[0].tax_rate}%)` : ""}. Checked with Valio Aimo at ${esc(niceTime(r.quote_checked_at))}.</div></section>` : "";
+  // 3. the decision, then the alternatives (usual product only / substitutes)
+  const usualLine = o && o.lines.find(l => l.role === "usual product");
+  const canUsualOnly = (r.parsed || {}).item_id && !r.replaced_by && (
+    (["needs_approval", "rejected"].includes(r.status) && o && o.lines.length > 1 && usualLine) ||
+    (r.status === "cannot_fulfil" && (r.blocked_by || []).some(b => b.rule === "B4")));
+  const canSubs = (r.parsed || {}).item_id && ["needs_approval", "rejected", "cannot_fulfil"].includes(r.status) && !r.replaced_by;
+  const instead = (canUsualOnly || canSubs) ? `<div class="stack" style="gap:8px"><div class="small" style="font-weight:600">${r.status === "needs_approval" ? "Or instead:" : "What you can do now:"}</div>
+      <div class="row" style="gap:8px">${canUsualOnly ? `<button class="btn" data-usual-only="${esc(r.id)}">Order only the usual product${usualLine ? ` (${num(usualLine.litres)} ${esc(unit)})` : ""}</button>` : ""}
+      ${canSubs ? `<button class="btn" data-load-subs="${esc(r.id)}">Show recipe-compatible substitutes</button>` : ""}</div>
+      ${canSubs ? `<div id="subsBox"></div>` : ""}</div>` : "";
+  let decide = "";
+  if (r.status === "needs_approval") decide = `<section class="stack" style="gap:14px;border:1px solid var(--line);border-radius:14px;padding:16px;background:var(--soft)">
+      <div class="row" style="gap:10px"><button class="btn primary big" data-decide="approve">Approve &amp; place order</button><button class="btn big" data-decide="reject">Reject</button>
+        <span class="small mute">Price and stock are checked again when you approve. Your name goes into the audit log.</span></div>${instead}</section>`;
+  else if (r.status === "ask_buyer") decide = `<section class="stack" style="gap:10px;border:1px solid var(--line);border-radius:14px;padding:16px;background:var(--soft)">
+      <div class="row">${answerButtons(r)}</div></section>`;
+  else if (instead) decide = `<section style="border:1px solid var(--line);border-radius:14px;padding:16px;background:var(--soft)">${instead}</section>`;
+  // 4. ranking of everything the agent compared
+  const ranked = (r.options || []).filter(x => x.rank != null).sort((x, y) => x.rank - y.rank);
+  const cmp = r.options_compared;
+  const ranking = ranked.length > 1 ? `<details ${r.status === "needs_approval" ? "open" : ""}><summary style="cursor:pointer;font-weight:600;min-height:32px">How the agent ranked the options${cmp ? ` (${cmp.usable + cmp.blocked} compared, ${cmp.usable} usable)` : ""}</summary>
+      <div class="small mute" style="margin:6px 0 8px">Order of preference from the rulebook: fewest approvals → most of the usual product → lowest price.</div>
+      <div class="scroll"><table style="min-width:640px"><thead><tr><th>#</th><th>Option</th><th class="num">Total</th><th class="num">Per ${esc(unit)}</th><th>Result</th><th>Why this place</th></tr></thead><tbody>
+      ${ranked.map(x => `<tr ${x.option_id === r.chosen ? 'style="background:var(--blue-t2)"' : ""}><td><b>${x.rank}</b></td>
+        <td>${x.lines.map(l => `${num(l.litres)} ${esc(unit)} ${esc(l.name)} <span class="mute">(${esc(l.product_id)})</span>`).join("<br>")}${x.option_id === r.chosen ? `<div class="small" style="color:var(--blue);font-weight:600">Chosen</div>` : ""}</td>
+        <td class="num">${eur(x.total_with_tax)}</td><td class="num">${x.price_per != null ? eur(x.price_per) : "–"}</td>
+        <td>${pill(...({ auto_order: ["Can order alone", "t-ok"], needs_approval: ["Needs approval", "t-approve"], blocked: ["Can't be used", "t-bad"] }[x.outcome] || [x.outcome, "t-grey"]))}</td>
+        <td class="small">${esc(x.rank_reason || "")}</td></tr>`).join("")}</tbody></table></div>
+      ${cmp && cmp.usable + cmp.blocked > ranked.length ? `<div class="small mute" style="margin-top:6px">Showing the top ${ranked.length}; the rest are in the audit log.</div>` : ""}</details>` : "";
+  // 5. rule checks
   const rules = `<section><div class="label" style="margin-bottom:8px">Rule checks</div><div class="stack" style="gap:8px">
       ${problems.map(p => { const done = p.result === "approve" && r.decided_by ? (r.status === "ordered" ? ["Approved by " + r.decided_by, "t-ok"] : ["Rejected by " + r.decided_by, "t-bad"]) : RESULT[p.result];
         return `<div class="rule ${done[1]}"><span class="k">${esc(done[0])}</span><span style="color:var(--ink);flex:1 1 300px"><b>${esc(p.rule)} - ${esc(p.name)}.</b> ${esc(p.detail)}</span></div>`; }).join("")}
       ${passed.length ? `<button class="btn" id="togglePassed" data-rest=" the ${passed.length} passed checks" style="align-self:flex-start;color:var(--green)">Show the ${passed.length} passed checks</button>
       <div id="passed" hidden>${passed.map(p => `<div class="passed"><b style="flex:0 0 34px;color:var(--green)">${esc(p.rule)}</b><span style="flex:0 0 170px;font-weight:500">${esc(p.name)}</span><span style="color:var(--ink2)">${esc(p.detail)}</span></div>`).join("")}</div>` : ""}
     </div></section>`;
-  const alts = (r.alternatives_detail || []).length ? `<div class="box"><b class="small">Other options considered</b><ul>${r.alternatives_detail.map(a =>
-      `<li>${a.lines.map(l => `${num(l.quantity)} × ${esc(l.name)} (${esc(l.product_id)})`).join(" + ")}: ${eur(a.total_with_tax)}. ${esc(a.outcome === "auto_order" ? "Usable, but ranked lower." : a.note)}</li>`).join("")}</ul></div>` : "";
-  const usualLine = o && o.lines.find(l => l.role === "usual product");
-  const canUsualOnly = (r.parsed || {}).item_id && !r.replaced_by && (
-    (["needs_approval", "rejected"].includes(r.status) && o && o.lines.length > 1 && usualLine) ||
-    (r.status === "cannot_fulfil" && (r.blocked_by || []).some(b => b.rule === "B4")));
-  const usualOnlyBtn = canUsualOnly ? `<button class="btn big" data-usual-only="${esc(r.id)}">Order only the usual product${usualLine ? ` (${num(usualLine.litres)} ${esc(usualLine.unit === "KG" ? "kg" : usualLine.unit)} available)` : " (as much as is available)"}</button>` : "";
+  // 6. footer: the less frequent actions
   const cancelBtn = ["needs_approval", "ask_buyer"].includes(r.status) ? `<button class="btn danger" data-cancel-req="${esc(r.id)}">Cancel request</button>`
     : r.status === "ordered" ? `<button class="btn danger" data-cancel-req="${esc(r.id)}">Cancel order ${esc(r.order_id)}</button>` : "";
-  let actions = "";
-  if (r.status === "needs_approval") actions = `<div class="row" style="border-top:1px solid var(--line);padding-top:20px">
-      <button class="btn primary big" data-decide="approve">Approve &amp; place order</button><button class="btn big" data-decide="reject">Reject</button>${usualOnlyBtn}
-      <span class="small mute" style="flex-basis:100%">Your name (top right) is written to the audit log.</span></div>`;
-  else if (r.status === "ask_buyer") actions = `<div class="row" style="border-top:1px solid var(--line);padding-top:20px">${answerButtons(r)}</div>`;
-  else if (usualOnlyBtn) actions = `<div class="row" style="border-top:1px solid var(--line);padding-top:20px">${usualOnlyBtn}<span class="small mute">Starts a new request for the usual product only. It is checked by all the rules again.</span></div>`;
   const links = [r.follow_up_of ? `Follow-up of <a href="#/requests/${esc(r.follow_up_of)}">${esc(r.follow_up_of)}</a>` : "",
-    r.replaced_by ? `Replaced by <a href="#/requests/${esc(r.replaced_by)}">${esc(r.replaced_by)}</a>` : ""].filter(Boolean).join(" · ");
-  if (links) actions = `<div class="small">${links}</div>` + actions;
-  if (cancelBtn) actions += `<div class="row" style="justify-content:flex-end">${cancelBtn}</div>`;
-  return `<div class="card stack" style="gap:24px">
-    <div class="row between" style="align-items:flex-start"><div><div class="small mute">${esc(r.id)} · received ${esc(niceTime(r.received_at))}${r.scenario ? " · demo scenario: " + esc(r.scenario) : ""}</div>
-      ${r.current_request ? `<h2 style="margin-top:4px">${esc(r.current_request[0].toUpperCase() + r.current_request.slice(1))}</h2>
-        <div class="small mute" style="margin-top:4px">${r.amount_changed_from != null ? `Amount changed by the buyer (was ${num(r.amount_changed_from)}). ` : (r.parsed || {}).amount_reason === "everything available" ? "Amount = everything Valio Aimo can deliver of the usual product. " : "Confirmed by the buyer. "}First written as: “${esc(r.text || "")}”</div>`
-        : r.origin === "auto" ? `<h2 style="margin-top:4px">${esc(r.text || "")}</h2>` : `<h2 style="margin-top:4px">“${esc(r.text || "")}”</h2>`}</div>${statusPill(r)}</div>
-    ${r.trigger ? `<div class="small" style="background:var(--blue-t2);border-radius:10px;padding:10px 14px"><b>Sent automatically by the stock monitor.</b> ${esc(r.trigger)}</div>` : ""}
+    r.replaced_by ? `Replaced by <a href="#/requests/${esc(r.replaced_by)}">${esc(r.replaced_by)}</a>` : "",
+    r.event_id ? `Part of event <a href="#/events/${esc(r.event_id)}">${esc(r.event_id)}</a>` : ""].filter(Boolean).join(" · ");
+  const title = r.current_request ? r.current_request[0].toUpperCase() + r.current_request.slice(1) : r.text || "";
+  return `<div class="card stack" style="gap:22px">
+    <div class="row between" style="align-items:flex-start"><div><div class="small mute">${esc(r.id)} · received ${esc(niceTime(r.received_at))}${r.scenario ? " · demo scenario: " + esc(r.scenario) : ""}${links ? " · " + links : ""}</div>
+      <h2 style="margin-top:4px">${r.origin === "typed" && !r.current_request ? "“" + esc(title) + "”" : esc(title)}</h2>
+      ${r.current_request ? `<div class="small mute" style="margin-top:4px">${r.amount_changed_from != null ? `Amount changed by the buyer (was ${num(r.amount_changed_from)}). ` : ""}First written as: “${esc(r.text || "")}”</div>` : ""}</div>${statusPill(r)}</div>
+    ${r.trigger ? `<div class="small" style="background:var(--blue-t2);border-radius:10px;padding:10px 14px"><b>${r.origin === "event" ? "Sent by the event planner." : "Sent automatically by the stock monitor."}</b> ${esc(r.trigger)}</div>` : ""}
+    ${r.possible_duplicate && needsAction(r) ? `<div class="banner t-approve" style="padding:14px 16px"><div><div class="label" style="color:inherit">Possible duplicate</div>
+      <div style="color:var(--ink);font-weight:500">This ingredient was ordered since this request (${esc(r.possible_duplicate.because)}). Kitchen now has ${num(r.possible_duplicate.stock)} in stock + ${num(r.possible_duplicate.on_way)} on its way (reorder level ${num(r.possible_duplicate.reorder_level)}).
+      The agent did not close it because a person asked for it.</div></div><button class="btn" data-cancel-req="${esc(r.id)}">Close this request</button></div>` : ""}
     ${r.notice ? `<div class="banner ${r.notice.kind === "ok" ? "t-ok" : r.notice.kind === "changed" ? "t-approve" : "t-bad"}" style="padding:14px 16px"><div><div class="label" style="color:inherit">${r.notice.kind === "ok" ? "Re-checked at approval" : r.notice.kind === "changed" ? "Price changed · please look again" : "Re-check failed"}</div>
       <div style="font-weight:500;color:var(--ink)">${esc(r.notice.text)}</div></div></div>` : ""}
-    ${r.summary ? `<div style="background:var(--bg);border-radius:12px;padding:12px 16px"><span class="label">In short</span>
-      <span class="small mute"> · written by ${esc(r.summary.written_by)} from the rule results</span><div style="margin-top:4px;font-size:16px">${esc(r.summary.text)}</div></div>` : ""}
-    <div class="tiles">${tiles}</div>${lines}${rules}
-    ${actions}
-    ${(r.parsed || {}).item_id && ["needs_approval", "rejected", "cannot_fulfil"].includes(r.status) && !r.replaced_by
-      ? `<section class="stack" style="gap:10px;border-top:1px solid var(--line);padding-top:20px"><div class="row between"><h3 style="font-size:18px">Recipe-compatible substitutes</h3>
-        <button class="btn" data-load-subs="${esc(r.id)}">Show substitutes</button></div><div id="subsBox" class="small mute">Products that work in the same dishes, checked live with Valio Aimo. You choose; nothing is ordered until you do.</div></section>` : ""}
+    ${r.summary ? `<div style="background:var(--bg);border-radius:12px;padding:14px 16px"><span class="label">${r.status === "needs_approval" ? "What needs deciding" : r.status === "ask_buyer" ? "What the agent needs" : "What happened"}</span>
+      <span class="small mute"> · written by ${esc(r.summary.written_by)} from the data and rule results</span><div style="margin-top:4px;font-size:16px">${esc(r.summary.text)}</div></div>` : ""}
+    ${tiles ? `<div class="tiles">${tiles}</div>` : ""}${lines}${decide}${ranking}${rules}
     ${r.substitute_note ? `<div class="small" style="background:var(--blue-t2);border-radius:10px;padding:10px 14px"><b>Chef's note on this swap:</b> ${esc(r.substitute_note)}</div>` : ""}
-    ${r.event_id ? `<div class="small">Part of event <a href="#/events/${esc(r.event_id)}">${esc(r.event_id)}</a></div>` : ""}
-    <details><summary style="cursor:pointer;font-weight:600;min-height:32px">What the agent did (${r.steps.length} steps) · <a href="#/log?request_id=${esc(r.id)}">open in audit log</a></summary><div style="margin-top:14px">${timeline(r.steps)}</div></details>
+    <div class="row between" style="border-top:1px solid var(--line);padding-top:16px;gap:10px">
+      <div class="row" style="gap:8px"><button class="btn" data-toggle-steps>Show the agent's ${r.steps.length} steps</button><a class="btn" href="#/log?request_id=${esc(r.id)}">Audit log for ${esc(r.id)}</a></div>${cancelBtn}</div>
+    <div id="stepsBox" hidden>${timeline(r.steps)}</div>
   </div>`;
 }
+document.addEventListener("click", e => { const b = e.target.closest("[data-toggle-steps]"); if (!b) return; const box = $("#stepsBox"); box.hidden = !box.hidden;
+  b.textContent = (box.hidden ? "Show" : "Hide") + b.textContent.replace(/^(Show|Hide)/, ""); });
 
 // ---------- recipe-aware substitutes (stock-out and events)
 function subsHtml(s, rid) {
@@ -406,14 +474,15 @@ function subsHtml(s, rid) {
   const head = s.combine_with_usual ? `Valio Aimo can deliver ${num(s.usual_available)} ${u} of the usual product by ${esc(niceDate(s.deadline))}. These can cover the missing ${num(s.needed)} ${u}:`
     : `These can replace ${num(s.needed)} ${u} of ${esc(s.name.toLowerCase())} by ${esc(niceDate(s.deadline))}:`;
   const opts = s.options.map(o => `<div class="rulecard"><div class="row between" style="align-items:flex-start;gap:8px 16px">
-      <div style="flex:1 1 380px;min-width:0"><b>${esc(o.name)}</b> <span class="small mute">${esc(o.product_id)} · ${esc(o.brand || "no brand")}</span>
+      <div style="flex:1 1 380px;min-width:0"><b style="color:var(--blue)">#${o.rank || "–"}</b> <b>${esc(o.name)}</b> <span class="small mute">${esc(o.product_id)} · ${esc(o.brand || "no brand")}</span>
         <div class="row" style="gap:6px;margin:4px 0">${pill(o.source, o.source === "chef's swap list" ? "t-ok" : o.source === "suggested by AI" ? "t-ask" : "t-grey")}
           ${o.pre_approved ? pill("pre-approved: agent may order alone", "t-ok") : pill("chef decides", "t-approve")}${o.fit ? pill("fit: " + o.fit, "t-grey") : ""}</div>
+        ${o.rank_reason ? `<div class="small" style="font-weight:600">Why #${o.rank}: ${esc(o.rank_reason)}</div>` : ""}
         <div style="color:var(--ink2)">${esc(o.note)}</div>
         <div class="small mute" style="margin-top:4px">${num(o.amount)} ${u} · ${eur(o.total_with_tax)} incl. tax (${eur(o.price_per)}/${u}) · arrives ${esc(niceDate(o.available_date))} · ${o.stock_status === "known" ? num(o.stock_amount) + " in stock" : o.stock_status === "no_limit" ? "no stock limit" : "stock unknown"}</div></div>
       ${rid ? `<button class="btn primary" data-pick-sub="${esc(o.product_id)}" data-rid="${esc(rid)}">Use this</button>` : ""}</div></div>`).join("");
   const bad = s.not_usable.length ? `<div class="small mute">Checked but can't be used: ${s.not_usable.map(o => `${esc(o.name)} (${esc(o.why_not)})`).join("; ")}.</div>` : "";
-  return `<div class="stack" style="gap:10px"><div class="small mute">Picked by ${esc(s.picked_by)} · checked live with Valio Aimo</div>
+  return `<div class="stack" style="gap:10px"><div class="small mute">Picked by ${esc(s.picked_by)} · checked live with Valio Aimo · ranked: pre-approved swaps → chef's list → AI fit → price</div>
     ${s.options.length ? `<div>${head}</div>${opts}` : `<div class="problem" style="background:var(--grey-t);color:var(--ink)">No product substitute can arrive by ${esc(niceDate(s.deadline))}.</div>`}${bad}</div>`;
 }
 document.addEventListener("click", async e => {
@@ -423,20 +492,73 @@ document.addEventListener("click", async e => {
     catch (err) { box.innerHTML = `<div class="problem">${esc(err.message)}</div>`; b.disabled = false; b.textContent = "Show substitutes"; } return; }
   const p = e.target.closest("[data-pick-sub]");
   if (p) { const by = me(); if (!by) return; p.disabled = true; p.textContent = "Ordering…";
-    try { const r = await api(`/api/requests/${p.dataset.rid}/substitute`, { body: { product_id: p.dataset.pickSub, by } }); await loadRequests(); FILTER = "all";
+    try { const r = await api(`/api/requests/${p.dataset.rid}/substitute`, { body: { product_id: p.dataset.pickSub, by } }); await loadRequests();
       toast(`New request ${r.id}: ${(STATUS[r.status] || [r.status])[0].toLowerCase()}.`); location.hash = "#/requests/" + r.id; if (CURRENT === "requests") route(); }
     catch (err) { toast(err.message); p.disabled = false; p.textContent = "Use this"; } }
 });
 
 // ---------- screen: events (last-minute bookings)
-const EV_STATE = { covered: ["From kitchen stock", "t-ok"], ordered: ["Ordered", "t-ok"], needs_approval: ["Needs approval", "t-approve"],
-  ask_buyer: ["Needs an answer", "t-ask"], cannot_fulfil: ["Can't be sourced in time", "t-bad"], rejected: ["Rejected", "t-bad"], cancelled: ["Cancelled", "t-grey"] };
-let EV_FORM = null;
+const EV_STATE = { covered: ["From kitchen stock", "t-ok"], ordered: ["Ordered", "t-ok"], needs_approval: ["Waiting for approval", "t-approve"],
+  ask_buyer: ["Needs an answer", "t-ask"], cannot_fulfil: ["Can't be sourced in time", "t-bad"], rejected: ["Rejected", "t-bad"], cancelled: ["Cancelled", "t-grey"],
+  missing: ["Not ordered yet", "t-bad"] };
+let EV_FORM = (() => { try { return JSON.parse(sessionStorage.getItem("evDraft") || "null"); } catch (e) { return null; } })();
+// The event form is kept as a draft (in this browser tab) until it is planned: leaving the page loses nothing.
+function saveEventDraft() {
+  const f = document.querySelector("#evForm"); if (!f) return;
+  const fd = new FormData(f);
+  EV_FORM = { name: fd.get("name") || "", date: fd.get("date") || "", guests: fd.get("guests") || "", budget: fd.get("budget") || "", dishes: fd.getAll("dish"),
+    read_by: (EV_FORM || {}).read_by, customs: [...document.querySelectorAll("#customDishes [data-dish-ed]")].map(readDish) };
+  try { sessionStorage.setItem("evDraft", JSON.stringify(EV_FORM)); } catch (e) {}
+}
+const uu = x => x === "KG" ? "kg" : x;
+function costBar(c) {
+  if (c.budget == null) return `<div class="row between"><span><b>Event cost:</b> ${eur(c.ordered)} ordered${c.waiting_for_approval ? ` + ${eur(c.waiting_for_approval)} waiting for approval` : ""} = <b>${eur(c.total)}</b></span><span class="small mute">No event budget set</span></div>`;
+  const pct = c.budget ? Math.min(100, Math.round(c.total / c.budget * 100)) : 100, ordPct = c.budget ? Math.min(100, Math.round(c.ordered / c.budget * 100)) : 100, over = c.total > c.budget;
+  return `<div class="stack" style="gap:6px"><div class="row between"><span><b>Event cost:</b> ${eur(c.ordered)} ordered${c.waiting_for_approval ? ` + ${eur(c.waiting_for_approval)} waiting for approval` : ""} = <b>${eur(c.total)}</b> of ${eur(c.budget)} budget</span>
+    <span class="pill ${over ? "t-bad" : "t-ok"}">${over ? eur(-c.left) + " over budget" : eur(c.left) + " left"}</span></div>
+    <div style="height:10px;border-radius:5px;background:var(--grey-t);position:relative;overflow:hidden"><div style="position:absolute;inset:0 auto 0 0;width:${pct}%;background:${over ? "var(--red)" : "var(--yellow)"}"></div><div style="position:absolute;inset:0 auto 0 0;width:${ordPct}%;background:${over ? "var(--red)" : "var(--green)"}"></div></div>
+    <div class="small mute">Green: ordered. Yellow: waiting for approval. Charged to the event's own budget, not the weekly ones.</div></div>`;
+}
+function ingredientRow(k, g) {
+  return `<div class="row" data-ing-row style="gap:8px"><select name="ci_item" style="flex:1 1 220px"><option value="">Ingredient…</option>${k.ingredients.map(i => `<option value="${esc(i.item_id)}" ${g && g.item_id === i.item_id ? "selected" : ""}>${esc(i.name)} (${i.unit === "L" ? "ml" : "g"})</option>`).join("")}</select>
+    <input type="number" name="ci_amount" min="1" max="5000" step="any" placeholder="g or ml" style="width:110px" value="${g && g.amount ? esc(+(g.amount * 1000).toFixed(1)) : ""}"><span class="small mute">per portion</span>
+    <button type="button" class="btn" data-del-ing aria-label="Remove ingredient">×</button></div>`;
+}
+// One editor for a dish, used on the Kitchen menu and for event-only dishes.
+function dishEditor(k, d, opts) {
+  d = d || {}; opts = opts || {};
+  return `<div class="stack" data-dish-ed data-dish-id="${esc(d.dish_id || "")}" style="gap:10px;padding:12px;border:1px dashed var(--line2);border-radius:12px;background:var(--card)">
+    <div class="form" style="padding:0;background:none"><label>Dish name<input type="text" name="d_name" value="${esc(d.name || "")}" placeholder="e.g. Salmon pasta"></label>
+      <label>Course<select name="d_course">${["main", "breakfast", "dessert"].map(c => `<option value="${c}" ${d.course === c ? "selected" : ""}>${c[0].toUpperCase() + c.slice(1)}</option>`).join("")}</select></label>
+      ${opts.perDay ? `<label>Portions a day<input type="number" name="d_ppd" min="0" max="5000" value="${esc(d.portions_per_day ?? 0)}"></label>` : ""}</div>
+    <div class="stack" style="gap:8px" data-ing-rows>${(d.ingredients && d.ingredients.length ? d.ingredients : [null]).map(g => ingredientRow(k, g)).join("")}</div>
+    <div class="row"><button type="button" class="btn" data-add-ing>+ Ingredient</button>
+      ${opts.event ? `<label class="row small" style="gap:6px"><input type="checkbox" name="d_menu" ${d.add_to_menu ? "checked" : ""}> Also add it to the menu</label><button type="button" class="btn danger" data-del-dish>Remove this dish</button>` : ""}
+      ${opts.save ? `<button type="button" class="btn primary" data-save-dish>${d.dish_id ? "Save changes" : "Add to the menu"}</button><button type="button" class="btn" data-cancel-dish>Cancel</button>` : ""}</div>
+  </div>`;
+}
+function readDish(el) {
+  return { dish_id: el.dataset.dishId || undefined, name: (el.querySelector("[name=d_name]").value || "").trim(), course: el.querySelector("[name=d_course]").value,
+    portions_per_day: el.querySelector("[name=d_ppd]") ? parseInt(el.querySelector("[name=d_ppd]").value || "0") : 0,
+    add_to_menu: !!(el.querySelector("[name=d_menu]") || {}).checked,
+    ingredients: [...el.querySelectorAll("[data-ing-row]")].map(r => ({ item_id: r.querySelector("[name=ci_item]").value, amount: parseFloat(r.querySelector("[name=ci_amount]").value) / 1000 }))
+      .filter(g => g.item_id && g.amount > 0) };
+}
+let KITCHEN_CACHE = null;
+document.addEventListener("click", e => {
+  const add = e.target.closest("[data-add-ing]");
+  if (add && KITCHEN_CACHE) { add.closest("[data-dish-ed]").querySelector("[data-ing-rows]").insertAdjacentHTML("beforeend", ingredientRow(KITCHEN_CACHE)); saveEventDraft(); return; }
+  const del = e.target.closest("[data-del-ing]");
+  if (del) { const rows = del.closest("[data-ing-rows]"); if (rows.children.length > 1) del.closest("[data-ing-row]").remove(); else { del.closest("[data-ing-row]").querySelectorAll("select,input").forEach(x => x.value = ""); } saveEventDraft(); return; }
+  const dd = e.target.closest("[data-del-dish]");
+  if (dd) { dd.closest("[data-dish-ed]").remove(); saveEventDraft(); }
+});
+
 async function viewEvents(eid) {
-  const [list, k] = await Promise.all([api("/api/events"), api("/api/kitchen")]);
+  const [list, k] = await Promise.all([api("/api/events"), api("/api/kitchen")]); KITCHEN_CACHE = k;
   if (eid) return viewEvent(eid, k);
   const tomorrow = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
-  const f = EV_FORM || { name: "", date: "", guests: "", dishes: [] };
+  const f = EV_FORM || { name: "", date: "", guests: "", dishes: [], budget: "", customs: [] };
   $("#view").innerHTML = `<div class="stack">
     <div><h1>Events</h1><p class="mute" style="margin:4px 0 0">An unexpected booking? Say what's coming. The agent works out what the recipes need, uses what the kitchen can spare, orders the rest through the normal rules, and flags anything that can't arrive in time, with recipe-aware fixes.</p></div>
     <div class="card stack" style="gap:14px">
@@ -448,89 +570,203 @@ async function viewEvents(eid) {
           <label>Event name<input type="text" name="name" value="${esc(f.name)}" placeholder="e.g. Company dinner"></label>
           <label>Date<input type="date" name="date" min="${tomorrow}" value="${esc(f.date || "")}" required></label>
           <label>Guests (portions of each dish)<input type="number" name="guests" min="1" max="5000" value="${esc(f.guests || "")}" required></label>
+          <label>Event budget (€, optional)<input type="number" name="budget" min="0" step="any" value="${esc(f.budget || "")}" placeholder="e.g. 3000"></label>
         </div>
         <div class="small" style="font-weight:600">Dishes from your menu</div>
         <div class="checks">${k.dishes.map(d => `<label class="row" style="gap:6px;min-height:36px;padding:0 10px;border:1px solid var(--line2);border-radius:999px"><input type="checkbox" name="dish" value="${esc(d.dish_id)}" ${f.dishes.includes(d.dish_id) ? "checked" : ""}> ${esc(d.name)}</label>`).join("")}</div>
-        <div class="row between"><span class="small mute" id="evReadBy">${f.read_by ? "Filled in by " + esc(f.read_by) + ". Check it before planning." : ""}</span><button class="btn primary big">Plan the event</button></div>
+        <div class="stack" style="gap:8px"><div class="row between"><span class="small" style="font-weight:600">Dishes not on the menu (just for this event)</span>
+            <button type="button" class="btn" id="addCustom">+ Add a dish</button></div>
+          <div id="customDishes" class="stack" style="gap:10px">${(f.customs || []).map(c => dishEditor(k, c, { event: true })).join("")}</div>
+          <div class="small mute">Ingredients come from the kitchen's list, each linked to a real Valio Aimo product. Missing one? Add it on the <a href="#/kitchen">Kitchen</a> screen.</div></div>
+        <div class="row between"><span class="small mute" id="evReadBy">${f.read_by ? "Filled in by " + esc(f.read_by) + ". Check it before planning." : EV_FORM ? "Draft kept while you move around." : ""}</span>
+          <div class="row" style="gap:8px">${EV_FORM ? `<button type="button" class="btn" id="clearDraft">Clear form</button>` : ""}<button class="btn primary big">Plan the event</button></div></div>
       </form>
-      <div id="evResult"></div>
     </div>
     <div class="card stack" style="gap:10px"><h2>Planned events</h2>${list.length ? list.map(ev => `<a class="rulecard" style="text-decoration:none;color:inherit" href="#/events/${esc(ev.id)}"><div class="row between"><b>${esc(ev.id)} · ${esc(ev.name)} · ${esc(niceDate(ev.date))}</b>
-      <span class="row" style="gap:6px">${ev.summary.cannot_source ? pill(ev.summary.cannot_source + " can't be sourced", "t-bad") : ""}${ev.summary.waiting_for_person ? pill(ev.summary.waiting_for_person + " waiting", "t-approve") : ""}${pill(ev.summary.ordered + " ordered", "t-ok")}${pill(ev.summary.covered_from_stock + " from stock", "t-grey")}</span></div>
+      <span class="row" style="gap:6px">${ev.summary.cannot_source ? pill(ev.summary.cannot_source + " can't be sourced", "t-bad") : ""}${ev.summary.waiting_for_person ? pill(ev.summary.waiting_for_person + " waiting", "t-approve") : ""}${pill(ev.summary.ordered + " ordered", "t-ok")}
+      ${ev.cost ? pill(eur(ev.cost.total) + (ev.cost.budget != null ? " of " + eur(ev.cost.budget) : ""), ev.cost.budget != null && ev.cost.total > ev.cost.budget ? "t-bad" : "t-grey") : ""}</span></div>
       <div class="small mute">${ev.dishes.map(d => `${num(d.portions)} × ${esc(d.name)}`).join(" · ")}</div></a>`).join("") : `<div class="mute">No events yet.</div>`}</div></div>`;
+  if ($("#clearDraft")) $("#clearDraft").onclick = () => { EV_FORM = null; try { sessionStorage.removeItem("evDraft"); } catch (e) {} viewEvents(); };
+  $("#addCustom").onclick = () => { $("#customDishes").insertAdjacentHTML("beforeend", dishEditor(k, null, { event: true })); saveEventDraft(); };
+  $("#evForm").addEventListener("input", saveEventDraft); $("#evForm").addEventListener("change", saveEventDraft);
   $("#evRead").onsubmit = async e => { e.preventDefault(); const t = $("#evText").value.trim(); if (!t) return toast("Describe the event first.");
     const b = e.target.querySelector("button"); b.disabled = true; b.textContent = "Reading…";
-    try { const r = await api("/api/events/read", { body: { text: t } }); EV_FORM = { name: t.slice(0, 60), date: r.date, guests: r.guests, dishes: r.dishes, read_by: r.read_by };
+    try { const r = await api("/api/events/read", { body: { text: t } }); saveEventDraft();
+      EV_FORM = { ...(EV_FORM || {}), name: t.slice(0, 60), date: r.date, guests: r.guests, dishes: r.dishes, read_by: r.read_by };
       const missing = [!r.date && "the date", !r.guests && "the number of guests", !r.dishes.length && "the dishes"].filter(Boolean);
       if (missing.length) toast("Please fill in " + missing.join(", ") + ". The agent does not guess.");
       viewEvents(); } catch (err) { toast(err.message); b.disabled = false; b.textContent = "Fill in the form"; } };
   $("#evForm").onsubmit = async e => { e.preventDefault(); const by = me(); if (!by) return; const fd = new FormData(e.target);
-    const dishes = fd.getAll("dish"), guests = parseInt(fd.get("guests"));
-    if (!dishes.length) return toast("Choose at least one dish.");
-    const b = e.target.querySelector(".btn.primary"); b.disabled = true; b.textContent = "Planning… asking Valio Aimo";
-    try { const ev = await api("/api/events", { body: { name: fd.get("name") || "Event", date: fd.get("date"), by, dishes: dishes.map(d => ({ dish_id: d, portions: guests })) } });
-      EV_FORM = null; await loadRequests(); location.hash = "#/events/" + ev.id; }
+    const guests = parseInt(fd.get("guests")); const dishes = fd.getAll("dish").map(d => ({ dish_id: d, portions: guests }));
+    const custom = [];
+    for (const [n, el] of [...document.querySelectorAll("#customDishes [data-dish-ed]")].entries()) {
+      const c = readDish(el); if (!c.name && !c.ingredients.length) continue;
+      if (!c.name) return toast("Give each extra dish a name.");
+      if (!c.ingredients.length) return toast(`Give "${c.name}" at least one ingredient with an amount.`);
+      const id = "custom-" + (n + 1); custom.push({ dish_id: id, name: c.name, course: c.course, ingredients: c.ingredients, add_to_menu: c.add_to_menu });
+      dishes.push({ dish_id: id, portions: guests });
+    }
+    if (!dishes.length) return toast("Choose at least one dish, or add your own.");
+    const b = e.target.querySelector(".btn.primary.big"); b.disabled = true; b.textContent = "Planning… asking Valio Aimo";
+    try { const ev = await api("/api/events", { body: { name: fd.get("name") || "Event", date: fd.get("date"), by, dishes, custom_dishes: custom,
+        budget: fd.get("budget") ? parseFloat(fd.get("budget")) : null } });
+      EV_FORM = null; try { sessionStorage.removeItem("evDraft"); } catch (e) {} await loadRequests(); location.hash = "#/events/" + ev.id; }
     catch (err) { toast(err.message); b.disabled = false; b.textContent = "Plan the event"; } };
+}
+function fixHtml(ev, l) {
+  const f = l.fix; if (!f) return "";
+  const plans = (f.portion_plan || []).map(p => `<div class="rulecard"><div><b>${esc(p.name)}</b>: with what Valio Aimo can deliver and the kitchen can spare (${num(f.can_get)} ${uu(l.unit)}), you can make <b>${num(p.can_make)} of ${num(p.portions)}</b> portions.
+      ${p.can_make ? "Move the other " : "Move all "}<b>${num(p.move)}</b> portions to:</div>
+      ${p.alternatives.length ? p.alternatives.map(a => `<div class="row between" style="gap:8px;border-top:1px solid var(--line);padding-top:8px"><div><b>${esc(a.name)}</b>${a.already_on_event ? " " + pill("already on this event", "t-grey") : ""}
+        <div class="small" style="color:var(--ink2)">${a.from_stock_only ? "Enough in the kitchen: nothing extra to order." : "Will need ordering: " + a.short.map(esc).join(", ") + " (the agent orders it through the normal rules)."}</div></div>
+        <button class="btn" data-move-from="${esc(p.dish_id)}" data-move-to="${esc(a.dish_id)}" data-move="${p.move}">Move ${num(p.move)} portions</button></div>`).join("")
+        : `<div class="small mute">No other dish of the same course is on the menu. Add one to the event (custom dish) or lower the portions.</div>`}</div>`).join("");
+  return `<div class="stack" style="gap:14px;padding:8px"><div class="row between"><span class="small mute">Checked ${esc(niceTime(f.checked_at))} · saved with the event</span><button class="btn" data-fix="${esc(l.item_id)}">Check again</button></div>
+    <div><h3 style="font-size:17px;margin-bottom:6px">Use a different product</h3>${subsHtml(f, l.request_id)}</div>
+    ${plans ? `<div><h3 style="font-size:17px;margin-bottom:6px">Or change the menu (recipe logic)</h3><div class="stack" style="gap:8px">${plans}</div></div>` : ""}</div>`;
 }
 async function viewEvent(eid, k) {
   const ev = await api("/api/events/" + encodeURIComponent(eid));
-  const u = x => x === "KG" ? "kg" : x;
-  const stuck = l => ["cannot_fulfil", "needs_approval", "rejected"].includes(l.status);
+  const action = l => {
+    if (l.status === "needs_approval") return `<a class="btn" href="#/requests/${esc(l.request_id)}">Approve or reject ${esc(l.request_id)}</a>`;
+    if (l.status === "ask_buyer") return `<a class="btn" href="#/requests/${esc(l.request_id)}">Answer ${esc(l.request_id)}</a>`;
+    if (["cannot_fulfil", "rejected", "cancelled", "missing"].includes(l.status)) return l.fix ? "" : `<button class="btn" data-fix="${esc(l.item_id)}">Find a fix</button>`;
+    return "";
+  };
   $("#view").innerHTML = `<div class="stack">
     <div class="row between"><div><div class="small mute"><a href="#/events">Events</a> · ${esc(ev.id)} · planned by ${esc(ev.created_by)}</div><h1>${esc(ev.name)} · ${esc(niceDate(ev.date))}</h1>
       <div class="mute">${ev.dishes.map(d => `${num(d.portions)} × ${esc(d.name)}`).join(" · ")}</div></div>
       <div class="row" style="gap:6px">${ev.summary.cannot_source ? pill(ev.summary.cannot_source + " can't be sourced in time", "t-bad") : ""}${ev.summary.waiting_for_person ? pill(ev.summary.waiting_for_person + " waiting for a person", "t-approve") : ""}${pill(ev.summary.ordered + " ordered", "t-ok")}${pill(ev.summary.covered_from_stock + " from kitchen stock", "t-grey")}</div></div>
+    <div class="card stack" style="gap:10px">${costBar(ev.cost)}
+      <form class="row" id="budgetForm" style="gap:8px"><label class="small" style="font-weight:600">Event budget (€) <input type="number" name="budget" min="0" step="any" value="${ev.budget ?? ""}" style="width:130px"></label><button class="btn">Save budget</button></form></div>
     ${ev.changes.length ? `<div class="small" style="background:var(--blue-t2);border-radius:10px;padding:10px 14px">${ev.changes.map(c => `<b>Menu change</b> by ${esc(c.by)}: ${esc(c.change)}`).join("<br>")}</div>` : ""}
-    <div class="card" style="padding:8px"><div style="overflow-x:auto"><table style="min-width:900px"><thead><tr><th>Ingredient</th><th class="num">Event needs</th><th class="num">Kitchen can spare</th><th class="num">To order</th><th>Result</th><th></th></tr></thead><tbody>
-      ${ev.lines.map(l => { const st = EV_STATE[l.status] || [l.status, "t-grey"]; return `<tr><td><b>${esc(l.name)}</b><div class="small mute">${l.dishes.map(d => esc((k.dishes.find(x => x.dish_id === d) || {}).name || d)).join(", ")}</div></td>
-        <td class="num">${num(l.needed)} ${u(l.unit)}</td><td class="num" title="stock ${num(l.stock)} + arriving ${num(l.arriving)} − normal service ${num(l.normal_use)}">${num(l.spare)} ${u(l.unit)}</td>
-        <td class="num">${l.short > 0 ? `${num(l.to_order || l.short)} ${u(l.unit)}` : "–"}</td>
-        <td>${pill(st[0], st[1])}${l.order_id ? ` <span class="small mute">${esc(l.order_id)}</span>` : ""}${l.request_id ? `<div class="small"><a href="#/requests/${esc(l.request_id)}">${esc(l.request_id)}</a></div>` : ""}${stuck(l) && l.problem ? `<div class="small mute" style="max-width:360px">${esc(l.problem)}</div>` : ""}</td>
-        <td>${stuck(l) ? `<button class="btn" data-fix="${esc(l.item_id)}">Find a fix</button>` : ""}</td></tr>
-        <tr hidden data-fix-row="${esc(l.item_id)}"><td colspan="6" style="background:#FAFAF8"><div data-fix-box="${esc(l.item_id)}"></div></td></tr>`; }).join("")}
+    <div class="card" style="padding:8px"><div style="overflow-x:auto"><table style="min-width:920px"><thead><tr><th>Ingredient</th><th class="num">Event needs</th><th class="num">Kitchen can spare</th><th class="num">Ordered for the event</th><th>Result</th><th></th></tr></thead><tbody>
+      ${ev.lines.map(l => { const st = EV_STATE[l.status] || [l.status, "t-grey"]; const stuck = ["cannot_fulfil", "rejected", "cancelled", "missing"].includes(l.status);
+        return `<tr><td><b>${esc(l.name)}</b><div class="small mute">${l.dishes.map(d => esc(((ev.dishes.find(x => x.dish_id === d) || {}).name || d).split(" (")[0])).join(", ")}</div></td>
+        <td class="num">${num(l.needed)} ${uu(l.unit)}</td><td class="num" title="stock ${num(l.stock)} + arriving ${num(l.arriving)} − normal service ${num(l.normal_use)}">${num(l.spare)} ${uu(l.unit)}</td>
+        <td class="num">${(l.order_ids || []).length ? esc(l.order_ids.join(", ")) : l.to_order ? `<span class="mute">${num(l.to_order)} ${uu(l.unit)} needed</span>` : "–"}</td>
+        <td>${pill(st[0], st[1])}${l.request_id ? `<div class="small"><a href="#/requests/${esc(l.request_id)}">${esc(l.request_id)}</a>${(l.request_ids || []).length > 1 ? ` <span class="mute">(${l.request_ids.length} requests)</span>` : ""}</div>` : ""}${(stuck || l.status === "needs_approval") && l.problem ? `<div class="small mute" style="max-width:360px">${esc(l.problem)}</div>` : ""}</td>
+        <td>${action(l)}</td></tr>
+        ${stuck && l.fix ? `<tr><td colspan="6" style="background:var(--soft)">${fixHtml(ev, l)}</td></tr>` : `<tr hidden data-fix-row="${esc(l.item_id)}"><td colspan="6" style="background:var(--soft)"><div data-fix-box="${esc(l.item_id)}"></div></td></tr>`}`; }).join("")}
       </tbody></table></div></div>
-    <p class="small mute" style="margin:0">"Kitchen can spare" = kitchen stock + deliveries arriving by the event − normal service until then (mock kitchen data). Every order went through the normal rules. Hover a number to see how it was worked out.</p></div>`;
-  $("#view").querySelectorAll("[data-fix]").forEach(b => b.onclick = async () => {
-    const id = b.dataset.fix, row = $(`[data-fix-row="${CSS.escape(id)}"]`), box = $(`[data-fix-box="${CSS.escape(id)}"]`);
-    row.hidden = false; b.disabled = true; b.textContent = "Checking…"; box.innerHTML = `<div class="mute" style="padding:8px">Looking for recipe-compatible fixes, checked live with Valio Aimo…</div>`;
-    try { const f = await api(`/api/events/${eid}/fixes/${id}`); const line = ev.lines.find(l => l.item_id === id);
-      const swaps = f.dish_swaps.map(d => `<div class="rulecard"><div class="row between"><div><b>Serve ${esc(d.name)} instead</b>
-          <div class="small" style="color:var(--ink2)">${d.from_stock_only ? `Can be made for ${num(d.portions)} from what the kitchen can spare: nothing to order.` : `Would still need: ${d.short.map(esc).join(", ")}.`}</div></div>
-          ${f.affected_dishes.map(a => `<button class="btn" data-swap-from="${esc(a.dish_id)}" data-swap-to="${esc(d.dish_id)}">Replace ${esc(a.name.split(" (")[0].split(" with ")[0])}</button>`).join("")}</div></div>`).join("");
-      box.innerHTML = `<div class="stack" style="gap:14px;padding:8px"><div><h3 style="font-size:17px;margin-bottom:6px">Use a different product</h3>${subsHtml(f, line.request_id)}</div>
-        ${swaps ? `<div><h3 style="font-size:17px;margin-bottom:6px">Or change the dish</h3><div class="stack" style="gap:8px">${swaps}</div></div>` : ""}</div>`;
-      box.querySelectorAll("[data-swap-from]").forEach(s => s.onclick = async () => { const by = me(); if (!by) return; s.disabled = true; s.textContent = "Re-planning…";
-        try { await api(`/api/events/${eid}/swap-dish`, { body: { from_dish: s.dataset.swapFrom, to_dish: s.dataset.swapTo, by } }); await loadRequests(); toast("Menu changed and re-planned."); viewEvent(eid, await api("/api/kitchen")); }
-        catch (err) { toast(err.message); s.disabled = false; } });
-      b.textContent = "Fix options shown"; }
-    catch (err) { box.innerHTML = `<div class="problem">${esc(err.message)}</div>`; b.disabled = false; b.textContent = "Find a fix"; }
-  });
+    <p class="small mute" style="margin:0">"Kitchen can spare" = kitchen stock + routine deliveries arriving by the event − normal service until then (mock kitchen data). Every order went through the normal rules. Hover a number to see how it was worked out.</p></div>`;
+  const v = $("#view");
+  $("#budgetForm").onsubmit = async e => { e.preventDefault(); const by = me(); if (!by) return; const val = new FormData(e.target).get("budget");
+    try { await api(`/api/events/${eid}/budget`, { method: "PUT", body: { budget: val === "" ? null : parseFloat(val), by } }); toast("Event budget saved."); viewEvent(eid, k); } catch (err) { toast(err.message); } };
+  v.querySelectorAll("[data-fix]").forEach(b => b.onclick = async () => {
+    const id = b.dataset.fix; b.disabled = true; b.textContent = "Checking with Valio Aimo…";
+    const box = $(`[data-fix-box="${CSS.escape(id)}"]`); if (box) { box.closest("tr").hidden = false; box.innerHTML = `<div class="mute" style="padding:8px">Looking for recipe-compatible fixes, checked live with Valio Aimo…</div>`; }
+    try { await api(`/api/events/${eid}/fixes/${id}`); viewEvent(eid, k); }
+    catch (err) { toast(err.message); b.disabled = false; b.textContent = "Find a fix"; } });
+  v.querySelectorAll("[data-move-from]").forEach(s => s.onclick = async () => { const by = me(); if (!by) return; s.disabled = true; s.textContent = "Re-planning…";
+    try { await api(`/api/events/${eid}/swap-dish`, { body: { from_dish: s.dataset.moveFrom, to_dish: s.dataset.moveTo, move: parseInt(s.dataset.move), by } }); await loadRequests(); toast("Menu changed and re-planned."); viewEvent(eid, k); }
+    catch (err) { toast(err.message); s.disabled = false; } });
 }
 
 // ---------- screen: kitchen (menu, stock, automatic restock)
 const K_STATE = { ok: ["OK", "t-ok"], low: ["Low", "t-approve"], on_order: ["On its way", "t-ask"], waiting_for_person: ["Waiting for a person", "t-approve"], failed: ["Could not order", "t-bad"] };
 let K_NOTE = "";
 async function viewKitchen() {
-  const k = await api("/api/kitchen");
+  const [k, bud] = await Promise.all([api("/api/kitchen"), api("/api/budgets")]); KITCHEN_CACHE = k;
   const amt = (n, u) => `${num(n)} ${u === "KG" ? "kg" : u}`;
   $("#view").innerHTML = `<div class="stack">
     <div class="row between"><div><h1>Kitchen</h1><p class="mute" style="margin:4px 0 0">Stock goes down as dishes are served. When an ingredient reaches its reorder level, the agent sends the usual order by itself, through the same rules as a typed request.</p></div>
       <div class="row" style="gap:8px"><button class="btn primary" id="simDay">Simulate a day of service</button><button class="btn" id="recv">Receive deliveries</button></div></div>
     ${K_NOTE}
-    <div class="card" style="padding:8px"><div class="row between" style="padding:8px 10px"><h2>Stock</h2><span class="small mute">Day ${k.day} · kitchen stock and menu are mock data; products and prices are real</span></div>
-      <div style="overflow-x:auto"><table style="min-width:940px"><thead><tr><th>Ingredient</th><th class="num">In stock</th><th class="num">Reorder at</th><th class="num">Used per day</th><th class="num">Lasts</th><th class="num">Usual order</th><th>Status</th><th>Used in</th></tr></thead><tbody>
+    <div class="card" style="padding:8px"><div class="row between" style="padding:8px 10px"><h2>Stock</h2><div class="row" style="gap:10px"><span class="small mute">Day ${k.day} · kitchen stock and menu are mock data; products and prices are real</span><button class="btn" id="addIngBtn">+ Add an ingredient</button></div></div>
+      <div id="newIngBox"></div>
+      <div style="overflow-x:auto"><table style="min-width:940px"><thead><tr><th>Ingredient</th><th class="num">In stock</th><th class="num">Reorder at</th><th class="num">Used per day</th><th class="num">Lasts</th><th class="num">Usual order</th><th>Status</th><th>Used in</th><th></th></tr></thead><tbody>
       ${k.ingredients.map(i => { const st = K_STATE[i.state]; const pct = Math.max(4, Math.min(100, Math.round(i.stock / Math.max(i.reorder_level * 3, 1) * 100)));
         return `<tr><td><div style="font-weight:600">${esc(i.name)}</div><div class="small mute">${esc(i.usual_product_name || "")} · ${esc(i.usual_product)}</div></td>
-        <td class="num"><b>${amt(i.stock, i.unit)}</b><div style="height:6px;border-radius:3px;background:var(--grey-t);margin-top:4px;min-width:70px"><div style="height:6px;border-radius:3px;width:${pct}%;background:${i.stock <= i.reorder_level ? "#B86A00" : "var(--green)"}"></div></div></td>
+        <td class="num"><b>${amt(i.stock, i.unit)}</b><div style="height:6px;border-radius:3px;background:var(--grey-t);margin-top:4px;min-width:70px"><div style="height:6px;border-radius:3px;width:${pct}%;background:${i.stock <= i.reorder_level ? "var(--amber-dot)" : "var(--green)"}"></div></div></td>
         <td class="num">${amt(i.reorder_level, i.unit)}</td><td class="num">${amt(i.daily_use, i.unit)}</td><td class="num">${i.days_left == null ? "–" : num(i.days_left) + " days"}</td><td class="num">${amt(i.usual_amount, i.unit)}</td>
         <td>${pill(st[0], st[1])}${i.incoming.length ? `<div class="small mute" style="margin-top:4px">${i.incoming.map(x => `${amt(x.amount, x.unit)} · ${esc(x.order_id)} · ${esc(niceDate(x.delivery_date))}`).join("<br>")}</div>` : ""}
-          ${i.open_request ? `<div class="small" style="margin-top:4px"><a href="#/requests/${esc(i.open_request)}">Open ${esc(i.open_request)}</a></div>` : ""}</td>
-        <td class="small">${i.used_by.length} dish${i.used_by.length === 1 ? "" : "es"}<div class="mute">${i.used_by.slice(0, 3).map(d => esc(d.name.split(" (")[0])).join(", ")}${i.used_by.length > 3 ? ", …" : ""}</div></td></tr>`; }).join("")}
+          ${i.open_request ? `<div class="small" style="margin-top:4px"><a href="#/requests/${esc(i.open_request)}">${i.open_request_note ? esc(i.open_request_note) : "Open " + esc(i.open_request)}</a></div>` : ""}</td>
+        <td class="small">${i.used_by.length} dish${i.used_by.length === 1 ? "" : "es"}<div class="mute">${i.used_by.slice(0, 3).map(d => esc(d.name.split(" (")[0])).join(", ")}${i.used_by.length > 3 ? ", …" : ""}</div></td>
+        <td><button class="btn" data-edit-ing="${esc(i.item_id)}">Edit</button></td></tr>
+        <tr hidden data-ing-panel="${esc(i.item_id)}"><td colspan="9" style="background:var(--soft)"></td></tr>`; }).join("")}
       </tbody></table></div></div>
-    <div class="card stack" style="gap:12px"><div class="row between"><h2>Menu</h2><span class="small mute">${k.dishes.length} dishes · ${k.dishes.reduce((a, d) => a + d.portions_per_day, 0)} portions a day</span></div>
-      ${k.dishes.map(d => `<div class="rulecard"><div class="row between"><b>${esc(d.name)}</b><span class="small mute">${num(d.portions_per_day)} portions a day</span></div>
-        <div class="small" style="color:var(--ink2)">${d.ingredients.map(g => { const ing = k.ingredients.find(x => x.item_id === g.item_id); return `${esc(ing ? ing.name : g.item_id)} ${num(g.amount * 1000)} ${ing && ing.unit === "L" ? "ml" : "g"}`; }).join(" · ")} <span class="mute">per portion</span></div></div>`).join("")}
+    <div class="card stack" style="gap:12px"><div class="row between"><h2>Weekly budgets</h2><span class="small mute">Routine orders are charged here by category; event orders go to the event's own budget</span></div>
+      <form id="budForm" class="stack" style="gap:10px">${bud.map(b => { const pct = b.limit ? Math.min(100, Math.round(b.spent / b.limit * 100)) : 0; const key = b.wallet.split(":")[1];
+        return `<div class="row" style="gap:12px"><b style="flex:0 0 130px">${esc(key[0].toUpperCase() + key.slice(1))}</b>
+          <div style="flex:1 1 200px;height:10px;border-radius:5px;background:var(--grey-t);overflow:hidden"><div style="height:10px;width:${pct}%;background:${b.left < 0 ? "var(--red)" : "var(--green)"}"></div></div>
+          <span class="small" style="flex:0 0 170px">${eur(b.spent)} used · ${eur(b.left)} left</span>
+          <label class="small">of € <input type="number" name="${esc(key)}" min="0" step="any" value="${b.limit}" style="width:110px"></label></div>`; }).join("")}
+        <div class="row"><button class="btn">Save budgets</button><span class="small mute">Shown to the approver before every order. Changes are logged.</span></div></form></div>
+    <div class="card stack" style="gap:12px" id="menuCard"><div class="row between"><h2>Menu</h2><div class="row" style="gap:10px"><span class="small mute">${k.dishes.length} dishes · ${k.dishes.reduce((a, d) => a + d.portions_per_day, 0)} portions a day</span><button class="btn primary" id="addDishBtn">+ Add a dish</button></div></div>
+      <div id="newDishBox"></div>
+      ${k.dishes.map(d => `<div class="rulecard" data-dish-card="${esc(d.dish_id)}"><div class="row between"><div><b>${esc(d.name)}</b> <span class="small mute">${esc(d.course || "main")} · ${num(d.portions_per_day)} portions a day</span></div>
+          <div class="row" style="gap:8px"><button class="btn" data-edit-dish="${esc(d.dish_id)}">Edit</button><button class="btn danger" data-remove-dish="${esc(d.dish_id)}">Remove</button></div></div>
+        <div class="small" style="color:var(--ink2)">${d.ingredients.map(g => { const ing = k.ingredients.find(x => x.item_id === g.item_id); return `${esc(ing ? ing.name : g.item_id)} ${num(g.amount * 1000)} ${ing && ing.unit === "L" ? "ml" : "g"}`; }).join(" · ")} <span class="mute">per portion</span></div>
+        <div data-dish-slot></div></div>`).join("")}
+      <div class="small mute">Changing recipes or portions changes daily use, so reorder points move too. Every change is in the audit log.</div>
     </div></div>`;
+  // ---- menu editing
+  const saveDish = async (el) => { const by = me(); if (!by) return; const d = readDish(el);
+    if (!d.name) return toast("Give the dish a name."); if (!d.ingredients.length) return toast("Add at least one ingredient with an amount.");
+    try { await api("/api/kitchen/dishes", { body: { ...d, by } }); toast(d.dish_id ? "Dish saved." : "Dish added to the menu."); viewKitchen(); } catch (err) { toast(err.message); } };
+  const wireEditor = (box) => { const el = box.querySelector("[data-dish-ed]");
+    el.querySelector("[data-save-dish]").onclick = () => saveDish(el); el.querySelector("[data-cancel-dish]").onclick = () => { box.innerHTML = ""; }; };
+  $("#addDishBtn").onclick = () => { const box = $("#newDishBox"); box.innerHTML = dishEditor(k, { course: "main", portions_per_day: 0 }, { perDay: true, save: true }); wireEditor(box); box.querySelector("input").focus(); };
+  $("#view").querySelectorAll("[data-edit-dish]").forEach(b => b.onclick = () => { const d = k.dishes.find(x => x.dish_id === b.dataset.editDish);
+    const box = b.closest("[data-dish-card]").querySelector("[data-dish-slot]"); box.innerHTML = dishEditor(k, d, { perDay: true, save: true }); wireEditor(box); });
+  $("#view").querySelectorAll("[data-remove-dish]").forEach(b => b.onclick = async () => { const by = me(); if (!by) return;
+    const d = k.dishes.find(x => x.dish_id === b.dataset.removeDish); if (!confirm(`Remove "${d.name}" from the menu? Daily use and reorder points change with it.`)) return;
+    try { await api(`/api/kitchen/dishes/${d.dish_id}/remove`, { body: { by } }); toast("Dish removed."); viewKitchen(); } catch (err) { toast(err.message); } });
+  // ---- ingredient editing (one place for an ingredient shared by several dishes)
+  const CATS_B = ["dairy", "dry goods", "fresh produce", "fish & meat"];
+  const productPicker = (unit) => `<div class="stack" style="gap:8px"><div class="row" style="gap:8px"><input type="search" name="p_q" placeholder="Search Valio Aimo products, e.g. shrimp" style="flex:1 1 260px">
+      <button type="button" class="btn" data-find>Search</button></div><div data-results class="stack" style="gap:6px"></div><input type="hidden" name="p_id"></div>`;
+  const wirePicker = (box, unitOf) => { const run = async () => { const q = box.querySelector("[name=p_q]").value.trim(); if (q.length < 2) return toast("Type at least 2 letters.");
+      const out = box.querySelector("[data-results]"); out.innerHTML = `<span class="small mute">Searching and asking Valio Aimo for prices…</span>`;
+      try { const r = await api(`/api/kitchen/find-products?q=${encodeURIComponent(q)}&unit=${unitOf()}`);
+        out.innerHTML = r.length ? r.map((x, n) => `<label class="row" style="gap:8px;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--card)"><input type="radio" name="p_pick" value="${esc(x.product_id)}" ${n === 0 && x.orderable ? "checked" : ""}>
+          <span style="flex:1"><b>${esc(x.name)}</b> <span class="small mute">${esc(x.product_id)} · ${esc(x.brand || "no brand")} · ${num(x.per_pack)} ${unitOf() === "KG" ? "kg" : "L"} a pack</span></span>
+          <span class="small">${x.orderable ? `${eur(x.price_per)}/${unitOf() === "KG" ? "kg" : "L"} · stock ${esc(x.stock ?? "?")}` : `<span style="color:var(--red)">not orderable now</span>`}</span></label>`).join("")
+          : `<span class="small mute">Nothing found with a known size in ${unitOf() === "KG" ? "kg" : "litres"}. Try other words.</span>`; }
+      catch (err) { out.innerHTML = `<div class="problem">${esc(err.message)}</div>`; } };
+    box.querySelector("[data-find]").onclick = run; box.querySelector("[name=p_q]").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); run(); } }); };
+  $("#addIngBtn").onclick = () => { const box = $("#newIngBox");
+    box.innerHTML = `<form class="stack" style="gap:10px;padding:12px;margin:0 8px 8px;border:1px dashed var(--line2);border-radius:12px">
+      <div class="form" style="padding:0;background:none"><label>Name<input type="text" name="i_name" required placeholder="e.g. Shrimps"></label>
+        <label>Unit<select name="i_unit"><option value="KG">kg</option><option value="L">litres</option></select></label>
+        <label>Budget<select name="i_cat">${CATS_B.map(c => `<option>${c}</option>`).join("")}</select></label>
+        <label>Usual order<input type="number" name="i_usual" min="0.1" step="any" required></label><label>Reorder at<input type="number" name="i_level" min="0" step="any" required></label>
+        <label>In stock now<input type="number" name="i_stock" min="0" step="any" value="0"></label></div>
+      <div class="small" style="font-weight:600">Which Valio Aimo product to order</div>${productPicker()}
+      <div class="row"><button class="btn primary">Add ingredient</button><button type="button" class="btn" data-cancel-ing>Cancel</button></div></form>`;
+    const form = box.querySelector("form"); wirePicker(form, () => form.i_unit.value);
+    form.querySelector("[data-cancel-ing]").onclick = () => { box.innerHTML = ""; };
+    form.onsubmit = async e => { e.preventDefault(); const by = me(); if (!by) return; const pick = form.querySelector("[name=p_pick]:checked");
+      if (!pick) return toast("Search and choose the Valio Aimo product first.");
+      try { await api("/api/kitchen/ingredients", { body: { by, name: form.i_name.value, unit: form.i_unit.value, category: form.i_cat.value, usual_product: pick.value,
+          usual_amount: parseFloat(form.i_usual.value), reorder_level: parseFloat(form.i_level.value), stock: parseFloat(form.i_stock.value || "0") } });
+        toast("Ingredient added. Use it in a dish on the menu or in an event."); viewKitchen(); } catch (err) { toast(err.message); } };
+    form.i_name.focus(); };
+  $("#view").querySelectorAll("[data-edit-ing]").forEach(b => b.onclick = () => {
+    const i = k.ingredients.find(x => x.item_id === b.dataset.editIng), row = $(`[data-ing-panel="${CSS.escape(i.item_id)}"]`), cell = row.firstElementChild;
+    if (!row.hidden) { row.hidden = true; return; } row.hidden = false; const u = i.unit === "L" ? "ml" : "g", uu2 = i.unit === "KG" ? "kg" : "L";
+    cell.innerHTML = `<form class="stack" style="gap:12px;padding:8px">
+      <div class="form" style="padding:0;background:none"><label>Usual order (${uu2})<input type="number" name="i_usual" min="0.1" step="any" value="${i.usual_amount}"></label>
+        <label>Reorder at (${uu2})<input type="number" name="i_level" min="0" step="any" value="${i.reorder_level}"></label>
+        <label>Budget<select name="i_cat">${CATS_B.map(c => `<option ${c === i.category ? "selected" : ""}>${c}</option>`).join("")}</select></label></div>
+      ${i.used_by.length ? `<div><div class="small" style="font-weight:600;margin-bottom:6px">Amount per portion in each dish (${u}) · ${num(i.daily_use)} ${uu2} a day in total</div>
+        <div class="form" style="padding:0;background:none">${i.used_by.map(d => `<label>${esc(d.name.split(" (")[0])} <span class="mute">(${num(d.portions_per_day)} a day)</span><input type="number" min="1" step="any" data-amt="${esc(d.dish_id)}" value="${+(d.amount * 1000).toFixed(1)}"></label>`).join("")}</div></div>` : `<div class="small mute">Not used in any dish yet.</div>`}
+      <details><summary style="cursor:pointer" class="small">Change the Valio Aimo product (now ${esc(i.usual_product_name || i.usual_product)})</summary><div style="margin-top:8px">${productPicker()}</div></details>
+      <div class="row"><button class="btn primary">Save</button>${i.used_by.length ? "" : `<button type="button" class="btn danger" data-del-ing-item>Remove ingredient</button>`}</div></form>`;
+    const form = cell.querySelector("form"); wirePicker(form, () => i.unit);
+    const delB = form.querySelector("[data-del-ing-item]"); if (delB) delB.onclick = async () => { const by = me(); if (!by) return; if (!confirm(`Remove ${i.name}?`)) return;
+      try { await api(`/api/kitchen/ingredients/${i.item_id}/remove`, { body: { by } }); toast("Ingredient removed."); viewKitchen(); } catch (err) { toast(err.message); } };
+    form.onsubmit = async e => { e.preventDefault(); const by = me(); if (!by) return; const pick = form.querySelector("[name=p_pick]:checked");
+      try { await api("/api/kitchen/ingredients", { body: { by, item_id: i.item_id, usual_amount: parseFloat(form.i_usual.value), reorder_level: parseFloat(form.i_level.value),
+          category: form.i_cat.value, usual_product: pick ? pick.value : undefined } });
+        const amounts = {}; form.querySelectorAll("[data-amt]").forEach(x => { amounts[x.dataset.amt] = parseFloat(x.value) / 1000; });
+        if (Object.keys(amounts).length) await api(`/api/kitchen/ingredients/${i.item_id}/amounts`, { body: { by, amounts } });
+        toast(`${i.name} saved.`); viewKitchen(); } catch (err) { toast(err.message); } };
+  });
+  $("#budForm").onsubmit = async e => { e.preventDefault(); const by = me(); if (!by) return;
+    const weekly = {}; new FormData(e.target).forEach((v, key) => { weekly[key] = parseFloat(v); });
+    try { await api("/api/budgets", { method: "PUT", body: { weekly, by } }); toast("Budgets saved."); viewKitchen(); } catch (err) { toast(err.message); } };
   $("#simDay").onclick = async e => { e.target.disabled = true; e.target.textContent = "Serving…";
     try { const r = await api("/api/kitchen/simulate-day", { body: {} }); await loadRequests();
       const sent = r.restock.sent, sk = r.restock.skipped;
@@ -576,11 +812,11 @@ async function viewLog(params) {
       const a = await api("/api/log/ask", { body: { question: q } });
       box.innerHTML = `<div class="diff"><div class="row between"><span class="label" style="color:var(--blue)">Answer · by ${esc(a.answered_by)}</span><span class="small mute">${esc(a.scope)}</span></div>
         <div style="font-size:16px;font-weight:500">${esc(a.answer)}</div>
-        ${a.points.map(p => `<div class="row" style="background:#fff;border-radius:10px;padding:10px 12px;gap:6px 14px;align-items:baseline">
+        ${a.points.map(p => `<div class="row" style="background:var(--card);border-radius:10px;padding:10px 12px;gap:6px 14px;align-items:baseline">
           <a href="#/log?request_id=${esc(p.request_id)}" style="font-weight:700;white-space:nowrap">${esc(niceTime(p.time))}</a><span class="small mute">${esc(p.request_id)} · line ${esc(p.line_id)}</span>
           <span style="flex:1 1 320px">${esc(p.text)}</span></div>`).join("")}
         ${a.cannot_tell ? `<div class="small" style="color:var(--ink2)">${esc(a.cannot_tell)}</div>` : ""}
-        ${a.lines.length ? `<details ${a.points.length ? "" : "open"}><summary style="cursor:pointer;font-weight:600">The ${a.lines.length} log lines behind this</summary><div style="overflow-x:auto;margin-top:8px"><table style="background:#fff;min-width:700px">
+        ${a.lines.length ? `<details ${a.points.length ? "" : "open"}><summary style="cursor:pointer;font-weight:600">The ${a.lines.length} log lines behind this</summary><div style="overflow-x:auto;margin-top:8px"><table style="background:var(--card);min-width:700px">
           ${a.lines.map(e => `<tr><td class="mute" style="white-space:nowrap">${esc(niceTime(e.time))}</td><td style="white-space:nowrap">${esc(e.request_id || "–")}</td><td><b>${esc(e.step)}</b></td><td>${esc(e.message)}</td></tr>`).join("")}</table></div></details>` : ""}
         <div class="small mute">Answers only use what is in the log. Every point links to the exact line it comes from.</div></div>`;
     } catch (e) { box.innerHTML = `<div class="problem">${esc(e.message)}</div>`; }
@@ -671,6 +907,11 @@ async function viewRules() {
       <div class="row"><button class="btn primary" id="yamlPreview">Preview change</button></div><div id="yamlBox"></div></div></details>
     ${RULES.default_yaml ? `<div class="card stack" style="gap:12px"><div class="row between"><div><b>Restore the default rules</b><div class="small mute">Puts back the original rulebook (the one the demo scenarios expect). You see what changes first.</div></div>
       <button class="btn" id="restoreBtn">Preview restore</button></div><div id="restoreBox"></div></div>` : ""}
+    <div class="card stack" style="gap:12px;border-color:var(--red-b)"><h2>Start over</h2>
+      <div class="mute">Puts everything back as if the app was opened for the first time: default rules, menu, kitchen stock and budgets; no requests, orders or events.
+        The audit log is started fresh, with one line saying who did it.</div>
+      <label class="row small" style="gap:8px"><input type="checkbox" id="withHistory"> Add the 3 weeks of example history (for trying "Ask the log")</label>
+      <div><button class="btn danger" id="resetAll">Reset everything</button></div></div>
     <div class="card stack" style="gap:12px"><h2>Change history</h2>${changes.length ? changes.map(c => `<div class="rulecard"><div class="row between"><div><b>${esc(c.change_id)}</b> · ${esc(niceTime(c.time))} · by ${esc(c.by)} <span class="pill t-grey">${esc(c.source)}</span></div>
       <button class="btn" data-undo="${esc(c.change_id)}">Undo this change</button></div>${c.diff.map(d => `<div class="small"><b>${esc(d.change)} ${esc(d.rule_id)}</b>${d.before ? `<div class="mute">Before: ${esc(d.before)}</div>` : ""}${d.after ? `<div>After: ${esc(d.after)}</div>` : ""}</div>`).join("")}</div>`).join("")
       : `<div class="mute">No rule changes yet.</div>`}</div></div>`;
@@ -703,6 +944,11 @@ async function viewRules() {
     $("#addType").onchange = draw; draw(); box.scrollIntoView({ behavior: "smooth", block: "nearest" });
   };
   if ($("#restoreBtn")) $("#restoreBtn").onclick = () => previewAndApply($("#restoreBox"), { text: RULES.default_yaml }, "restore defaults");
+  $("#resetAll").onclick = async () => { const by = me(); if (!by) return;
+    const t = prompt("This deletes all requests, orders, events and rule changes, and starts a new audit log. It can't be undone.\n\nType RESET to confirm.");
+    if (t !== "RESET") return toast("Nothing was reset.");
+    try { await api("/api/admin/reset", { body: { by, confirm: "RESET", with_history: $("#withHistory").checked } }); FILTER = "approval"; toast("Everything is back to the defaults."); location.hash = "#/new"; route(); }
+    catch (e) { toast(e.message); } };
   $("#yamlPreview").onclick = () => previewAndApply($("#yamlBox"), { text: $("#yaml").value }, "text");
   v.querySelectorAll("[data-undo]").forEach(b => b.onclick = async () => { const by = me(); if (!by) return; b.disabled = true;
     try { await api(`/api/rules/changes/${b.dataset.undo}/undo`, { body: { by } }); toast("Change undone."); viewRules(); } catch (e) { toast(e.message); b.disabled = false; } });

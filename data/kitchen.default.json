@@ -840,5 +840,13 @@
    ],
    "course": "breakfast"
   }
- ]
+ ],
+ "budgets": {
+  "weekly": {
+   "dairy": 4000,
+   "dry goods": 1500,
+   "fresh produce": 1500,
+   "fish & meat": 4500
+  }
+ }
 }
