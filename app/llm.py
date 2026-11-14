@@ -85,8 +85,11 @@ def generate_json(system, user, timeout=20):
     except (KeyError, IndexError, ValueError, TypeError):
         _state["last_error"] = "Gemini's answer was not valid JSON"
         raise LLMError(_state["last_error"])
+    if isinstance(data, list) and len(data) == 1 and isinstance(data[0], dict):
+        data = data[0]  # Gemini sometimes wraps the object in a list
     if not isinstance(data, dict):
-        raise LLMError("Gemini's answer was not a JSON object")
+        _state["last_error"] = "Gemini's answer was not a JSON object"
+        raise LLMError(_state["last_error"])
     _state["last_error"] = None
     if len(_cache) > 300:
         _cache.clear()

@@ -50,7 +50,8 @@
       "464398": 1000
      }
     }
-   ]
+   ],
+   "recipe_swaps": []
   },
   {
    "item_id": "butter",
@@ -70,7 +71,8 @@
    "reorder_level": 11.5,
    "stock": 29,
    "lead_days": 2,
-   "category": "dairy"
+   "category": "dairy",
+   "recipe_swaps": []
   },
   {
    "item_id": "cooking-cream",
@@ -94,7 +96,21 @@
    "reorder_level": 15.0,
    "stock": 34,
    "lead_days": 2,
-   "category": "dairy"
+   "category": "dairy",
+   "recipe_swaps": [
+    {
+     "product_id": "465193",
+     "name": "Whipping cream (lactose free)",
+     "dishes": [
+      "salmon-soup",
+      "chicken-penne",
+      "chicken-stew",
+      "carrot-soup"
+     ],
+     "pre_approved": true,
+     "note": "Richer than cooking cream; use 3 parts whipping cream to 1 part milk for the same result. Same brand."
+    }
+   ]
   },
   {
    "item_id": "eggs",
@@ -115,7 +131,8 @@
    "reorder_level": 34,
    "stock": 68,
    "lead_days": 2,
-   "category": "dairy"
+   "category": "dairy",
+   "recipe_swaps": []
   },
   {
    "item_id": "cheese",
@@ -136,7 +153,8 @@
    "reorder_level": 5.5,
    "stock": 14.0,
    "lead_days": 2,
-   "category": "dairy"
+   "category": "dairy",
+   "recipe_swaps": []
   },
   {
    "item_id": "wheat-flour",
@@ -157,7 +175,8 @@
    "reorder_level": 4.5,
    "stock": 17.5,
    "lead_days": 2,
-   "category": "dry goods"
+   "category": "dry goods",
+   "recipe_swaps": []
   },
   {
    "item_id": "arborio-rice",
@@ -178,7 +197,18 @@
    "reorder_level": 3.5,
    "stock": 10.5,
    "lead_days": 2,
-   "category": "dry goods"
+   "category": "dry goods",
+   "recipe_swaps": [
+    {
+     "product_id": "476015",
+     "name": "Carnaroli risotto rice",
+     "dishes": [
+      "mushroom-risotto"
+     ],
+     "pre_approved": true,
+     "note": "Also a risotto rice: slightly firmer grain, same cooking time and liquid. Many chefs prefer it."
+    }
+   ]
   },
   {
    "item_id": "penne",
@@ -197,7 +227,28 @@
    "reorder_level": 13.5,
    "stock": 17.5,
    "lead_days": 2,
-   "category": "dry goods"
+   "category": "dry goods",
+   "recipe_swaps": [
+    {
+     "product_id": "471450",
+     "name": "Penne rigate",
+     "dishes": [
+      "chicken-penne",
+      "beef-pasta-bake"
+     ],
+     "pre_approved": true,
+     "note": "Same shape with ridges, holds sauce even better. Same cooking time."
+    },
+    {
+     "product_id": "462863",
+     "name": "Macaroni",
+     "dishes": [
+      "beef-pasta-bake"
+     ],
+     "pre_approved": false,
+     "note": "Fine in the pasta bake, but holds less sauce in chicken penne. Changes how the dish looks, so the chef decides."
+    }
+   ]
   },
   {
    "item_id": "crushed-tomato",
@@ -219,7 +270,8 @@
    "reorder_level": 17.5,
    "stock": 35,
    "lead_days": 2,
-   "category": "dry goods"
+   "category": "dry goods",
+   "recipe_swaps": []
   },
   {
    "item_id": "oat-flakes",
@@ -240,7 +292,8 @@
    "reorder_level": 18.0,
    "stock": 40,
    "lead_days": 2,
-   "category": "dry goods"
+   "category": "dry goods",
+   "recipe_swaps": []
   },
   {
    "item_id": "lingonberry-jam",
@@ -261,7 +314,8 @@
    "reorder_level": 14.0,
    "stock": 28,
    "lead_days": 2,
-   "category": "dry goods"
+   "category": "dry goods",
+   "recipe_swaps": []
   },
   {
    "item_id": "potato",
@@ -282,7 +336,8 @@
    "reorder_level": 59,
    "stock": 118,
    "lead_days": 2,
-   "category": "fresh produce"
+   "category": "fresh produce",
+   "recipe_swaps": []
   },
   {
    "item_id": "onion",
@@ -303,7 +358,8 @@
    "reorder_level": 10.5,
    "stock": 27,
    "lead_days": 2,
-   "category": "fresh produce"
+   "category": "fresh produce",
+   "recipe_swaps": []
   },
   {
    "item_id": "carrot",
@@ -324,7 +380,8 @@
    "reorder_level": 13.0,
    "stock": 17.5,
    "lead_days": 2,
-   "category": "fresh produce"
+   "category": "fresh produce",
+   "recipe_swaps": []
   },
   {
    "item_id": "mushroom",
@@ -345,7 +402,18 @@
    "reorder_level": 7.0,
    "stock": 14.0,
    "lead_days": 2,
-   "category": "fresh produce"
+   "category": "fresh produce",
+   "recipe_swaps": [
+    {
+     "product_id": "472026",
+     "name": "Sliced champignons (preserved)",
+     "dishes": [
+      "chicken-stew"
+     ],
+     "pre_approved": false,
+     "note": "OK in the stew, but softer and milder than fresh mushrooms; not recommended for the risotto."
+    }
+   ]
   },
   {
    "item_id": "salmon",
@@ -366,7 +434,19 @@
    "reorder_level": 17.5,
    "stock": 21,
    "lead_days": 2,
-   "category": "fish & meat"
+   "category": "fish & meat",
+   "recipe_swaps": [
+    {
+     "product_id": "462016",
+     "name": "Rainbow trout fillet",
+     "dishes": [
+      "salmon-soup",
+      "baked-salmon"
+     ],
+     "pre_approved": false,
+     "note": "Closest swap: similar fat and texture, cooks the same way in soup and in the oven. Milder taste and a little pinker. A different fish on a fish dish, so the chef decides."
+    }
+   ]
   },
   {
    "item_id": "chicken",
@@ -387,7 +467,19 @@
    "reorder_level": 16.0,
    "stock": 32,
    "lead_days": 2,
-   "category": "fish & meat"
+   "category": "fish & meat",
+   "recipe_swaps": [
+    {
+     "product_id": "467814",
+     "name": "Boneless chicken thigh",
+     "dishes": [
+      "chicken-penne",
+      "chicken-stew"
+     ],
+     "pre_approved": true,
+     "note": "Juicier and more forgiving than breast in stew and pasta sauce; darker meat. Cut the same size and cook a few minutes longer."
+    }
+   ]
   },
   {
    "item_id": "minced-beef",
@@ -408,7 +500,19 @@
    "reorder_level": 20.0,
    "stock": 45,
    "lead_days": 2,
-   "category": "fish & meat"
+   "category": "fish & meat",
+   "recipe_swaps": [
+    {
+     "product_id": "475632",
+     "name": "Beef-pork minced meat",
+     "dishes": [
+      "meatballs",
+      "beef-pasta-bake"
+     ],
+     "pre_approved": false,
+     "note": "Works in meatballs and the pasta bake: softer and a little fattier. Not suitable for guests who don't eat pork, so the chef decides."
+    }
+   ]
   }
  ],
  "dishes": [
@@ -441,7 +545,8 @@
      "item_id": "butter",
      "amount": 0.01
     }
-   ]
+   ],
+   "course": "main"
   },
   {
    "dish_id": "meatballs",
@@ -476,7 +581,8 @@
      "item_id": "lingonberry-jam",
      "amount": 0.03
     }
-   ]
+   ],
+   "course": "main"
   },
   {
    "dish_id": "chicken-penne",
@@ -507,7 +613,8 @@
      "item_id": "cheese",
      "amount": 0.02
     }
-   ]
+   ],
+   "course": "main"
   },
   {
    "dish_id": "mushroom-risotto",
@@ -534,7 +641,8 @@
      "item_id": "cheese",
      "amount": 0.03
     }
-   ]
+   ],
+   "course": "main"
   },
   {
    "dish_id": "beef-pasta-bake",
@@ -573,7 +681,8 @@
      "item_id": "butter",
      "amount": 0.008
     }
-   ]
+   ],
+   "course": "main"
   },
   {
    "dish_id": "baked-salmon",
@@ -596,7 +705,8 @@
      "item_id": "butter",
      "amount": 0.015
     }
-   ]
+   ],
+   "course": "main"
   },
   {
    "dish_id": "chicken-stew",
@@ -627,7 +737,8 @@
      "item_id": "wheat-flour",
      "amount": 0.005
     }
-   ]
+   ],
+   "course": "main"
   },
   {
    "dish_id": "oat-porridge",
@@ -650,7 +761,8 @@
      "item_id": "butter",
      "amount": 0.005
     }
-   ]
+   ],
+   "course": "breakfast"
   },
   {
    "dish_id": "pannukakku",
@@ -677,7 +789,8 @@
      "item_id": "lingonberry-jam",
      "amount": 0.04
     }
-   ]
+   ],
+   "course": "dessert"
   },
   {
    "dish_id": "carrot-soup",
@@ -704,7 +817,8 @@
      "item_id": "butter",
      "amount": 0.008
     }
-   ]
+   ],
+   "course": "main"
   },
   {
    "dish_id": "breakfast-buffet",
@@ -723,7 +837,8 @@
      "item_id": "butter",
      "amount": 0.01
     }
-   ]
+   ],
+   "course": "breakfast"
   }
  ]
 }

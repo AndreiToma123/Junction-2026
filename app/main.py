@@ -7,7 +7,7 @@ from typing import List, Optional
 from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel, Field
 
-from . import agent, ai, aimo, catalog, config, kitchen, log, orders, rule_edit, store
+from . import agent, ai, aimo, catalog, config, events, kitchen, log, orders, rule_edit, store
 
 app = FastAPI(
     title="Trusted Trade Agent: buying agent backend",
@@ -100,8 +100,10 @@ def new_request(req: BuyRequest):
 
 
 @app.get("/api/requests")
-def list_requests():
-    return store.all_records()
+def list_requests(full: bool = False):
+    """All requests, newest last. Light versions unless ?full=true (open one request for everything)."""
+    recs = store.all_records()
+    return recs if full else [store.summary(r) for r in recs]
 
 
 @app.get("/api/requests/{rid}")
@@ -125,15 +127,66 @@ def decide(rid: str, d: Decision):
         raise HTTPException(409, str(e))
 
 
+class ByWhom(BaseModel):
+    by: str = Field(..., min_length=1)
+
+
+@app.post("/api/requests/{rid}/usual-only")
+def usual_only(rid: str, body: ByWhom):
+    """Order only what Valio Aimo has of the usual product (a new request, checked by all the rules)."""
+    try:
+        return agent.usual_only(rid, body.by)
+    except ValueError as e:
+        raise HTTPException(409, str(e))
+
+
+@app.get("/api/requests/{rid}/substitutes")
+def request_substitutes(rid: str):
+    """Recipe-compatible substitutes for a kitchen ingredient that could not be (fully) ordered."""
+    from . import substitutes
+    rec = store.get(rid)
+    req = (rec or {}).get("parsed") or {}
+    if not req.get("item_id") or not req.get("amount") or not req.get("deadline"):
+        raise HTTPException(409, "Substitutes are only for the kitchen's own ingredients, with an amount and a date.")
+    try:
+        return substitutes.for_request(rec)
+    except (ValueError, aimo.AimoError) as e:
+        raise HTTPException(409, str(e))
+
+
+class SubstitutePick(BaseModel):
+    product_id: str
+    by: str = Field(..., min_length=1)
+
+
+@app.post("/api/requests/{rid}/substitute")
+def order_substitute(rid: str, body: SubstitutePick):
+    try:
+        return agent.order_substitute(rid, body.product_id, body.by)
+    except ValueError as e:
+        raise HTTPException(409, str(e))
+
+
+@app.post("/api/requests/{rid}/cancel")
+def cancel_request(rid: str, body: ByWhom):
+    """Cancel a request that is waiting, or a mock order that has not been delivered yet."""
+    try:
+        return agent.cancel(rid, body.by)
+    except (ValueError, orders.OrderError) as e:
+        raise HTTPException(409, str(e))
+
+
 class BuyerAnswer(BaseModel):
     confirm: bool = False
     new_amount: Optional[float] = None
+    new_deadline: Optional[str] = Field(None, description="YYYY-MM-DD")
+    new_unit: Optional[str] = Field(None, pattern="^(L|KG)$")
 
 
 @app.post("/api/requests/{rid}/answer")
 def answer(rid: str, a: BuyerAnswer):
     try:
-        return agent.answer(rid, confirm=a.confirm, new_amount=a.new_amount)
+        return agent.answer(rid, confirm=a.confirm, new_amount=a.new_amount, new_deadline=a.new_deadline, new_unit=a.new_unit)
     except ValueError as e:
         raise HTTPException(409, str(e))
 
@@ -280,6 +333,74 @@ def kitchen_check():
 def kitchen_receive():
     """Mock: all orders on their way arrive now."""
     return kitchen.receive_deliveries()
+
+
+# ---------------------------------------------------------------- last-minute events
+
+class EventText(BaseModel):
+    text: str = Field(..., min_length=1, max_length=500)
+
+
+@app.post("/api/events/read")
+def read_event(body: EventText):
+    """Read '40 extra guests on Monday: salmon soup and meatballs' into date, guests and dishes (to check on a form)."""
+    return events.read_description(body.text)
+
+
+class EventDish(BaseModel):
+    dish_id: str
+    portions: int = Field(..., gt=0, le=5000)
+
+
+class NewEvent(BaseModel):
+    name: str = "Event"
+    date: str = Field(..., examples=["2026-11-16"])
+    dishes: List[EventDish]
+    by: str = Field(..., min_length=1)
+    scenario: Optional[str] = None
+
+
+@app.post("/api/events")
+def new_event(body: NewEvent):
+    try:
+        return events.plan(body.name, body.date, [d.model_dump() for d in body.dishes], body.by, scenario=body.scenario)
+    except ValueError as e:
+        raise HTTPException(422, str(e))
+
+
+@app.get("/api/events")
+def list_events():
+    return [events.view(e["id"]) for e in events.all_events()][::-1]
+
+
+@app.get("/api/events/{eid}")
+def get_event(eid: str):
+    ev = events.view(eid)
+    if not ev:
+        raise HTTPException(404, "Unknown event")
+    return ev
+
+
+@app.get("/api/events/{eid}/fixes/{item_id}")
+def event_fixes(eid: str, item_id: str):
+    try:
+        return events.fixes(eid, item_id)
+    except (ValueError, aimo.AimoError) as e:
+        raise HTTPException(409, str(e))
+
+
+class DishSwap(BaseModel):
+    from_dish: str
+    to_dish: str
+    by: str = Field(..., min_length=1)
+
+
+@app.post("/api/events/{eid}/swap-dish")
+def event_swap_dish(eid: str, body: DishSwap):
+    try:
+        return events.swap_dish(eid, body.from_dish, body.to_dish, body.by)
+    except ValueError as e:
+        raise HTTPException(409, str(e))
 
 
 # ---------------------------------------------------------------- for the dashboard

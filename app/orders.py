@@ -79,3 +79,19 @@ def place_order(lines, delivery_date, placed_by, request_id=None, note=None):
         with open(config.ORDERS_FILE, "a", encoding="utf-8") as f:
             f.write(json.dumps(order, ensure_ascii=False) + "\n")
     return order
+
+
+def cancel_order(order_id, by):
+    """Mark a mock order as cancelled (the line stays in the file; only its status changes)."""
+    with _lock:
+        all_orders = _all()
+        o = next((x for x in all_orders if x["order_id"] == order_id), None)
+        if not o:
+            raise OrderError(f"No order {order_id}")
+        o["status"] = "cancelled (mock)"
+        o["cancelled_by"] = by
+        o["cancelled_at"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
+        with open(config.ORDERS_FILE, "w", encoding="utf-8") as f:
+            for x in all_orders:
+                f.write(json.dumps(x, ensure_ascii=False) + "\n")
+    return o

@@ -2,7 +2,7 @@
 
 Junction 2026 · Valio Aimo "Trusted Trade Agents" · final submission **Sunday 15 Nov, 10:00**
 
-Last updated: Sat 14 Nov 2026, late afternoon.
+Last updated: Sat 14 Nov 2026, evening.
 
 ---
 
@@ -28,9 +28,17 @@ Everything in the original build plan is done and tested with live Valio Aimo da
 |---|---|---|
 | B1 | Re-check price and stock at approval (story 6) | ✅ Done |
 | B2 | Menu (11 dishes), 18 ingredients, kitchen stock, automatic restock with duplicate guard, Kitchen screen, kg support | ✅ Done |
-| B3 | Menu editing: edit / add / remove dishes, shared-ingredient view, rules for new ingredients | ⬜ Next |
-| B4 | Wallets: recurring budgets per category, event wallets (charged by purpose) | ⬜ |
-| B5 | "Order what is available now" (partial order) with "restock date unknown" | ⬜ First to cut |
+| B3 | Menu editing: edit / add / remove dishes, shared-ingredient view, rules for new ingredients | ⏸ Paused (14 Nov) |
+| B4 | Wallets: recurring budgets per category, event wallets (charged by purpose) | ⏸ Paused |
+| B5 | "Order what is available now" (partial order) | ✅ Done as "Order only the usual product" |
+
+### Challenge scenarios (agreed 14 Nov, evening)
+
+| Scenario | What works |
+|---|---|
+| **Last-minute event** | Events tab: describe the booking, check the form, plan. Needs vs. what the kitchen can spare, orders the rest through the rules, flags what can't arrive in time, offers recipe-aware product substitutes or a dish change from stock. |
+| **Supplier stock-out** | When the usual product is short (e.g. salmon: 43 kg at Aimo vs 60 kg needed), the request shows recipe-compatible substitutes for the missing part with the trade-off, or "Order only the usual product". Pre-approved swaps are ordered by the agent alone. |
+| Need → recipe → order, proactive selling, drift detection | Not started |
 
 Tests: 9 rule cases, rule-editing tests, 31 AI safety checks, 4 scenarios. All pass. Test scripts
 run in a sandbox and can't touch real data.
@@ -46,7 +54,7 @@ run in a sandbox and can't touch real data.
 
 ## 2. Decisions so far (short version)
 
-Full list with reasons: [DECISIONS.md](DECISIONS.md) (34 decisions).
+Full list with reasons: [DECISIONS.md](DECISIONS.md) (41 decisions).
 
 **Scope and data**
 - Ordering is our own mock order service; nothing is sent to Aimo (1).

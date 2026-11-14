@@ -99,6 +99,7 @@ tr.hist td{background:#FCFCFA;color:var(--ink2)}
   <div class="tabs" id="tabs">
     <a href="#/new" data-tab="new">New request</a>
     <a href="#/requests" data-tab="requests">Requests <span class="badge" id="badge" hidden>0</span></a>
+    <a href="#/events" data-tab="events">Events</a>
     <a href="#/kitchen" data-tab="kitchen">Kitchen</a>
     <a href="#/log" data-tab="log">Audit log</a>
     <a href="#/rules" data-tab="rules">Rules</a>
@@ -136,7 +137,7 @@ api("/api/ai/status").then(a => { const el = $("#aiPill"); el.textContent = a.ge
 
 const STATUS = {
   needs_approval: ["Needs approval", "t-approve"], ask_buyer: ["Needs your answer", "t-ask"], ordered: ["Ordered", "t-ok"],
-  rejected: ["Rejected", "t-bad"], cannot_fulfil: ["Can't be done", "t-bad"]
+  rejected: ["Rejected", "t-bad"], cannot_fulfil: ["Can't be done", "t-bad"], cancelled: ["Cancelled", "t-grey"]
 };
 const RESULT = { pass: ["Passed", "t-ok"], approve: ["Needs approval", "t-approve"], ask: ["Ask buyer", "t-ask"], blocked: ["Can't be used", "t-bad"] };
 const pill = (text, cls) => `<span class="pill ${cls}">${esc(text)}</span>`;
@@ -161,6 +162,16 @@ function stockText(l) {
   return "–";
 }
 function answerButtons(r) {
+  if (r.ask_kind === "missing" && (r.ask_fields || []).length) {
+    const f = r.ask_fields, id = esc(r.id);
+    const tomorrow = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+    return `<form class="row" data-fill-form="${id}" style="gap:10px;align-items:flex-end">
+      ${f.includes("amount") ? `<label class="small" style="font-weight:600">How much<br><input type="number" name="amount" min="0.1" step="any" style="width:120px" required></label>` : ""}
+      ${f.includes("unit") || (f.includes("amount") && !(r.parsed || {}).unit) ? `<label class="small" style="font-weight:600">Unit<br><select name="unit"><option value="KG">kg</option><option value="L">litres</option></select></label>` : ""}
+      ${f.includes("deadline") ? `<label class="small" style="font-weight:600">Needed by<br><input type="date" name="deadline" min="${tomorrow}" value="${(r.parsed || {}).deadline || ""}" required></label>` : ""}
+      ${f.includes("product") ? `<a class="btn" href="#/new?text=${encodeURIComponent(r.text || "")}">Say which product</a>` : `<button class="btn primary">Continue</button>`}
+    </form>`;
+  }
   if (r.ask_kind === "understanding") return `<button class="btn primary" data-answer="${esc(r.id)}" data-confirm="1">Yes, that's right</button>
     <a class="btn" href="#/new?text=${encodeURIComponent(r.text || "")}">No, let me rewrite it</a>`;
   const a1 = (r.request_checks || []).find(c => c.rule === "A1" && c.result === "ask" && c.facts?.usual);
@@ -184,6 +195,7 @@ function outcomeBanner(r, withLink) {
     ${withLink ? `<a class="btn primary" href="#/requests/${esc(r.id)}">Open to approve or reject</a>` : ""}</div>`; }
   if (r.status === "ask_buyer") return `<div class="banner t-ask"><div><div class="label" style="color:inherit">The agent needs your answer · nothing ordered</div>
     <h3>${esc(r.question)}</h3></div><div class="row">${answerButtons(r)}</div></div>`;
+  if (r.status === "cancelled") return `<div class="banner t-grey"><div><div class="label" style="color:inherit">Cancelled</div><h3>Cancelled by ${esc(r.decided_by)}.</h3></div>${link}</div>`;
   if (r.status === "rejected") return `<div class="banner t-bad"><div><div class="label" style="color:inherit">Rejected</div>
     <h3>Rejected by ${esc(r.decided_by)}. Nothing was ordered.</h3></div>${link}</div>`;
   return `<div class="banner t-bad"><div><div class="label" style="color:inherit">Can't be done · nothing ordered</div>
@@ -213,6 +225,26 @@ async function doAnswer(btn) {
   catch (e) { toast(e.message); btn.disabled = false; }
 }
 document.addEventListener("click", e => { const b = e.target.closest("[data-answer]"); if (b) doAnswer(b); });
+document.addEventListener("submit", async e => {
+  const form = e.target.closest("[data-fill-form]"); if (!form) return;
+  e.preventDefault(); const id = form.dataset.fillForm, fd = new FormData(form), body = {};
+  if (fd.get("amount")) body.new_amount = parseFloat(fd.get("amount"));
+  if (fd.get("unit")) body.new_unit = fd.get("unit");
+  if (fd.get("deadline")) body.new_deadline = fd.get("deadline");
+  const btn = form.querySelector("button"); if (btn) { btn.disabled = true; btn.textContent = "Working…"; }
+  try { const r = await api(`/api/requests/${id}/answer`, { body }); await loadRequests(); FILTER = "all";
+    if (CURRENT === "new") showRun(r); else { location.hash = "#/requests/" + r.id; if (CURRENT === "requests") route(); } }
+  catch (err) { toast(err.message); if (btn) { btn.disabled = false; btn.textContent = "Continue"; } }
+});
+async function personAction(btn, path, msg) {
+  const by = me(); if (!by) return; btn.disabled = true; const old = btn.textContent; btn.textContent = "Working…";
+  try { const r = await api(path, { body: { by } }); await loadRequests(); FILTER = "all"; toast(msg(r)); location.hash = "#/requests/" + r.id; if (CURRENT === "requests") route(); }
+  catch (err) { toast(err.message); btn.disabled = false; btn.textContent = old; }
+}
+document.addEventListener("click", e => {
+  const u = e.target.closest("[data-usual-only]"); if (u) return personAction(u, `/api/requests/${u.dataset.usualOnly}/usual-only`, r => `New request ${r.id}: ${(STATUS[r.status] || [r.status])[0].toLowerCase()}.`);
+  const c = e.target.closest("[data-cancel-req]"); if (c) return personAction(c, `/api/requests/${c.dataset.cancelReq}/cancel`, r => `${r.id} cancelled. Nothing more will be ordered for it.`);
+});
 
 // ---------- screen 1: new request
 async function viewNew(params) {
@@ -268,6 +300,7 @@ async function viewRequests(params, id) {
   await loadRequests();
   const shown = REQS.filter(r => FILTER === "all" || needsAction(r));
   let cur = REQS.find(r => r.id === id) || shown[0] || REQS[0];
+  if (cur) cur = await api("/api/requests/" + encodeURIComponent(cur.id));  // the full record, only for the one on screen
   const list = shown.length ? shown : [];
   $("#view").innerHTML = `<div class="stack">
     <div class="row between"><h1>Requests</h1><div class="row" style="gap:8px">
@@ -283,7 +316,7 @@ async function viewRequests(params, id) {
   $("#view").querySelectorAll("[data-filter]").forEach(b => b.onclick = () => { FILTER = b.dataset.filter; viewRequests(params, null); });
   $("#view").querySelectorAll("[data-open]").forEach(b => b.onclick = () => { location.hash = "#/requests/" + b.dataset.open; });
   $("#view").querySelectorAll("[data-decide]").forEach(b => b.onclick = async () => {
-    const by = me(); if (!by) return; b.disabled = true;
+    const by = me(); if (!by) return; b.disabled = true; b.textContent = b.dataset.decide === "approve" ? "Re-checking with Valio Aimo…" : "Rejecting…";
     try { const r = await api(`/api/requests/${cur.id}/decision`, { body: { decision: b.dataset.decide, by } }); FILTER = "all"; await viewRequests(params, cur.id); window.scrollTo(0, 0);
       if (r.notice) toast(r.notice.kind === "ok" ? "Approved and ordered. Price and stock re-checked: unchanged." : r.notice.kind === "changed" ? "The price changed. Nothing was ordered. Please look again." : "This can no longer be ordered. Nothing was ordered."); }
     catch (e) { toast(e.message); b.disabled = false; }
@@ -296,6 +329,7 @@ function headline(r) {
   if (r.status === "needs_approval") return o.results.filter(x => x.result === "approve").map(x => x.name).join(", ");
   if (r.status === "ask_buyer") return "Waiting for the buyer's answer";
   if (r.status === "rejected") return "Rejected by " + r.decided_by;
+  if (r.status === "cancelled") return "Cancelled by " + r.decided_by;
   return "No usable option";
 }
 function tile(k, v, sub, tone) { return `<div class="tile ${tone || ""}"><span class="label">${esc(k)}</span><b>${esc(v)}</b>${sub ? `<span class="small" style="color:var(--ink2)">${esc(sub)}</span>` : ""}</div>`; }
@@ -309,6 +343,7 @@ function detail(r) {
   else if (r.status === "ask_buyer") tiles = tile("Decision needed", "Buyer must answer", "", "ask") + tile("Reason", problems.map(p => p.rule + " - " + p.name).join(" · "), r.question, "ask");
   else if (r.status === "ordered") tiles = tile("Decision needed", "None", r.decided_by ? "Approved by " + r.decided_by : "Ordered automatically", "ok") + tile("Order", r.order_id, "Mock order, demo only", "ok");
   else if (r.status === "rejected") tiles = tile("Decision", "Rejected", "By " + r.decided_by + ". Nothing was ordered.", "bad");
+  else if (r.status === "cancelled") tiles = tile("Decision", "Cancelled", "By " + r.decided_by + (r.order_id ? ". Mock order " + r.order_id + " cancelled." : ". Nothing was ordered."), "bad");
   else tiles = tile("Result", "Can't be done", r.reason, "bad");
   if (o) tiles += tile("Total incl. tax", eur(o.total_with_tax), limit != null ? "Limit " + eur(limit) : "") + tile("Delivery", niceDate(o.lines[0].available_date), cut ? "Order by " + niceTime(cut) : "")
     + tile("Rules", `${passed.length} passed` + (problems.length ? ` · ${problems.length} ${r.status === "ordered" ? "approved by a person" : "not"}` : ""), "") + tile("Why this option", o.kind === "split" ? "Split order" : "Single product", r.why_chosen || "");
@@ -327,15 +362,27 @@ function detail(r) {
     </div></section>`;
   const alts = (r.alternatives_detail || []).length ? `<div class="box"><b class="small">Other options considered</b><ul>${r.alternatives_detail.map(a =>
       `<li>${a.lines.map(l => `${num(l.quantity)} × ${esc(l.name)} (${esc(l.product_id)})`).join(" + ")}: ${eur(a.total_with_tax)}. ${esc(a.outcome === "auto_order" ? "Usable, but ranked lower." : a.note)}</li>`).join("")}</ul></div>` : "";
+  const usualLine = o && o.lines.find(l => l.role === "usual product");
+  const canUsualOnly = (r.parsed || {}).item_id && !r.replaced_by && (
+    (["needs_approval", "rejected"].includes(r.status) && o && o.lines.length > 1 && usualLine) ||
+    (r.status === "cannot_fulfil" && (r.blocked_by || []).some(b => b.rule === "B4")));
+  const usualOnlyBtn = canUsualOnly ? `<button class="btn big" data-usual-only="${esc(r.id)}">Order only the usual product${usualLine ? ` (${num(usualLine.litres)} ${esc(usualLine.unit === "KG" ? "kg" : usualLine.unit)} available)` : " (as much as is available)"}</button>` : "";
+  const cancelBtn = ["needs_approval", "ask_buyer"].includes(r.status) ? `<button class="btn danger" data-cancel-req="${esc(r.id)}">Cancel request</button>`
+    : r.status === "ordered" ? `<button class="btn danger" data-cancel-req="${esc(r.id)}">Cancel order ${esc(r.order_id)}</button>` : "";
   let actions = "";
   if (r.status === "needs_approval") actions = `<div class="row" style="border-top:1px solid var(--line);padding-top:20px">
-      <button class="btn primary big" data-decide="approve">Approve &amp; place order</button><button class="btn big" data-decide="reject">Reject</button>
-      <span class="small mute">Your name (top right) is written to the audit log.</span></div>`;
+      <button class="btn primary big" data-decide="approve">Approve &amp; place order</button><button class="btn big" data-decide="reject">Reject</button>${usualOnlyBtn}
+      <span class="small mute" style="flex-basis:100%">Your name (top right) is written to the audit log.</span></div>`;
   else if (r.status === "ask_buyer") actions = `<div class="row" style="border-top:1px solid var(--line);padding-top:20px">${answerButtons(r)}</div>`;
+  else if (usualOnlyBtn) actions = `<div class="row" style="border-top:1px solid var(--line);padding-top:20px">${usualOnlyBtn}<span class="small mute">Starts a new request for the usual product only. It is checked by all the rules again.</span></div>`;
+  const links = [r.follow_up_of ? `Follow-up of <a href="#/requests/${esc(r.follow_up_of)}">${esc(r.follow_up_of)}</a>` : "",
+    r.replaced_by ? `Replaced by <a href="#/requests/${esc(r.replaced_by)}">${esc(r.replaced_by)}</a>` : ""].filter(Boolean).join(" · ");
+  if (links) actions = `<div class="small">${links}</div>` + actions;
+  if (cancelBtn) actions += `<div class="row" style="justify-content:flex-end">${cancelBtn}</div>`;
   return `<div class="card stack" style="gap:24px">
     <div class="row between" style="align-items:flex-start"><div><div class="small mute">${esc(r.id)} · received ${esc(niceTime(r.received_at))}${r.scenario ? " · demo scenario: " + esc(r.scenario) : ""}</div>
       ${r.current_request ? `<h2 style="margin-top:4px">${esc(r.current_request[0].toUpperCase() + r.current_request.slice(1))}</h2>
-        <div class="small mute" style="margin-top:4px">${r.amount_changed_from != null ? `Amount changed by the buyer (was ${num(r.amount_changed_from)}). ` : "Confirmed by the buyer. "}First written as: “${esc(r.text || "")}”</div>`
+        <div class="small mute" style="margin-top:4px">${r.amount_changed_from != null ? `Amount changed by the buyer (was ${num(r.amount_changed_from)}). ` : (r.parsed || {}).amount_reason === "everything available" ? "Amount = everything Valio Aimo can deliver of the usual product. " : "Confirmed by the buyer. "}First written as: “${esc(r.text || "")}”</div>`
         : r.origin === "auto" ? `<h2 style="margin-top:4px">${esc(r.text || "")}</h2>` : `<h2 style="margin-top:4px">“${esc(r.text || "")}”</h2>`}</div>${statusPill(r)}</div>
     ${r.trigger ? `<div class="small" style="background:var(--blue-t2);border-radius:10px;padding:10px 14px"><b>Sent automatically by the stock monitor.</b> ${esc(r.trigger)}</div>` : ""}
     ${r.notice ? `<div class="banner ${r.notice.kind === "ok" ? "t-ok" : r.notice.kind === "changed" ? "t-approve" : "t-bad"}" style="padding:14px 16px"><div><div class="label" style="color:inherit">${r.notice.kind === "ok" ? "Re-checked at approval" : r.notice.kind === "changed" ? "Price changed · please look again" : "Re-check failed"}</div>
@@ -344,8 +391,120 @@ function detail(r) {
       <span class="small mute"> · written by ${esc(r.summary.written_by)} from the rule results</span><div style="margin-top:4px;font-size:16px">${esc(r.summary.text)}</div></div>` : ""}
     <div class="tiles">${tiles}</div>${lines}${rules}
     ${actions}
+    ${(r.parsed || {}).item_id && ["needs_approval", "rejected", "cannot_fulfil"].includes(r.status) && !r.replaced_by
+      ? `<section class="stack" style="gap:10px;border-top:1px solid var(--line);padding-top:20px"><div class="row between"><h3 style="font-size:18px">Recipe-compatible substitutes</h3>
+        <button class="btn" data-load-subs="${esc(r.id)}">Show substitutes</button></div><div id="subsBox" class="small mute">Products that work in the same dishes, checked live with Valio Aimo. You choose; nothing is ordered until you do.</div></section>` : ""}
+    ${r.substitute_note ? `<div class="small" style="background:var(--blue-t2);border-radius:10px;padding:10px 14px"><b>Chef's note on this swap:</b> ${esc(r.substitute_note)}</div>` : ""}
+    ${r.event_id ? `<div class="small">Part of event <a href="#/events/${esc(r.event_id)}">${esc(r.event_id)}</a></div>` : ""}
     <details><summary style="cursor:pointer;font-weight:600;min-height:32px">What the agent did (${r.steps.length} steps) · <a href="#/log?request_id=${esc(r.id)}">open in audit log</a></summary><div style="margin-top:14px">${timeline(r.steps)}</div></details>
   </div>`;
+}
+
+// ---------- recipe-aware substitutes (stock-out and events)
+function subsHtml(s, rid) {
+  const u = s.unit === "KG" ? "kg" : s.unit;
+  const head = s.combine_with_usual ? `Valio Aimo can deliver ${num(s.usual_available)} ${u} of the usual product by ${esc(niceDate(s.deadline))}. These can cover the missing ${num(s.needed)} ${u}:`
+    : `These can replace ${num(s.needed)} ${u} of ${esc(s.name.toLowerCase())} by ${esc(niceDate(s.deadline))}:`;
+  const opts = s.options.map(o => `<div class="rulecard"><div class="row between" style="align-items:flex-start;gap:8px 16px">
+      <div style="flex:1 1 380px;min-width:0"><b>${esc(o.name)}</b> <span class="small mute">${esc(o.product_id)} · ${esc(o.brand || "no brand")}</span>
+        <div class="row" style="gap:6px;margin:4px 0">${pill(o.source, o.source === "chef's swap list" ? "t-ok" : o.source === "suggested by AI" ? "t-ask" : "t-grey")}
+          ${o.pre_approved ? pill("pre-approved: agent may order alone", "t-ok") : pill("chef decides", "t-approve")}${o.fit ? pill("fit: " + o.fit, "t-grey") : ""}</div>
+        <div style="color:var(--ink2)">${esc(o.note)}</div>
+        <div class="small mute" style="margin-top:4px">${num(o.amount)} ${u} · ${eur(o.total_with_tax)} incl. tax (${eur(o.price_per)}/${u}) · arrives ${esc(niceDate(o.available_date))} · ${o.stock_status === "known" ? num(o.stock_amount) + " in stock" : o.stock_status === "no_limit" ? "no stock limit" : "stock unknown"}</div></div>
+      ${rid ? `<button class="btn primary" data-pick-sub="${esc(o.product_id)}" data-rid="${esc(rid)}">Use this</button>` : ""}</div></div>`).join("");
+  const bad = s.not_usable.length ? `<div class="small mute">Checked but can't be used: ${s.not_usable.map(o => `${esc(o.name)} (${esc(o.why_not)})`).join("; ")}.</div>` : "";
+  return `<div class="stack" style="gap:10px"><div class="small mute">Picked by ${esc(s.picked_by)} · checked live with Valio Aimo</div>
+    ${s.options.length ? `<div>${head}</div>${opts}` : `<div class="problem" style="background:var(--grey-t);color:var(--ink)">No product substitute can arrive by ${esc(niceDate(s.deadline))}.</div>`}${bad}</div>`;
+}
+document.addEventListener("click", async e => {
+  const b = e.target.closest("[data-load-subs]");
+  if (b) { b.disabled = true; b.textContent = "Checking with Valio Aimo…"; const box = $("#subsBox");
+    try { box.innerHTML = subsHtml(await api(`/api/requests/${b.dataset.loadSubs}/substitutes`), b.dataset.loadSubs); box.classList.remove("mute", "small"); b.remove(); }
+    catch (err) { box.innerHTML = `<div class="problem">${esc(err.message)}</div>`; b.disabled = false; b.textContent = "Show substitutes"; } return; }
+  const p = e.target.closest("[data-pick-sub]");
+  if (p) { const by = me(); if (!by) return; p.disabled = true; p.textContent = "Ordering…";
+    try { const r = await api(`/api/requests/${p.dataset.rid}/substitute`, { body: { product_id: p.dataset.pickSub, by } }); await loadRequests(); FILTER = "all";
+      toast(`New request ${r.id}: ${(STATUS[r.status] || [r.status])[0].toLowerCase()}.`); location.hash = "#/requests/" + r.id; if (CURRENT === "requests") route(); }
+    catch (err) { toast(err.message); p.disabled = false; p.textContent = "Use this"; } }
+});
+
+// ---------- screen: events (last-minute bookings)
+const EV_STATE = { covered: ["From kitchen stock", "t-ok"], ordered: ["Ordered", "t-ok"], needs_approval: ["Needs approval", "t-approve"],
+  ask_buyer: ["Needs an answer", "t-ask"], cannot_fulfil: ["Can't be sourced in time", "t-bad"], rejected: ["Rejected", "t-bad"], cancelled: ["Cancelled", "t-grey"] };
+let EV_FORM = null;
+async function viewEvents(eid) {
+  const [list, k] = await Promise.all([api("/api/events"), api("/api/kitchen")]);
+  if (eid) return viewEvent(eid, k);
+  const tomorrow = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+  const f = EV_FORM || { name: "", date: "", guests: "", dishes: [] };
+  $("#view").innerHTML = `<div class="stack">
+    <div><h1>Events</h1><p class="mute" style="margin:4px 0 0">An unexpected booking? Say what's coming. The agent works out what the recipes need, uses what the kitchen can spare, orders the rest through the normal rules, and flags anything that can't arrive in time, with recipe-aware fixes.</p></div>
+    <div class="card stack" style="gap:14px">
+      <label for="evText" style="font-weight:600">Describe it</label>
+      <form class="row" id="evRead"><input type="text" id="evText" placeholder="e.g. 40 extra guests on Monday: salmon soup and meatballs" style="flex:1 1 360px;min-height:48px;font-size:16px">
+        <button class="btn big">Fill in the form</button></form>
+      <form id="evForm" class="stack" style="gap:12px">
+        <div class="form">
+          <label>Event name<input type="text" name="name" value="${esc(f.name)}" placeholder="e.g. Company dinner"></label>
+          <label>Date<input type="date" name="date" min="${tomorrow}" value="${esc(f.date || "")}" required></label>
+          <label>Guests (portions of each dish)<input type="number" name="guests" min="1" max="5000" value="${esc(f.guests || "")}" required></label>
+        </div>
+        <div class="small" style="font-weight:600">Dishes from your menu</div>
+        <div class="checks">${k.dishes.map(d => `<label class="row" style="gap:6px;min-height:36px;padding:0 10px;border:1px solid var(--line2);border-radius:999px"><input type="checkbox" name="dish" value="${esc(d.dish_id)}" ${f.dishes.includes(d.dish_id) ? "checked" : ""}> ${esc(d.name)}</label>`).join("")}</div>
+        <div class="row between"><span class="small mute" id="evReadBy">${f.read_by ? "Filled in by " + esc(f.read_by) + ". Check it before planning." : ""}</span><button class="btn primary big">Plan the event</button></div>
+      </form>
+      <div id="evResult"></div>
+    </div>
+    <div class="card stack" style="gap:10px"><h2>Planned events</h2>${list.length ? list.map(ev => `<a class="rulecard" style="text-decoration:none;color:inherit" href="#/events/${esc(ev.id)}"><div class="row between"><b>${esc(ev.id)} · ${esc(ev.name)} · ${esc(niceDate(ev.date))}</b>
+      <span class="row" style="gap:6px">${ev.summary.cannot_source ? pill(ev.summary.cannot_source + " can't be sourced", "t-bad") : ""}${ev.summary.waiting_for_person ? pill(ev.summary.waiting_for_person + " waiting", "t-approve") : ""}${pill(ev.summary.ordered + " ordered", "t-ok")}${pill(ev.summary.covered_from_stock + " from stock", "t-grey")}</span></div>
+      <div class="small mute">${ev.dishes.map(d => `${num(d.portions)} × ${esc(d.name)}`).join(" · ")}</div></a>`).join("") : `<div class="mute">No events yet.</div>`}</div></div>`;
+  $("#evRead").onsubmit = async e => { e.preventDefault(); const t = $("#evText").value.trim(); if (!t) return toast("Describe the event first.");
+    const b = e.target.querySelector("button"); b.disabled = true; b.textContent = "Reading…";
+    try { const r = await api("/api/events/read", { body: { text: t } }); EV_FORM = { name: t.slice(0, 60), date: r.date, guests: r.guests, dishes: r.dishes, read_by: r.read_by };
+      const missing = [!r.date && "the date", !r.guests && "the number of guests", !r.dishes.length && "the dishes"].filter(Boolean);
+      if (missing.length) toast("Please fill in " + missing.join(", ") + ". The agent does not guess.");
+      viewEvents(); } catch (err) { toast(err.message); b.disabled = false; b.textContent = "Fill in the form"; } };
+  $("#evForm").onsubmit = async e => { e.preventDefault(); const by = me(); if (!by) return; const fd = new FormData(e.target);
+    const dishes = fd.getAll("dish"), guests = parseInt(fd.get("guests"));
+    if (!dishes.length) return toast("Choose at least one dish.");
+    const b = e.target.querySelector(".btn.primary"); b.disabled = true; b.textContent = "Planning… asking Valio Aimo";
+    try { const ev = await api("/api/events", { body: { name: fd.get("name") || "Event", date: fd.get("date"), by, dishes: dishes.map(d => ({ dish_id: d, portions: guests })) } });
+      EV_FORM = null; await loadRequests(); location.hash = "#/events/" + ev.id; }
+    catch (err) { toast(err.message); b.disabled = false; b.textContent = "Plan the event"; } };
+}
+async function viewEvent(eid, k) {
+  const ev = await api("/api/events/" + encodeURIComponent(eid));
+  const u = x => x === "KG" ? "kg" : x;
+  const stuck = l => ["cannot_fulfil", "needs_approval", "rejected"].includes(l.status);
+  $("#view").innerHTML = `<div class="stack">
+    <div class="row between"><div><div class="small mute"><a href="#/events">Events</a> · ${esc(ev.id)} · planned by ${esc(ev.created_by)}</div><h1>${esc(ev.name)} · ${esc(niceDate(ev.date))}</h1>
+      <div class="mute">${ev.dishes.map(d => `${num(d.portions)} × ${esc(d.name)}`).join(" · ")}</div></div>
+      <div class="row" style="gap:6px">${ev.summary.cannot_source ? pill(ev.summary.cannot_source + " can't be sourced in time", "t-bad") : ""}${ev.summary.waiting_for_person ? pill(ev.summary.waiting_for_person + " waiting for a person", "t-approve") : ""}${pill(ev.summary.ordered + " ordered", "t-ok")}${pill(ev.summary.covered_from_stock + " from kitchen stock", "t-grey")}</div></div>
+    ${ev.changes.length ? `<div class="small" style="background:var(--blue-t2);border-radius:10px;padding:10px 14px">${ev.changes.map(c => `<b>Menu change</b> by ${esc(c.by)}: ${esc(c.change)}`).join("<br>")}</div>` : ""}
+    <div class="card" style="padding:8px"><div style="overflow-x:auto"><table style="min-width:900px"><thead><tr><th>Ingredient</th><th class="num">Event needs</th><th class="num">Kitchen can spare</th><th class="num">To order</th><th>Result</th><th></th></tr></thead><tbody>
+      ${ev.lines.map(l => { const st = EV_STATE[l.status] || [l.status, "t-grey"]; return `<tr><td><b>${esc(l.name)}</b><div class="small mute">${l.dishes.map(d => esc((k.dishes.find(x => x.dish_id === d) || {}).name || d)).join(", ")}</div></td>
+        <td class="num">${num(l.needed)} ${u(l.unit)}</td><td class="num" title="stock ${num(l.stock)} + arriving ${num(l.arriving)} − normal service ${num(l.normal_use)}">${num(l.spare)} ${u(l.unit)}</td>
+        <td class="num">${l.short > 0 ? `${num(l.to_order || l.short)} ${u(l.unit)}` : "–"}</td>
+        <td>${pill(st[0], st[1])}${l.order_id ? ` <span class="small mute">${esc(l.order_id)}</span>` : ""}${l.request_id ? `<div class="small"><a href="#/requests/${esc(l.request_id)}">${esc(l.request_id)}</a></div>` : ""}${stuck(l) && l.problem ? `<div class="small mute" style="max-width:360px">${esc(l.problem)}</div>` : ""}</td>
+        <td>${stuck(l) ? `<button class="btn" data-fix="${esc(l.item_id)}">Find a fix</button>` : ""}</td></tr>
+        <tr hidden data-fix-row="${esc(l.item_id)}"><td colspan="6" style="background:#FAFAF8"><div data-fix-box="${esc(l.item_id)}"></div></td></tr>`; }).join("")}
+      </tbody></table></div></div>
+    <p class="small mute" style="margin:0">"Kitchen can spare" = kitchen stock + deliveries arriving by the event − normal service until then (mock kitchen data). Every order went through the normal rules. Hover a number to see how it was worked out.</p></div>`;
+  $("#view").querySelectorAll("[data-fix]").forEach(b => b.onclick = async () => {
+    const id = b.dataset.fix, row = $(`[data-fix-row="${CSS.escape(id)}"]`), box = $(`[data-fix-box="${CSS.escape(id)}"]`);
+    row.hidden = false; b.disabled = true; b.textContent = "Checking…"; box.innerHTML = `<div class="mute" style="padding:8px">Looking for recipe-compatible fixes, checked live with Valio Aimo…</div>`;
+    try { const f = await api(`/api/events/${eid}/fixes/${id}`); const line = ev.lines.find(l => l.item_id === id);
+      const swaps = f.dish_swaps.map(d => `<div class="rulecard"><div class="row between"><div><b>Serve ${esc(d.name)} instead</b>
+          <div class="small" style="color:var(--ink2)">${d.from_stock_only ? `Can be made for ${num(d.portions)} from what the kitchen can spare: nothing to order.` : `Would still need: ${d.short.map(esc).join(", ")}.`}</div></div>
+          ${f.affected_dishes.map(a => `<button class="btn" data-swap-from="${esc(a.dish_id)}" data-swap-to="${esc(d.dish_id)}">Replace ${esc(a.name.split(" (")[0].split(" with ")[0])}</button>`).join("")}</div></div>`).join("");
+      box.innerHTML = `<div class="stack" style="gap:14px;padding:8px"><div><h3 style="font-size:17px;margin-bottom:6px">Use a different product</h3>${subsHtml(f, line.request_id)}</div>
+        ${swaps ? `<div><h3 style="font-size:17px;margin-bottom:6px">Or change the dish</h3><div class="stack" style="gap:8px">${swaps}</div></div>` : ""}</div>`;
+      box.querySelectorAll("[data-swap-from]").forEach(s => s.onclick = async () => { const by = me(); if (!by) return; s.disabled = true; s.textContent = "Re-planning…";
+        try { await api(`/api/events/${eid}/swap-dish`, { body: { from_dish: s.dataset.swapFrom, to_dish: s.dataset.swapTo, by } }); await loadRequests(); toast("Menu changed and re-planned."); viewEvent(eid, await api("/api/kitchen")); }
+        catch (err) { toast(err.message); s.disabled = false; } });
+      b.textContent = "Fix options shown"; }
+    catch (err) { box.innerHTML = `<div class="problem">${esc(err.message)}</div>`; b.disabled = false; b.textContent = "Find a fix"; }
+  });
 }
 
 // ---------- screen: kitchen (menu, stock, automatic restock)
@@ -560,6 +719,7 @@ async function route() {
     else if (CURRENT === "log") { await loadRequests(); await viewLog(params); }
     else if (CURRENT === "rules") { loadRequests(); await viewRules(); }
     else if (CURRENT === "kitchen") { loadRequests(); await viewKitchen(); }
+    else if (CURRENT === "events") { loadRequests(); await viewEvents(parts[1]); }
     else { loadRequests(); await viewNew(params); }
   } catch (e) { $("#view").innerHTML = `<div class="problem">Could not load this screen: ${esc(e.message)}</div>`; }
   window.scrollTo(0, 0);

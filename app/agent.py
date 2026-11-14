@@ -9,7 +9,7 @@ Acts in exactly one of four ways (worst rule result decides, see rules.py):
 Every step is recorded in record["steps"] as one plain-language line with its source.
 Every sentence is built from data or rule results; nothing is invented.
 """
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 
 from . import ai, aimo, catalog, demo, log, orders, rules, store
 
@@ -32,6 +32,49 @@ def _name(pid):
     return p["name_en"] or p["name_fi"]
 
 
+def _as_much_as_possible(rec, req, scenario):
+    """Work out the amount for 'as much as possible'. Returns a finished record if it has to ask, else None."""
+    item = rules.find_usual_item(req["item_id"])
+    pid, unit = item["usual_product"], item["unit"]
+    p = catalog.get(pid)
+    try:
+        q = demo.apply_stock_overrides(aimo.quote([pid], req["deadline"]), scenario)["products"].get(pid) or {}
+    except aimo.AimoError as e:
+        q = {}
+        _step(rec, "lookup", f"Could not ask Valio Aimo about {pid}: {e}", "Aimo API")
+    stock = _usable_stock_units(q) if q else 0
+    if q and q.get("deliverable") and q.get("available_date") and q["available_date"] > req["deadline"]:
+        stock = 0
+    per = catalog.content_per_sales_unit(p, unit)
+    name = p["name_en"] or p["name_fi"]
+    if stock is None:
+        question = (f"Valio Aimo reports no stock limit for {name} ({pid}), so 'as much as possible' has no number. "
+                    f"How much do you need? (Usual order: {rules.num(item['usual_amount'])} {unit.lower() if unit == 'KG' else unit}.)")
+    elif not stock or not per:
+        why = ("its order cut-off has passed" if q.get("cutoff_passed") else
+               "it can't be delivered by then" if q.get("deliverable") else "Valio Aimo gave no delivery date")
+        question = (f"None of the usual {name} ({pid}) can be ordered for {rules.nice_date(req['deadline'])}: {why}. "
+                    f"Tell me an amount and I will look for other products, or choose a later date.")
+    else:
+        units = rules.whole_steps_within(p, stock)
+        if req.get("max_amount"):  # follow-up: never more than was first asked for
+            units = min(units, rules.units_for(pid, req["max_amount"], unit))
+        req["amount"] = round(units * per, 3)
+        req["buyer_confirmed_amount"] = True  # the buyer asked for everything: not a typo
+        req["amount_reason"] = "everything available"
+        rec["current_request"] = (f"{rules.num(req['amount'])} {unit.lower() if unit == 'KG' else unit} of {item['name'].lower()} "
+                                  f"by {rules.nice_date(req['deadline'])} (everything available)")
+        _step(rec, "lookup", f"'As much as possible': Valio Aimo has {rules.num(stock)} {p['sales_unit']} of {name} ({pid}) "
+              f"for {rules.nice_date(req['deadline'])}" + (" (demo stock)" if q.get("demo_stock_override") else "")
+              + f". The agent will ask for {rules.num(req['amount'])} {unit}.", "Aimo API", amount=req["amount"])
+        return None
+    rec["request_checks"] = []
+    rec.update(status="ask_buyer", outcome="ask_buyer", options=[], chosen=None, ask_kind="missing", ask_fields=["amount"],
+               question=question)
+    _step(rec, "ask", f"Asked the buyer: {question}", "agent")
+    return _finish(rec)
+
+
 def _finish(rec):
     """Last thing on every path: write the short summary (from rule results only), then save."""
     rec["summary"] = ai.summarize(rec)
@@ -43,6 +86,10 @@ def _finish(rec):
 def _candidates(req):
     """Products that could fill the request, from the product file (no API calls)."""
     item = rules.find_usual_item(req.get("item_id")) if req.get("item_id") else None
+    if req.get("only_products"):  # a substitute the chef picked: order exactly this product
+        hits = [catalog.get(pid) for pid in req["only_products"] if catalog.get(pid)]
+        labels = item["search"].get("labels", []) if item else []
+        return item, [p for p in hits if catalog.content_per_sales_unit(p, req["unit"])], labels
     if item:
         s = item["search"]
         hits = catalog.search(s.get("words", ""), s.get("labels", []), s.get("category"), limit=200)
@@ -88,6 +135,8 @@ def _usable_stock_units(q):
 def _role(pid, usual):
     if usual and pid == usual["usual_product"]:
         return "usual product"
+    if usual and any(s["product_id"] == pid for s in usual.get("recipe_swaps", [])):
+        return "recipe swap"
     if usual and pid in (catalog.get(usual["usual_product"]) or {}).get("substitutes", []):
         return "official substitute"
     return "alternative"
@@ -185,6 +234,12 @@ def handle(text=None, parsed=None, scenario=None, today=None, record=None, origi
         return _finish(rec)
     rec.pop("ask_kind", None)
 
+    # "As much as possible": the amount = what Valio Aimo can deliver of the usual product by the deadline.
+    if req.get("as_much_as_possible") and req.get("amount") is None and req.get("deadline") and req.get("item_id"):
+        found = _as_much_as_possible(rec, req, scenario)
+        if found is not None:
+            return found
+
     # A: checks on the request itself
     req_results = rules.check_request(req)
     rec["request_checks"] = [r.to_dict() for r in req_results]
@@ -192,7 +247,11 @@ def handle(text=None, parsed=None, scenario=None, today=None, record=None, origi
         _step(rec, "rules", f"{r.rule} - {r.name}: {r.result}. {r.detail}", "rules.yaml")
     if rules.outcome(req_results) in ("ask_buyer", "blocked"):
         bad = [r for r in req_results if r.result != "pass"]
+        missing = next((r.facts.get("missing") for r in bad if r.rule == "A2" and r.facts.get("missing")), None)
+        if req.get("as_much_as_possible") and missing:
+            missing = [f for f in missing if f != "amount"]  # 'as much as possible' is the amount
         rec.update(status="ask_buyer", outcome="ask_buyer", options=[], chosen=None,
+                   ask_kind="missing" if missing else "size", ask_fields=missing or [],
                    question=" ".join(r.detail for r in bad))
         rec["not_checked"].insert(0, "Products, prices and stock: not looked up until the buyer answers")
         _step(rec, "ask", f"Asked the buyer: {rec['question']}", "agent")
@@ -385,13 +444,28 @@ def decide(rid, decision, by):
     return _finish(rec)
 
 
-def answer(rid, confirm=False, new_amount=None):
-    """The buyer answers a question (e.g. 'is 10,000 L right?')."""
+def answer(rid, confirm=False, new_amount=None, new_deadline=None, new_unit=None):
+    """The buyer answers a question: 'is 10,000 L right?', or fills in what was missing (amount, date)."""
     rec = store.get(rid)
     if not rec or rec.get("status") != "ask_buyer":
         raise ValueError(f"{rid} is not waiting for the buyer")
     req = dict(rec["parsed"])
+    if new_deadline:
+        try:
+            if date.fromisoformat(new_deadline) < date.today():
+                raise ValueError
+        except ValueError:
+            raise ValueError("The date must be today or later (YYYY-MM-DD).")
+        req["deadline"] = new_deadline
+        _step(rec, "answer", f"The buyer set the deadline to {rules.nice_date(new_deadline)}.", "buyer", actor="buyer")
+        if new_amount is None and not confirm:
+            confirm = None  # only the date was missing
+    if new_unit and not req.get("unit"):
+        req["unit"] = new_unit
+    if new_amount is not None and float(new_amount) <= 0:
+        raise ValueError("The amount must be more than 0.")
     if new_amount is not None:
+        req["as_much_as_possible"] = False
         req["amount"] = float(new_amount)
         # The buyer typed this amount themselves: that IS their confirmation. Never ask twice.
         req["buyer_confirmed_understanding"] = True
@@ -404,13 +478,108 @@ def answer(rid, confirm=False, new_amount=None):
     elif confirm:
         req["buyer_confirmed_amount"] = True
         _step(rec, "answer", f"The buyer confirmed {rules.num(req['amount'])} {req['unit']}.", "buyer", actor="buyer")
+    elif confirm is None:
+        pass
     else:
-        raise ValueError("give confirm=True or new_amount")
+        raise ValueError("give confirm=True, new_amount or new_deadline")
     rec["history"].append({"status": rec["status"], "question": rec.get("question")})
-    for k in ("question", "options", "chosen", "why_chosen", "alternatives", "alternatives_detail", "reason", "blocked_by"):
+    for k in ("question", "options", "chosen", "why_chosen", "alternatives", "alternatives_detail", "reason", "blocked_by",
+              "ask_kind", "ask_fields", "current_request"):
         rec.pop(k, None)
     req["parsed_by"] = rec["parsed"].get("parsed_by", "parser") + " + buyer answer"
     # What the request is NOW, in plain words (the dashboard shows this, with the original text below it).
-    rec["current_request"] = (f"{rules.num(req['amount'])} {req['unit']} of {(req.get('product') or 'product').lower()}"
+    if req.get("amount") is not None and req.get("unit"):
+        rec["current_request"] = (f"{rules.num(req['amount'])} {req['unit']} of {(req.get('product') or 'product').lower()}"
                               + (f" by {rules.nice_date(req['deadline'])}" if req.get("deadline") else ""))
     return handle(parsed=req, scenario=rec.get("scenario"), record=rec)
+
+
+# ---------------------------------------------------------------- follow-ups and cancelling
+
+def usual_only(rid, by):
+    """'Order only what is available of the usual product.' Starts a new request for everything
+    Valio Aimo has of the usual product by the same deadline (it goes through all the rules again).
+    If the original is still waiting for a decision, it is closed as replaced."""
+    rec = store.get(rid)
+    if not rec or not (rec.get("parsed") or {}).get("item_id"):
+        raise ValueError(f"{rid} is not about one of the kitchen's usual items")
+    if rec.get("status") not in ("needs_approval", "rejected", "cannot_fulfil"):
+        raise ValueError(f"{rid} is {rec.get('status')}; nothing to replace")
+    old = rec["parsed"]
+    if rec["status"] == "needs_approval":
+        rec.update(status="cancelled", outcome="cancelled", decided_by=by)
+        _step(rec, "decision", f"Closed by {by}: replaced by an order for only the usual product.", "dashboard", actor=f"person:{by}")
+        store.save(rec)
+    else:
+        _step(rec, "decision", f"{by} asked for only the usual product instead.", "dashboard", actor=f"person:{by}")
+        store.save(rec)
+    item = rules.find_usual_item(old["item_id"])
+    new = handle(text=f"Only the usual product, as much as is available (instead of {rid})",
+                 parsed={"product": old.get("product"), "item_id": old["item_id"], "amount": None, "unit": old.get("unit") or item["unit"],
+                         "deadline": old["deadline"], "as_much_as_possible": True, "max_amount": old.get("amount"),
+                         "parsed_by": f"follow-up of {rid} by {by}"},
+                 scenario=rec.get("scenario"), origin=rec.get("origin", "typed"))
+    new["follow_up_of"] = rid
+    rec["replaced_by"] = new["id"]
+    store.save(rec)
+    return store.save(new)
+
+
+def cancel(rid, by):
+    """A person cancels a request that is waiting, or a mock order that has not arrived yet."""
+    rec = store.get(rid)
+    if not rec:
+        raise ValueError(f"No request {rid}")
+    if rec.get("status") in ("needs_approval", "ask_buyer"):
+        rec.update(status="cancelled", outcome="cancelled", decided_by=by)
+        _step(rec, "decision", f"Cancelled by {by}. Nothing was ordered.", "dashboard", actor=f"person:{by}")
+        return _finish(rec)
+    if rec.get("status") == "ordered" and rec.get("order_id"):
+        from . import kitchen
+        if not kitchen.cancel_incoming(rec["order_id"]) and kitchen.was_delivered(rec["order_id"]):
+            raise ValueError(f"{rec['order_id']} has already been delivered, so it can't be cancelled.")
+        orders.cancel_order(rec["order_id"], by)
+        rec.update(status="cancelled", outcome="cancelled", decided_by=by)
+        _step(rec, "decision", f"Mock order {rec['order_id']} cancelled by {by} before delivery.", "dashboard", actor=f"person:{by}")
+        return _finish(rec)
+    raise ValueError(f"{rid} is {rec.get('status')} and can't be cancelled")
+
+
+def order_substitute(rid, product_id, by):
+    """The chef picks a recipe-compatible substitute for a request that could not be (fully) ordered.
+    Starts a new request for exactly that product, by the same deadline. All the rules still apply."""
+    from . import substitutes
+    rec = store.get(rid)
+    old = (rec or {}).get("parsed") or {}
+    if not rec or not old.get("item_id"):
+        raise ValueError(f"{rid} is not about one of the kitchen's ingredients")
+    if rec.get("status") not in ("needs_approval", "rejected", "cannot_fulfil"):
+        raise ValueError(f"{rid} is {rec.get('status')}; nothing to replace")
+    item = rules.find_usual_item(old["item_id"])
+    p = catalog.get(product_id)
+    if not p:
+        raise ValueError(f"Unknown product {product_id}")
+    swap = next((s for s in item.get("recipe_swaps", []) if s["product_id"] == product_id), None)
+    if rec["status"] == "needs_approval":
+        rec.update(status="cancelled", outcome="cancelled", decided_by=by)
+    _step(rec, "decision", f"{by} chose a substitute instead: {p['name_en'] or p['name_fi']} ({product_id})"
+          + (" from the chef's swap list" if swap else "") + ".", "dashboard", actor=f"person:{by}")
+    store.save(rec)
+    have = substitutes.usual_available(old["item_id"], old["deadline"], rec.get("scenario"))
+    combine = bool(have and 0 < have < old["amount"])  # use all of the usual product, the substitute fills the gap
+    products = [item["usual_product"], product_id] if combine else [product_id]
+    what = (f"{rules.num(have)} {old['unit'].lower() if old['unit'] == 'KG' else old['unit']} of the usual product + "
+            f"{p['name_en'] or p['name_fi']} for the rest") if combine else (p["name_en"] or p["name_fi"])
+    new = handle(text=f"Substitute for {item['name'].lower()}: {what} (instead of {rid})",
+                 parsed={"product": item["name"], "item_id": old["item_id"], "amount": old["amount"], "unit": old["unit"],
+                         "deadline": old["deadline"], "only_products": products, "substitute_for": old["item_id"],
+                         "person_approved_products": [product_id], "chosen_by": by,
+                         "buyer_confirmed_amount": True, "parsed_by": f"substitute chosen by {by}"},
+                 scenario=rec.get("scenario"), origin=rec.get("origin", "typed"))
+    new["follow_up_of"] = rid
+    new["substitute_note"] = swap["note"] if swap else None
+    if rec.get("event_id"):
+        new["event_id"] = rec["event_id"]
+    rec["replaced_by"] = new["id"]
+    store.save(rec)
+    return store.save(new)

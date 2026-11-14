@@ -109,7 +109,9 @@ def check_option(option, quote, req, required_labels):
     """Product rules for every line, then whole-order rules.
     Returns {"results", "outcome", "total_with_tax", "litres", "warnings"}."""
     usual = find_usual_item(req.get("item_id")) if req.get("item_id") else None
-    ctx = {"required_labels": required_labels, "usual_product": usual["usual_product"] if usual else None}
+    ctx = {"required_labels": required_labels, "usual_product": usual["usual_product"] if usual else None,
+           "approved_substitutes": [s["product_id"] for s in (usual or {}).get("recipe_swaps", []) if s.get("pre_approved")],
+           "chosen_by_person": {pid: req.get("chosen_by") for pid in req.get("person_approved_products", [])}}
     results = []
     for line in option["lines"]:
         q = quote["products"].get(line["product_id"])

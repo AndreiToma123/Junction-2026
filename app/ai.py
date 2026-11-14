@@ -51,14 +51,17 @@ def parse_request(text, today=None):
     if not llm.available():
         simple["parsed_by"] = "simple pattern reader (no Gemini key yet)"
         return simple
-    complete = all(simple.get(k) not in (None, "") for k in ("product", "amount", "unit", "deadline")) and simple.get("item_id")
+    complete = (all(simple.get(k) not in (None, "") for k in ("product", "unit", "deadline")) and simple.get("item_id")
+                and (simple.get("amount") is not None or simple.get("as_much_as_possible")))
     if complete and PARSE_MODE != "always":
         simple["parsed_by"] = "simple pattern reader (clear request, no AI needed)"
         return simple
     items = [{"item_id": i["item_id"], "name": i["name"], "aliases": i["aliases"]} for i in rules.usual_orders()["items"]]
     system = ("You read purchase requests for a professional kitchen and return JSON with exactly these keys: "
               "product (string or null), item_id (one of the given item ids, or null), amount (number or null), "
-              "unit ('L', 'KG' or null), deadline ('YYYY-MM-DD' or null). "
+              "unit ('L', 'KG' or null), deadline ('YYYY-MM-DD' or null), as_much_as_possible (true if the buyer asks for "
+              "as much as possible / everything available instead of an amount, else false). "
+              "Ignore repeated words and small typos (e.g. 'but Nov 16th' means 'by Nov 16th'). "
               "Use null for anything the text does not state. Never guess an amount or a date.")
     user = json.dumps({"today": today.isoformat(), "weekday": today.strftime("%A"),
                        "kitchen_usual_items": items, "request_text": text}, ensure_ascii=False)
@@ -93,8 +96,11 @@ def _check_parsed(g, text, today):
     product = g.get("product") if isinstance(g.get("product"), str) and g.get("product").strip() else None
     if item_id:
         product = rules.find_usual_item(item_id)["name"]
+    as_much = g.get("as_much_as_possible") is True and amount is None
+    if as_much and item_id and not unit:
+        unit = rules.find_usual_item(item_id)["unit"]
     out = {"product": product, "item_id": item_id, "amount": float(amount) if amount is not None else None,
-           "unit": unit, "deadline": deadline, "parsed_by": AI}
+           "unit": unit, "deadline": deadline, "as_much_as_possible": as_much, "parsed_by": AI}
     # The amount must be written in the text as digits. If Gemini worked it out from words
     # ("a thousand litres"), we keep it but the agent asks the buyer to confirm first.
     if amount is not None:

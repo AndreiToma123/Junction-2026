@@ -29,6 +29,18 @@ def get(rid):
     return json.loads(f.read_text(encoding="utf-8")) if f.exists() else None
 
 
+SUMMARY_DROP = ("steps", "history", "alternatives", "alternatives_detail", "not_checked", "request_checks")
+
+
+def summary(r):
+    """A light version of a record for lists: no step trail, and only the chosen option."""
+    out = {k: v for k, v in r.items() if k not in SUMMARY_DROP and k != "options"}
+    chosen = next((o for o in r.get("options") or [] if o["option_id"] == r.get("chosen")), None)
+    out["options"] = [chosen] if chosen else []
+    out["steps_count"] = len(r.get("steps") or [])
+    return out
+
+
 def all_records():
     if not DIR.exists():
         return []

@@ -36,9 +36,12 @@ RESULT_WORDS = {"approve": "needs approval", "ask": "ask the buyer", "blocked": 
 # ======================================================================= request scope
 
 def _check_clear_request(rule, req, ctx):
-    missing = [f for f in rule["settings"]["required_fields"] if req.get(f) in (None, "")]
+    missing = [f for f in rule["settings"]["required_fields"] if req.get(f) in (None, "")
+               and not (f == "amount" and req.get("as_much_as_possible"))]
     if missing:
-        return rule["result"], f"Missing from the request: {', '.join(missing)}. The agent does not guess.", {"missing": missing}
+        words = {"deadline": "the date it is needed by", "amount": "how much", "unit": "the unit (kg or litres)", "product": "which product"}
+        return rule["result"], ("Please tell me " + " and ".join(words.get(f, f) for f in missing)
+                                + ". The agent does not guess."), {"missing": missing}
     return "pass", "Product, amount, unit and deadline are all known.", {}
 
 
@@ -224,15 +227,21 @@ def _check_approved_brands(rule, option, quote, req, ctx):
     brands = _brands(option)
     # The kitchen's usual product for this item is always fine: it is their stated preference.
     usual = ctx.get("usual_product") if rule["settings"].get("usual_product_ok", True) else None
-    others = sorted({b or "no brand" for pid, b in brands.items() if b not in ok and pid != usual})
-    facts = {"brands": brands, "approved": ok, "usual_product": usual}
-    if not others and usual and any(pid == usual and b not in ok for pid, b in brands.items()):
-        return "pass", f"{usual} is the kitchen's usual product for this item.", facts
+    swaps = ctx.get("approved_substitutes") or [] if usual else []
+    chosen = ctx.get("chosen_by_person") or {}
+    fine = lambda pid, b: b in ok or pid == usual or pid in swaps or pid in chosen
+    others = sorted({b or "no brand" for pid, b in brands.items() if not fine(pid, b)})
+    facts = {"brands": brands, "approved": ok, "usual_product": usual, "pre_approved_swaps": swaps}
+    if not others and any(b not in ok for b in brands.values()):
+        why = [f"{pid} is the kitchen's usual product" if pid == usual else
+               f"{pid} was chosen as a substitute by {chosen[pid]}" if pid in chosen else f"{pid} is on the chef's pre-approved swap list"
+               for pid, b in brands.items() if b not in ok]
+        return "pass", "; ".join(why) + ".", facts
     if others:
         names = [f"{(catalog.get(pid) or {}).get('name_en') or pid} ({pid}, {b or 'no brand'})"
-                 for pid, b in brands.items() if b not in ok and pid != usual]
+                 for pid, b in brands.items() if not fine(pid, b)]
         return rule["result"], (f"{'; '.join(names)} {'is' if len(names) == 1 else 'are'} not "
-                                + ("the kitchen's usual product and not " if usual else "")
+                                + ("the kitchen's usual product, not a pre-approved swap and not " if usual else "")
                                 + f"an approved brand (approved: {', '.join(ok)})."), facts
     return "pass", f"{', '.join(sorted(set(brands.values())))}: approved.", facts
 

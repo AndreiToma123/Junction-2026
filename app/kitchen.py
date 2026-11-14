@@ -78,19 +78,28 @@ def used_by(item_id, doc=None):
             for d in doc["dishes"] for i in d["ingredients"] if i["item_id"] == item_id]
 
 
-def _open_request(item_id):
-    """A request for this ingredient that is still waiting for a person (approval or an answer)."""
+def _by_item(records=None):
+    """All requests grouped by ingredient, read from disk once."""
     from . import store
-    for r in store.all_records():
-        if (r.get("parsed") or {}).get("item_id") == item_id and r.get("status") in ("needs_approval", "ask_buyer"):
+    out = {}
+    for r in records if records is not None else store.all_records():
+        iid = (r.get("parsed") or {}).get("item_id")
+        if iid:
+            out.setdefault(iid, []).append(r)
+    return out
+
+
+def _open_request(item_id, grouped=None):
+    """A request for this ingredient that is still waiting for a person (approval or an answer)."""
+    for r in (grouped if grouped is not None else _by_item()).get(item_id, []):
+        if r.get("status") in ("needs_approval", "ask_buyer"):
             return r
     return None
 
 
-def _last_failed(item_id):
+def _last_failed(item_id, grouped=None):
     """The newest request for this ingredient, if the rules said it can't be done (not an API hiccup)."""
-    from . import store
-    mine = [r for r in store.all_records() if (r.get("parsed") or {}).get("item_id") == item_id]
+    mine = (grouped if grouped is not None else _by_item()).get(item_id, [])
     last = mine[-1] if mine else None
     return last if last and last.get("status") == "cannot_fulfil" and last.get("blocked_by") else None
 
@@ -98,12 +107,13 @@ def _last_failed(item_id):
 def overview():
     doc = load()
     use = daily_use(doc)
+    grouped = _by_item()
     rows = []
     for i in doc["ingredients"]:
         incoming = [x for x in doc["incoming"] if x["item_id"] == i["item_id"]]
-        waiting = _open_request(i["item_id"])
+        waiting = _open_request(i["item_id"], grouped)
         low = i["stock"] <= i["reorder_level"]
-        failed = _last_failed(i["item_id"]) if low and not incoming and not waiting else None
+        failed = _last_failed(i["item_id"], grouped) if low and not incoming and not waiting else None
         state = ("on_order" if incoming else "waiting_for_person" if waiting else "failed" if failed else "low" if low else "ok")
         p = catalog.get(i["usual_product"]) or {}
         d = use.get(i["item_id"], 0)
@@ -166,6 +176,19 @@ def add_incoming(item_id, amount, order_id, delivery_date, request_id=None):
         doc["incoming"].append({"item_id": item_id, "name": i["name"], "unit": i["unit"], "amount": round(amount, 2),
                                 "order_id": order_id, "delivery_date": delivery_date, "request_id": request_id})
         save(doc)
+
+
+def cancel_incoming(order_id):
+    with _lock:
+        doc = load()
+        before = len(doc["incoming"])
+        doc["incoming"] = [x for x in doc["incoming"] if x["order_id"] != order_id]
+        save(doc)
+        return len(doc["incoming"]) < before
+
+
+def was_delivered(order_id):
+    return any(e["step"] == "delivery" and (e.get("data") or {}).get("order_id") == order_id for e in log.read())
 
 
 def check_restock(today=None):

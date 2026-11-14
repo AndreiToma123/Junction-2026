@@ -62,7 +62,29 @@ Other checks you can run (they use a sandbox copy, so your data and rules are ne
 
 ---
 
-## The dashboard (4 screens)
+## The two challenge scenarios we focus on
+
+**Last-minute event.** On the **Events** tab, type "150 extra guests on Monday: salmon soup and meatballs".
+The agent fills in a form (you check it), works out what the recipes need, takes what the kitchen can
+spare, orders the rest through the normal rules, and flags anything that can't arrive in time. For those it
+offers recipe-aware fixes: a substitute that works in that dish, or a different dish from the same course
+that can be made from kitchen stock. You choose.
+
+**Supplier stock-out.** When the usual product runs short (Aimo has 43 kg of salmon, the kitchen needs 60),
+the request shows recipe-compatible substitutes for the missing part, with the trade-off in plain words
+("Rainbow trout: similar fat and texture, milder taste…"), or "Order only the usual product". Swaps the chef
+has pre-approved are ordered by the agent alone; everything else waits for the chef.
+
+Substitutes come from the chef's own swap list, or are picked by the AI from Aimo products that plain code has
+already checked (deliverable in time, in stock, priced). The AI never invents a product.
+
+```bash
+.venv/bin/python -m scripts.try_events     # 16 checks: dates, "as much as possible", stock-out, events (sandbox)
+```
+
+## The dashboard
+
+Screens: New request · Requests · Events · Kitchen · Audit log · Rules.
 
 1. **New request**: type what you need, or tap "Your usual". Watch the agent's steps, then a clear result.
 2. **Requests**: what needs action, with summary boxes (decision, reason, total, delivery), the order,
@@ -156,7 +178,7 @@ No proprietary formats: every file opens in a text editor.
 
 ## Assumptions
 
-All 34 decisions, with reasons, are in **[DECISIONS.md](DECISIONS.md)**. Progress and what could come next: **[roadmap.md](roadmap.md)**. The ones that matter most:
+All 41 decisions, with reasons, are in **[DECISIONS.md](DECISIONS.md)**. Progress and what could come next: **[roadmap.md](roadmap.md)**. The ones that matter most:
 
 - **Stock numbers.** `999999` on a supplier ("Terminal") product means *unknown* (documented by Aimo).
   `9999999999` and `666666666` on stocked products mean *no limit* (our reading, not documented).
