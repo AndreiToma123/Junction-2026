@@ -304,7 +304,8 @@ def download_log():
 
 @app.get("/api/ai/status")
 def ai_status():
-    return ai.status()
+    import os
+    return {**ai.status(), "demo_password_required": bool(os.getenv("DEMO_PASSWORD"))}
 
 
 class Question(BaseModel):
@@ -353,9 +354,18 @@ def kitchen_receive():
 
 # ---------------------------------------------------------------- clearing and resetting
 
+def _check_password(given):
+    """On a public demo, DEMO_PASSWORD (set on the server) protects the actions that affect every tester."""
+    import os
+    want = os.getenv("DEMO_PASSWORD")
+    if want and given != want:
+        raise HTTPException(403, "Wrong or missing demo password. Nothing was changed.")
+
+
 class ClearBody(BaseModel):
     by: str = Field(..., min_length=1)
     confirm: str = Field(..., description='Must be "CLEAR"')
+    password: Optional[str] = None
 
 
 @app.post("/api/admin/clear-requests")
@@ -363,6 +373,7 @@ def clear_requests(body: ClearBody):
     from . import admin
     if body.confirm != "CLEAR":
         raise HTTPException(422, 'Type CLEAR to confirm.')
+    _check_password(body.password)
     return admin.clear_requests(body.by)
 
 
@@ -370,6 +381,7 @@ class ResetBody(BaseModel):
     by: str = Field(..., min_length=1)
     confirm: str = Field(..., description='Must be "RESET"')
     with_history: bool = False
+    password: Optional[str] = None
 
 
 @app.post("/api/admin/reset")
@@ -377,6 +389,7 @@ def reset_everything(body: ResetBody):
     from . import admin
     if body.confirm != "RESET":
         raise HTTPException(422, 'Type RESET to confirm.')
+    _check_password(body.password)
     return admin.reset_all(body.by, body.with_history)
 
 

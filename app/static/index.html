@@ -39,6 +39,7 @@ main{padding:28px 0 64px}
 .label{font-size:12px;font-weight:600;color:var(--mute);text-transform:uppercase;letter-spacing:.05em}
 input[type=text],input[type=search],input[type=number],input[type=date],select,textarea{border:1px solid var(--line2);border-radius:10px;padding:0 12px;min-height:44px;background:var(--card);max-width:100%}
 textarea{padding:12px 14px;width:100%;resize:vertical}
+dialog::backdrop{background:rgba(10,12,15,.45)}
 input:focus,select:focus,textarea:focus,button:focus-visible,a:focus-visible{outline:3px solid var(--focus);outline-offset:1px}
 .btn{min-height:44px;padding:0 18px;border-radius:10px;border:1px solid var(--line2);background:var(--card);font-weight:600;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;color:var(--ink);white-space:nowrap}
 .btn.primary{background:var(--blue);border-color:var(--blue);color:var(--on-blue)}
@@ -156,7 +157,31 @@ try { meInput.value = localStorage.getItem("me") || ""; } catch (e) {}
 meInput.addEventListener("input", () => { try { localStorage.setItem("me", meInput.value); } catch (e) {} });
 function me() { const v = meInput.value.trim(); if (!v) { meInput.focus(); toast("Type your name first (top right). It goes into the audit log."); } return v; }
 
-api("/api/ai/status").then(a => { const el = $("#aiPill"); el.textContent = a.gemini ? "AI: Gemini" : "AI: simple mode"; el.className = "pill " + (a.gemini ? "t-ok" : "t-grey"); el.title = a.mode; }).catch(() => {});
+let NEEDS_PW = false;
+// One in-page dialog for actions that affect everyone: a word to type (any case) and, on the public demo, the password.
+function confirmDanger({ title, text, word, button }) {
+  return new Promise(resolve => {
+    const d = document.createElement("dialog");
+    d.style.cssText = "border:1px solid var(--line2);border-radius:16px;padding:0;max-width:460px;width:calc(100% - 32px);background:var(--card);color:var(--ink)";
+    d.innerHTML = `<form method="dialog" class="stack" style="gap:14px;padding:22px">
+      <h2 style="font-size:20px">${esc(title)}</h2><div class="mute" style="color:var(--ink2)">${esc(text)}</div>
+      <label class="small" style="font-weight:600">Type <b>${esc(word)}</b> to confirm<input type="text" name="w" autocomplete="off" style="width:100%;margin-top:4px"></label>
+      ${NEEDS_PW ? `<label class="small" style="font-weight:600">Demo password<input type="password" name="p" autocomplete="off" style="width:100%;margin-top:4px"></label>` : ""}
+      <div class="problem" data-err hidden></div>
+      <div class="row" style="justify-content:flex-end;gap:8px"><button type="button" class="btn" data-no>Cancel</button><button class="btn danger" value="ok">${esc(button)}</button></div></form>`;
+    document.body.appendChild(d);
+    const f = d.querySelector("form"), err = d.querySelector("[data-err]");
+    const done = v => { d.close(); d.remove(); resolve(v); };
+    d.querySelector("[data-no]").onclick = () => done(null);
+    d.addEventListener("cancel", () => done(null));
+    f.onsubmit = e => { e.preventDefault();
+      if (f.w.value.trim().toUpperCase() !== word) { err.textContent = `Type the word ${word} in the first box.`; err.hidden = false; f.w.focus(); return; }
+      if (NEEDS_PW && !f.p.value) { err.textContent = "Enter the demo password in the second box."; err.hidden = false; f.p.focus(); return; }
+      done({ password: NEEDS_PW ? f.p.value : null }); };
+    d.showModal(); f.w.focus();
+  });
+}
+api("/api/ai/status").then(a => { NEEDS_PW = !!a.demo_password_required; const el = $("#aiPill"); el.textContent = a.gemini ? "AI: Gemini" : "AI: simple mode"; el.className = "pill " + (a.gemini ? "t-ok" : "t-grey"); el.title = a.mode; }).catch(() => {});
 
 const STATUS = {
   needs_approval: ["Needs approval", "t-approve"], ask_buyer: ["Needs your answer", "t-ask"], ordered: ["Ordered", "t-ok"],
@@ -390,9 +415,10 @@ async function viewRequests(params, id) {
     if (location.hash !== "#/requests") location.hash = "#/requests"; else viewRequests(params, null); });
   $("#view").querySelectorAll("[data-open]").forEach(b => b.onclick = () => { location.hash = "#/requests/" + b.dataset.open; });
   $("#clearReqs").onclick = async () => { const by = me(); if (!by) return;
-    const t = prompt(`This removes all ${REQS.length} requests and all events from the lists. Orders already placed, kitchen stock, rules and the audit log stay.\n\nType CLEAR to confirm.`);
-    if (t !== "CLEAR") return toast("Nothing was cleared.");
-    try { const r = await api("/api/admin/clear-requests", { body: { by, confirm: "CLEAR" } }); toast(`Cleared ${r.requests_removed} requests and ${r.events_removed} events.`); location.hash = "#/requests"; route(); }
+    const c = await confirmDanger({ title: "Clear all requests?", word: "CLEAR", button: "Clear requests",
+      text: `This removes all ${REQS.length} requests and all events from the lists, for everyone using this app. Orders already placed, kitchen stock, rules and the audit log stay.` });
+    if (!c) return;
+    try { const r = await api("/api/admin/clear-requests", { body: { by, confirm: "CLEAR", password: c.password } }); toast(`Cleared ${r.requests_removed} requests and ${r.events_removed} events.`); location.hash = "#/requests"; route(); }
     catch (e) { toast(e.message); } };
   $("#view").querySelectorAll("[data-decide]").forEach(b => b.onclick = async () => {
     const by = me(); if (!by) return; b.disabled = true; const label = b.textContent; b.textContent = b.dataset.decide === "approve" ? "Re-checking with Valio Aimo…" : "Rejecting…";
@@ -1030,9 +1056,10 @@ async function viewRules() {
   };
   if ($("#restoreBtn")) $("#restoreBtn").onclick = () => previewAndApply($("#restoreBox"), { text: RULES.default_yaml }, "restore defaults");
   $("#resetAll").onclick = async () => { const by = me(); if (!by) return;
-    const t = prompt("This deletes all requests, orders, events and rule changes, and starts a new audit log. It can't be undone.\n\nType RESET to confirm.");
-    if (t !== "RESET") return toast("Nothing was reset.");
-    try { await api("/api/admin/reset", { body: { by, confirm: "RESET", with_history: $("#withHistory").checked } }); FILTER = "approval"; toast("Everything is back to the defaults."); location.hash = "#/new"; route(); }
+    const c = await confirmDanger({ title: "Reset everything?", word: "RESET", button: "Reset everything",
+      text: "This deletes all requests, orders, events and rule changes for everyone using this app, and starts a new audit log. It can't be undone." });
+    if (!c) return;
+    try { await api("/api/admin/reset", { body: { by, confirm: "RESET", with_history: $("#withHistory").checked, password: c.password } }); FILTER = "approval"; toast("Everything is back to the defaults."); location.hash = "#/new"; route(); }
     catch (e) { toast(e.message); } };
   $("#yamlPreview").onclick = () => previewAndApply($("#yamlBox"), { text: $("#yaml").value }, "text");
   v.querySelectorAll("[data-undo]").forEach(b => b.onclick = async () => { const by = me(); if (!by) return; b.disabled = true;

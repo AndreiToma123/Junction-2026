@@ -248,3 +248,18 @@ docs/            Aimo's API docs and datasets, our API description
 5. **Allergens and quality rules** (school kitchens; fresh → frozen), and brand rules per item ("no Brand B for coffee milk").
 6. **Learned usual orders** from real history, with drift alerts; restock dates and delivery times from Aimo.
 7. **Notifications** to the approver and the cook (email / chat).
+
+## Deploy a public demo (Modal)
+
+The app runs on [Modal](https://modal.com) as one small web app with a persistent Volume for its data.
+Keys never go into git: they are stored as a Modal Secret. Only the 9.5 MB search index is uploaded, not the 87 MB product file.
+
+```bash
+.venv/bin/pip install modal                       # once (Ubuntu: always inside the project's .venv)
+.venv/bin/modal setup                             # once: log in to Modal in the browser
+.venv/bin/modal secret create buying-agent-keys --from-dotenv .env DEMO_PASSWORD=choose-a-password
+.venv/bin/modal deploy modal_app.py               # prints the public link
+```
+
+On a public link, "Reset everything" and "Clear requests" ask for `DEMO_PASSWORD`; everything else is open to testers.
+Redeploy after code changes with the last command; the data on the Volume stays.

@@ -14,3 +14,7 @@ data/rule_versions/
 data/log.jsonl
 data/kitchen.json
 data/events/
+
+# downloaded Junction platform page (contains personal account details)
+Junction Platform.html
+Junction Platform_files/
