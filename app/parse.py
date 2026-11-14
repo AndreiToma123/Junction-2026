@@ -97,3 +97,53 @@ def parse(text, today=None):
         "deadline": _deadline(text, today),
         "parsed_by": "simple pattern reader",
     }
+
+
+# ---------------------------------------------------------------- several products in one request
+
+_SPLIT = re.compile(r"\s*(?:,|;|\n|\+|&|\bplus\b|\band\b|\bja\b)\s*", re.I)
+_CATEGORY_WORDS = {"dairy": "dairy", "milk products": "dairy", "maito": "dairy", "dry goods": "dry goods", "dry": "dry goods",
+                   "vegetable": "fresh produce", "veg": "fresh produce", "produce": "fresh produce", "fish": "fish & meat",
+                   "meat": "fish & meat"}
+
+
+def split_items(text, today=None):
+    """'Usual dairy order, plus 20 kg extra butter and 30 kg salmon by Monday' ->
+    one entry per product (same deadline for all). Returns [] if the text is about one product only.
+    'usual <category> order' expands to every usual item of that category with its usual amount.
+    The same product named twice is added up (usual butter + 20 kg extra butter)."""
+    deadline = _deadline(text, today or date.today())
+    items, order = {}, []
+
+    def add(item_id, product, amount, unit, source, extra=False):
+        key = item_id or (product or "").lower()
+        if key in items and items[key]["amount"] is not None and amount is not None:
+            items[key]["amount"] += amount
+            items[key]["source"] += " + " + source
+            return
+        items[key] = {"product": product, "item_id": item_id, "amount": amount, "unit": unit, "deadline": deadline,
+                      "as_much_as_possible": False, "source": source, "parsed_by": "simple pattern reader (several products)"}
+        order.append(key)
+
+    for seg in [s for s in _SPLIT.split(text or "") if s and s.strip()]:
+        low = seg.lower()
+        cat = next((c for w, c in _CATEGORY_WORDS.items() if w in low), None)
+        if "usual" in low and cat:
+            for i in rules.usual_orders()["items"]:
+                if i.get("category") == cat:
+                    add(i["item_id"], i["name"], float(i["usual_amount"]), i["unit"], f"usual {cat} order")
+            continue
+        m = _AMOUNT.search(seg)
+        item = _item(seg)
+        if not m and not item:
+            continue  # date words, "please", etc.
+        if item:
+            add(item["item_id"], item["name"], _number(m.group(1)) if m else None,
+                UNITS[m.group(2).lower()] if m else item["unit"], seg.strip())
+        else:
+            after = seg[m.end():]
+            words = re.split(r"\b(by|until|before|for|mennessä)\b", after, flags=re.I)[0]
+            name = re.sub(r"^\s*(of|extra)\s+", "", words.strip(" .,"), flags=re.I) or None
+            add(None, name, _number(m.group(1)), UNITS[m.group(2).lower()], seg.strip())
+    out = [items[k] for k in order]
+    return out if len(out) > 1 else []

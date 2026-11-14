@@ -111,7 +111,7 @@ def _check_stock(rule, line, q, p, req, ctx):
     if not q or not q["deliverable"]:
         return None
     pid, qty = line["product_id"], line["quantity"]
-    override = " (demo stock override)" if q.get("demo_stock_override") else ""
+    override = (" (demo stock override)" if q.get("demo_stock_override") else "") + (" (includes a demo restock)" if q.get("demo_restock") else "")
     facts = {"product": pid, "ordered": qty, "stock_status": q["stock_status"], "stock": q["stock_amount"],
              "demo_stock_override": bool(q.get("demo_stock_override"))}
     if q["stock_status"] == "known":

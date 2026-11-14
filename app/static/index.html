@@ -141,7 +141,7 @@ api("/api/ai/status").then(a => { const el = $("#aiPill"); el.textContent = a.ge
 
 const STATUS = {
   needs_approval: ["Needs approval", "t-approve"], ask_buyer: ["Needs your answer", "t-ask"], ordered: ["Ordered", "t-ok"],
-  rejected: ["Rejected", "t-bad"], cannot_fulfil: ["Can't be done", "t-bad"], cancelled: ["Cancelled", "t-grey"], superseded: ["Closed: not needed", "t-grey"]
+  rejected: ["Rejected", "t-bad"], cannot_fulfil: ["Can't be done", "t-bad"], cancelled: ["Cancelled", "t-grey"], superseded: ["Closed: not needed", "t-grey"], basket: ["Several products", "t-grey"]
 };
 const RESULT = { pass: ["Passed", "t-ok"], approve: ["Needs approval", "t-approve"], ask: ["Ask buyer", "t-ask"], blocked: ["Can't be used", "t-bad"] };
 const pill = (text, cls) => `<span class="pill ${cls}">${esc(text)}</span>`;
@@ -197,10 +197,14 @@ function answerButtons(r) {
 }
 function outcomeBanner(r, withLink) {
   const o = chosen(r), link = withLink ? `<a class="btn" href="#/requests/${esc(r.id)}">Open details</a>` : "";
-  const dl = o ? niceDate(o.lines[0].available_date) : "";
+  const dl = (r.parsed || {}).deadline ? niceDate(r.parsed.deadline) : o ? niceDate(o.lines[0].available_date) : "";
+  if (r.kind === "basket") return `<div class="banner t-grey"><div style="flex:1"><div class="label" style="color:inherit">${(r.child_summaries || []).length} products · one request each</div>
+    ${(r.child_summaries || []).map(c => `<div class="row" style="gap:8px;margin-top:6px">${pill(...(STATUS[c.status] || [c.status, "t-grey"]))} <b>${esc(c.product || "?")}</b>
+      <span class="small" style="color:var(--ink2)">${esc(c.status === "ordered" ? c.delivery_message || "" : c.status === "ask_buyer" ? c.question || "" : c.status === "needs_approval" ? (c.total != null ? eur(c.total) + " · waiting for a person" : "waiting for a person") : c.reason || "")}</span>
+      <a href="#/requests/${esc(c.id)}" class="small">${esc(c.id)}</a></div>`).join("")}</div>${link}</div>`;
   if (r.status === "ordered") return `<div class="banner t-ok"><div><div class="label" style="color:inherit">Ordered</div>
     <h3>${esc(r.order_id)} · ${num(o.litres)} ${esc(o.unit || "L")} · ${eur(o.total_with_tax)} incl. tax · delivery ${dl}</h3>
-    <div class="small">${r.decided_by ? "Approved by " + esc(r.decided_by) : "Every rule passed, so the agent ordered by itself"}. Mock order, nothing is sent to Valio Aimo.</div></div>${link}</div>`;
+    <div class="small">${r.decided_by ? "Approved by " + esc(r.decided_by) : "Every rule passed, so the agent ordered by itself"}. ${esc(r.delivery_message || "")} Mock order, nothing is sent to Valio Aimo.</div></div>${link}</div>`;
   if (r.status === "needs_approval") { const why = o.results.filter(x => x.result === "approve").map(x => x.detail).join(" ");
     return `<div class="banner t-approve"><div><div class="label" style="color:inherit">Waiting for approval · nothing ordered yet</div>
     <h3>${num(o.litres)} ${esc(o.unit || "L")} · ${eur(o.total_with_tax)} incl. tax · delivery ${dl}</h3><div class="small">${esc(why)}</div></div>
@@ -215,7 +219,7 @@ function outcomeBanner(r, withLink) {
 }
 const STEP_TITLE = { request: "Read the request", rules: "Checked a rule", search: "Searched the product list", lookup: "Asked Valio Aimo for price, stock and delivery",
   demo: "Demo stock", split: "Split needed", options: "Built options", choose: "Chose an option", approval: "Sent for approval", order: "Placed the order",
-  recheck: "Re-checked price and stock", trigger: "Stock ran low", ask: "Asked the buyer", answer: "Buyer answered", decision: "Decision", result: "Result" };
+  recheck: "Re-checked price and stock", basket: "Split into one request per product", message: "Message to the buyer", trigger: "Stock ran low", ask: "Asked the buyer", answer: "Buyer answered", decision: "Decision", result: "Result" };
 function stepDot(s) {
   if (/: approve\./.test(s.message) || s.step === "approval") return "warn";
   if (/: ask\./.test(s.message) || s.step === "ask") return "ask";
@@ -256,6 +260,7 @@ async function personAction(btn, path, msg) {
 }
 document.addEventListener("click", e => {
   const u = e.target.closest("[data-usual-only]"); if (u) return personAction(u, `/api/requests/${u.dataset.usualOnly}/usual-only`, r => `New request ${r.id}: ${(STATUS[r.status] || [r.status])[0].toLowerCase()}.`);
+  const w = e.target.closest("[data-wait-restock]"); if (w) return personAction(w, `/api/requests/${w.dataset.waitRestock}/wait-for-restock`, r => `New request ${r.id}: ${(STATUS[r.status] || [r.status])[0].toLowerCase()}.`);
   const c = e.target.closest("[data-cancel-req]"); if (c) return personAction(c, `/api/requests/${c.dataset.cancelReq}/cancel`, r => `${r.id} cancelled. Nothing more will be ordered for it.`);
 });
 
@@ -269,7 +274,7 @@ async function viewNew(params) {
       <label class="label" for="need">Your request</label>
       <textarea id="need" rows="3" style="font-size:18px" placeholder="e.g. I need 1,000 litres of lactose-free milk by Monday">${esc(params.get("text") || "")}</textarea>
       ${usual.items.length ? `<div class="row" style="gap:8px"><span class="small mute">Your usual:</span>${usual.items.slice(0, 4).map(i =>
-        `<button class="chip" data-fill="${esc(`I need ${num(i.usual_amount)} ${i.unit === "L" ? "litres" : i.unit} of ${i.name.toLowerCase()} by Monday.`)}">${num(i.usual_amount)} ${esc(i.unit)} ${esc(i.name)}</button>`).join("")}</div>` : ""}
+        `<button class="chip" data-fill="${esc(`I need ${num(i.usual_amount)} ${i.unit === "L" ? "litres" : i.unit} of ${i.name.toLowerCase()} by Monday.`)}">${num(i.usual_amount)} ${esc(i.unit === "KG" ? "kg" : i.unit)} ${esc(i.name)}</button>`).join("")}</div>` : ""}
       <div class="row between">
         <details class="small mute"><summary style="cursor:pointer;min-height:32px">Demo options</summary>
           <label class="row" style="gap:8px;margin-top:6px">Simulate: <select id="demoScenario"><option value="">nothing (all real data)</option>
@@ -318,12 +323,12 @@ const CATS = [
   ["all", "All", r => true],
 ];
 let FILTER = (() => { try { return localStorage.getItem("reqFilter") || "approval"; } catch (e) { return "approval"; } })();
-const ORDER = { needs_approval: 0, ask_buyer: 1, cannot_fulfil: 2, ordered: 3, rejected: 4, cancelled: 5, superseded: 6 };
+const ORDER = { needs_approval: 0, ask_buyer: 1, cannot_fulfil: 2, basket: 3, ordered: 3, rejected: 4, cancelled: 5, superseded: 6 };
 function itemHtml(r, cur) {
   const o = chosen(r);
   return `<button class="item ${cur && r.id === cur.id ? "on" : ""}" data-open="${esc(r.id)}">
     <span class="row between" style="gap:6px;width:100%"><span class="small mute">${esc(r.id)} · ${esc(niceTime(r.received_at))}${r.origin === "auto" ? " · automatic" : r.origin === "event" ? " · event" : ""}</span>${statusPill(r)}</span>
-    <b>${esc(r.current_request ? r.current_request[0].toUpperCase() + r.current_request.slice(1) : r.text || "")}</b><span class="small" style="color:var(--ink2)">${esc(o ? eur(o.total_with_tax) + " · " + headline(r) : headline(r))}</span>
+    <b>${esc(r.current_request ? r.current_request[0].toUpperCase() + r.current_request.slice(1) : r.text || "")}</b><span class="small" style="color:var(--ink2)">${esc(r.kind === "basket" ? (r.children || []).length + " products, each its own request" : o ? eur(o.total_with_tax) + " · " + headline(r) : headline(r))}</span>
     ${r.possible_duplicate && needsAction(r) ? `<span class="small" style="color:var(--amber)">Possible duplicate: already ordered since</span>` : ""}</button>`;
 }
 async function viewRequests(params, id) {
@@ -374,7 +379,23 @@ function headline(r) {
   return "No usable option";
 }
 function tile(k, v, sub, tone) { return `<div class="tile ${tone || ""}"><span class="label">${esc(k)}</span><b>${esc(v)}</b>${sub ? `<span class="small" style="color:var(--ink2)">${esc(sub)}</span>` : ""}</div>`; }
+function basketDetail(r) {
+  const kids = r.child_summaries || [];
+  return `<div class="card stack" style="gap:20px">
+    <div class="row between" style="align-items:flex-start"><div><div class="small mute">${esc(r.id)} · received ${esc(niceTime(r.received_at))}</div>
+      <h2 style="margin-top:4px">“${esc(r.text || "")}”</h2></div>${statusPill(r)}</div>
+    <div style="background:var(--bg);border-radius:12px;padding:14px 16px"><span class="label">What happened</span>
+      <div style="margin-top:4px;font-size:16px">The request named ${kids.length} products, so the agent made one request for each. Each one went through all the rules on its own.</div></div>
+    <div class="scroll"><table style="min-width:640px"><thead><tr><th>Product</th><th>Request</th><th>Result</th><th class="num">Total</th><th>Next</th></tr></thead><tbody>
+      ${kids.map(c => `<tr><td><b>${esc(c.product || "?")}</b><div class="small mute">${esc(c.text || "")}</div></td><td><a href="#/requests/${esc(c.id)}">${esc(c.id)}</a></td>
+        <td>${pill(...(STATUS[c.status] || [c.status, "t-grey"]))}</td><td class="num">${c.total != null ? eur(c.total) : "–"}</td>
+        <td class="small">${c.status === "ordered" ? esc(c.delivery_message || "") : c.status === "needs_approval" ? `<a class="btn" href="#/requests/${esc(c.id)}">Approve or reject</a>`
+          : c.status === "ask_buyer" ? `<a class="btn" href="#/requests/${esc(c.id)}">Answer</a> <span class="mute">${esc(c.question || "")}</span>` : esc(c.reason || "")}</td></tr>`).join("")}
+    </tbody></table></div>
+    <div class="row" style="gap:8px;border-top:1px solid var(--line);padding-top:16px"><a class="btn" href="#/log?request_id=${esc(r.id)}">Audit log for ${esc(r.id)}</a></div></div>`;
+}
 function detail(r) {
+  if (r.kind === "basket") return basketDetail(r);
   const o = chosen(r), results = o ? o.results : (r.request_checks || []);
   const problems = results.filter(x => x.result !== "pass"), passed = results.filter(x => x.result === "pass");
   const limit = results.find(x => x.facts && x.facts.limit != null)?.facts.limit;
@@ -382,7 +403,7 @@ function detail(r) {
   const unit = o && o.lines[0] ? (o.lines[0].unit === "KG" ? "kg" : o.lines[0].unit || "L") : "";
   // 1. key numbers (no repeats of the reason: that is in "What needs deciding" and in the rule checks)
   let tiles = "";
-  if (r.status === "ordered") tiles += tile("Order", r.order_id, r.decided_by ? "Approved by " + r.decided_by : "Ordered by the agent", "ok");
+  if (r.status === "ordered") tiles += tile("Order", r.order_id, (r.decided_by ? "Approved by " + r.decided_by : "Ordered by the agent") + (r.delivery_message ? ". " + r.delivery_message.replace(/^Ordered \([^)]*\)\. /, "") : ""), "ok");
   else if (r.status === "rejected") tiles += tile("Result", "Rejected", "By " + r.decided_by + ". Nothing was ordered.", "bad");
   else if (r.status === "superseded") tiles += tile("Result", "Closed: not needed", "Ordered or delivered since; closed by the stock monitor.", "bad");
   else if (r.status === "cancelled") tiles += tile("Result", "Cancelled", "By " + r.decided_by + (r.order_id ? ". Mock order " + r.order_id + " cancelled." : ". Nothing was ordered."), "bad");
@@ -409,9 +430,13 @@ function detail(r) {
     (["needs_approval", "rejected"].includes(r.status) && o && o.lines.length > 1 && usualLine) ||
     (r.status === "cannot_fulfil" && (r.blocked_by || []).some(b => b.rule === "B4")));
   const canSubs = (r.parsed || {}).item_id && ["needs_approval", "rejected", "cannot_fulfil"].includes(r.status) && !r.replaced_by;
-  const instead = (canUsualOnly || canSubs) ? `<div class="stack" style="gap:8px"><div class="small" style="font-weight:600">${r.status === "needs_approval" ? "Or instead:" : "What you can do now:"}</div>
+  const rs = !r.replaced_by && ["needs_approval", "rejected", "cannot_fulfil"].includes(r.status) ? r.restock : null;
+  const waitBtn = rs && !rs.unknown ? `<button class="btn" data-wait-restock="${esc(r.id)}">Wait for the usual product: order all ${num((r.parsed || {}).amount)} ${esc(unit || ((r.parsed || {}).unit === "KG" ? "kg" : (r.parsed || {}).unit))} for ${esc(niceDate(rs.date))}</button>` : "";
+  const waitNote = rs ? (rs.unknown ? `<div class="small mute">Waiting for a restock: Valio Aimo doesn't say when the usual product (${esc(rs.product_id)}) comes back, so the agent can't promise a date.</div>`
+    : `<div class="small mute">Valio Aimo restocks the usual product on ${esc(niceDate(rs.date))} (+${num(rs.amount)} ${esc(unit || ((r.parsed || {}).unit === "KG" ? "kg" : (r.parsed || {}).unit || ""))}, demo data)${rs.after_deadline ? ": after your deadline, so only if the date can move" : ""}.</div>`) : "";
+  const instead = (canUsualOnly || canSubs || rs) ? `<div class="stack" style="gap:8px"><div class="small" style="font-weight:600">${r.status === "needs_approval" ? "Or instead:" : "What you can do now:"}</div>
       <div class="row" style="gap:8px">${canUsualOnly ? `<button class="btn" data-usual-only="${esc(r.id)}">Order only the usual product${usualLine ? ` (${num(usualLine.litres)} ${esc(unit)})` : ""}</button>` : ""}
-      ${canSubs ? `<button class="btn" data-load-subs="${esc(r.id)}">Show recipe-compatible substitutes</button>` : ""}</div>
+      ${waitBtn}${canSubs ? `<button class="btn" data-load-subs="${esc(r.id)}">Show recipe-compatible substitutes</button>` : ""}</div>${waitNote}
       ${canSubs ? `<div id="subsBox"></div>` : ""}</div>` : "";
   let decide = "";
   if (r.status === "needs_approval") decide = `<section class="stack" style="gap:14px;border:1px solid var(--line);border-radius:14px;padding:16px;background:var(--soft)">
@@ -536,6 +561,14 @@ function dishEditor(k, d, opts) {
       ${opts.event ? `<label class="row small" style="gap:6px"><input type="checkbox" name="d_menu" ${d.add_to_menu ? "checked" : ""}> Also add it to the menu</label><button type="button" class="btn danger" data-del-dish>Remove this dish</button>` : ""}
       ${opts.save ? `<button type="button" class="btn primary" data-save-dish>${d.dish_id ? "Save changes" : "Add to the menu"}</button><button type="button" class="btn" data-cancel-dish>Cancel</button>` : ""}</div>
   </div>`;
+}
+function swapRow(sw, i) {
+  return `<div class="rulecard" data-swap-row data-pid="${esc(sw.product_id)}" data-name="${esc(sw.name || sw.product_id)}" style="background:var(--card)">
+    <div class="row between"><div><b>${esc(sw.name || sw.product_id)}</b> <span class="small mute">${esc(sw.product_id)}</span></div>
+      <div class="row" style="gap:10px"><label class="row small" style="gap:6px;font-weight:600"><input type="checkbox" name="sw_pre" ${sw.pre_approved ? "checked" : ""}> Pre-approved (agent may order alone)</label>
+      <button type="button" class="btn danger" data-del-swap>Remove</button></div></div>
+    <label class="small" style="font-weight:600">Trade-off note for the approver<textarea name="sw_note" rows="2" style="margin-top:4px" placeholder="e.g. Similar texture, milder taste; works in soup">${esc(sw.note || "")}</textarea></label>
+    ${i.used_by.length ? `<div class="checks small">Works in: ${i.used_by.map(d => `<label class="row" style="gap:4px"><input type="checkbox" name="sw_dish" value="${esc(d.dish_id)}" ${(sw.dishes || []).includes(d.dish_id) ? "checked" : ""}> ${esc(d.name.split(" (")[0])}</label>`).join("")}</div>` : ""}</div>`;
 }
 function readDish(el) {
   return { dish_id: el.dataset.dishId || undefined, name: (el.querySelector("[name=d_name]").value || "").trim(), course: el.querySelector("[name=d_course]").value,
@@ -753,8 +786,22 @@ async function viewKitchen() {
       ${i.used_by.length ? `<div><div class="small" style="font-weight:600;margin-bottom:6px">Amount per portion in each dish (${u}) · ${num(i.daily_use)} ${uu2} a day in total</div>
         <div class="form" style="padding:0;background:none">${i.used_by.map(d => `<label>${esc(d.name.split(" (")[0])} <span class="mute">(${num(d.portions_per_day)} a day)</span><input type="number" min="1" step="any" data-amt="${esc(d.dish_id)}" value="${+(d.amount * 1000).toFixed(1)}"></label>`).join("")}</div></div>` : `<div class="small mute">Not used in any dish yet.</div>`}
       <details><summary style="cursor:pointer" class="small">Change the Valio Aimo product (now ${esc(i.usual_product_name || i.usual_product)})</summary><div style="margin-top:8px">${productPicker()}</div></details>
-      <div class="row"><button class="btn primary">Save</button>${i.used_by.length ? "" : `<button type="button" class="btn danger" data-del-ing-item>Remove ingredient</button>`}</div></form>`;
+      <div class="row"><button class="btn primary">Save</button>${i.used_by.length ? "" : `<button type="button" class="btn danger" data-del-ing-item>Remove ingredient</button>`}</div></form>
+      <div class="stack" data-swaps style="gap:10px;padding:8px;border-top:1px solid var(--line);margin-top:6px">
+        <div><b>Recipe swaps (the chef's list)</b><div class="small mute">What may replace ${esc(i.name.toLowerCase())} in a recipe when it runs short. <b>Pre-approved</b> swaps may be ordered by the agent alone; the others always go to a person.</div></div>
+        <div data-swap-rows class="stack" style="gap:8px">${(i.recipe_swaps || []).map(sw => swapRow(sw, i)).join("") || `<div class="small mute" data-no-swaps>No swaps yet.</div>`}</div>
+        <details><summary style="cursor:pointer" class="small">+ Add a swap</summary><div style="margin-top:8px" data-swap-picker>${productPicker()}<button type="button" class="btn" data-add-swap style="margin-top:8px">Add the chosen product as a swap</button></div></details>
+        <div><button type="button" class="btn primary" data-save-swaps>Save swaps</button></div></div>`;
     const form = cell.querySelector("form"); wirePicker(form, () => i.unit);
+    const sbox = cell.querySelector("[data-swaps]"), spick = sbox.querySelector("[data-swap-picker]"); wirePicker(spick, () => i.unit);
+    sbox.querySelector("[data-add-swap]").onclick = () => { const pick = spick.querySelector("[name=p_pick]:checked"); if (!pick) return toast("Search and choose a product first.");
+      const name = pick.closest("label").querySelector("b").textContent; const none = sbox.querySelector("[data-no-swaps]"); if (none) none.remove();
+      sbox.querySelector("[data-swap-rows]").insertAdjacentHTML("beforeend", swapRow({ product_id: pick.value, name, note: "", dishes: i.used_by.map(d => d.dish_id), pre_approved: false }, i)); };
+    sbox.querySelector("[data-save-swaps]").onclick = async () => { const by = me(); if (!by) return;
+      const swaps = [...sbox.querySelectorAll("[data-swap-row]")].map(rw => ({ product_id: rw.dataset.pid, name: rw.dataset.name, note: rw.querySelector("[name=sw_note]").value.trim(),
+        pre_approved: rw.querySelector("[name=sw_pre]").checked, dishes: [...rw.querySelectorAll("[name=sw_dish]:checked")].map(x => x.value) }));
+      try { await api(`/api/kitchen/ingredients/${i.item_id}/swaps`, { body: { by, swaps } }); toast("Swaps saved. Changes are in the audit log."); viewKitchen(); } catch (err) { toast(err.message); } };
+    sbox.addEventListener("click", e => { const x = e.target.closest("[data-del-swap]"); if (x) x.closest("[data-swap-row]").remove(); });
     const delB = form.querySelector("[data-del-ing-item]"); if (delB) delB.onclick = async () => { const by = me(); if (!by) return; if (!confirm(`Remove ${i.name}?`)) return;
       try { await api(`/api/kitchen/ingredients/${i.item_id}/remove`, { body: { by } }); toast("Ingredient removed."); viewKitchen(); } catch (err) { toast(err.message); } };
     form.onsubmit = async e => { e.preventDefault(); const by = me(); if (!by) return; const pick = form.querySelector("[name=p_pick]:checked");

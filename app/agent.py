@@ -11,7 +11,7 @@ Every sentence is built from data or rule results; nothing is invented.
 """
 from datetime import date, datetime, timezone
 
-from . import ai, aimo, catalog, demo, log, orders, rules, store
+from . import ai, aimo, catalog, demo, log, orders, parse, rules, store
 
 MAX_SPLIT_PARTNERS = 8  # how many second products to try in a split
 
@@ -75,6 +75,8 @@ def _as_much_as_possible(rec, req, scenario):
 
 def _finish(rec):
     """Last thing on every path: write the short summary (from rule results only), then save."""
+    if rec.get("status") in ("needs_approval", "cannot_fulfil"):
+        rec["restock"] = restock_info(rec)
     rec["summary"] = ai.summarize(rec)
     return store.save(rec)
 
@@ -118,6 +120,7 @@ def _line(pid, qty, role, quote, unit="L"):
             "demo_stock_override": bool(q.get("demo_stock_override")),
             "available_date": q.get("available_date"), "closing_time": q.get("closing_time"),
             "tax_rate": q.get("tax_rate"), "price_valid_to": q.get("price_valid_to"),
+            "delivery_window": demo.delivery_window(pid), "demo_restock": bool(q.get("demo_restock")),
             "demo_price_override": bool(q.get("demo_price_override"))}
 
 
@@ -426,6 +429,10 @@ def _place(rec, option, req, placed_by):
             tidy_duplicates(req["item_id"], f"order {order['order_id']} ({rec['id']})")
     _step(rec, "order", f"Placed mock order {order['order_id']}, €{order['total_with_tax']:,.2f} incl. tax, "
           f"delivery {rules.nice_date(req['deadline'])}. Placed by {placed_by}.", "mock order service", order_id=order["order_id"])
+    windows = sorted({l.get("delivery_window") for l in option["lines"] if l.get("delivery_window")})
+    rec["delivery_message"] = (f"Ordered ({order['order_id']}). Arrives {rules.nice_date(req['deadline'])}"
+                               + (f", {windows[0]} (demo delivery time)." if windows else " (Valio Aimo gives the day, not the time)."))
+    _step(rec, "message", f"Message to the buyer: {rec['delivery_message']}", "agent")
 
 
 # ---------------------------------------------------------------- people's answers
@@ -683,3 +690,97 @@ def tidy_duplicates(item_id, because):
             _step(r, "note", f"Possible duplicate: {i['name']} was ordered since this request ({because}). "
                   f"Not closed automatically because a person asked for it.", "agent")
             store.save(r)
+
+
+# ---------------------------------------------------------------- several products in one request
+
+def handle_text(text, scenario=None, today=None):
+    """Entry point for typed requests. One product -> a normal request. Several products ->
+    a parent request (kind "basket") with one child request per product; each child goes
+    through all the rules on its own (some are ordered by the agent, some wait for a person,
+    some ask for missing information)."""
+    items = parse.split_items(text, today)
+    if not items:
+        return handle(text, scenario=scenario, today=today)
+    parent = {"id": store.new_id(), "kind": "basket", "received_at": _now(), "text": text, "scenario": scenario,
+              "origin": "typed", "status": "basket", "children": [], "steps": [], "history": []}
+    _step(parent, "request", f"Read a request with {len(items)} products: " + "; ".join(
+        f"{rules.num(i['amount']) + ' ' + ('kg' if i['unit'] == 'KG' else i['unit'] or '') if i['amount'] is not None else '? (amount missing)'} "
+        f"{i['product'] or '?'}" for i in items) + (f", by {rules.nice_date(items[0]['deadline'])}" if items[0]["deadline"] else ", no date given")
+          + ". Each product becomes its own request.", "simple pattern reader")
+    store.save(parent)
+    for i in items:
+        what = (f"{rules.num(i['amount'])} {'kg' if i['unit'] == 'KG' else i['unit']} of {(i['product'] or '?').lower()}"
+                if i["amount"] is not None else f"{i['product'] or '?'} (amount missing)")
+        child = handle(text=f"{what} (part of {parent['id']}: {i['source']})", parsed={k: v for k, v in i.items() if k != "source"},
+                       scenario=scenario, today=today)
+        child["basket_id"] = parent["id"]
+        store.save(child)
+        parent["children"].append(child["id"])
+    parent = basket_view(parent)
+    _step(parent, "basket", "Split into " + ", ".join(f"{c['id']} ({c['status'].replace('_', ' ')})" for c in parent["child_summaries"]) + ".", "agent")
+    return store.save(parent)
+
+
+def basket_view(parent):
+    """Fresh status of every product in a several-product request."""
+    kids = [store.get(c) for c in parent.get("children", [])]
+    out = []
+    for k in kids:
+        if not k:
+            continue
+        while k.get("replaced_by") and store.get(k["replaced_by"]):
+            k = store.get(k["replaced_by"])
+        o = next((x for x in k.get("options") or [] if x["option_id"] == k.get("chosen")), None)
+        out.append({"id": k["id"], "status": k["status"], "text": k.get("current_request") or k.get("text"),
+                    "product": (k.get("parsed") or {}).get("product"), "total": o["total_with_tax"] if o else None,
+                    "order_id": k.get("order_id"), "delivery_message": k.get("delivery_message"),
+                    "question": k.get("question"), "reason": k.get("reason")})
+    parent["child_summaries"] = out
+    parent["counts"] = {s: sum(1 for c in out if c["status"] == s) for s in {c["status"] for c in out}}
+    return parent
+
+
+# ---------------------------------------------------------------- waiting for a restock (story 2)
+
+def restock_info(rec):
+    """When the usual product is short: when does Valio Aimo get more? The real API does not say;
+    a few products have a DEMO restock date (data/demo_stock_overrides.json, "restock")."""
+    req = rec.get("parsed") or {}
+    item = rules.find_usual_item(req.get("item_id")) if req.get("item_id") else None
+    if not item:
+        return None
+    o = next((x for x in rec.get("options") or [] if x["option_id"] == rec.get("chosen")), None)
+    short = (o and len(o["lines"]) > 1) or (rec.get("status") == "cannot_fulfil" and any(b["rule"] == "B4" for b in rec.get("blocked_by") or []))
+    if not short:
+        return None
+    r = demo.restock_for(item["usual_product"])
+    if r:
+        return {"product_id": item["usual_product"], "date": r["date"], "amount": r["amount"], "demo": True,
+                "after_deadline": r["date"] > req["deadline"]}
+    return {"product_id": item["usual_product"], "unknown": True}
+
+
+def wait_for_restock(rid, by):
+    """Order the full amount of the usual product for the day it is restocked (demo restock dates only)."""
+    rec = store.get(rid)
+    info = restock_info(rec) if rec else None
+    if not info or info.get("unknown"):
+        raise ValueError("Valio Aimo gives no restock date for this product, so the agent can't order for a later day.")
+    old = rec["parsed"]
+    if rec["status"] == "needs_approval":
+        rec.update(status="cancelled", outcome="cancelled", decided_by=by)
+    _step(rec, "decision", f"{by} chose to wait for the usual product (restock {rules.nice_date(info['date'])}, demo data).",
+          "dashboard", actor=f"person:{by}")
+    store.save(rec)
+    item = rules.find_usual_item(old["item_id"])
+    new = handle(text=f"Wait for the usual product: {rules.num(old['amount'])} {'kg' if old['unit'] == 'KG' else old['unit']} of "
+                      f"{item['name'].lower()} on {rules.nice_date(info['date'])} (instead of {rid})",
+                 parsed={**{k: old[k] for k in ("product", "item_id", "amount", "unit")}, "deadline": info["date"],
+                         "only_products": [item["usual_product"]], "buyer_confirmed_amount": True,
+                         "parsed_by": f"follow-up of {rid} by {by}: wait for restock"},
+                 scenario=rec.get("scenario"), origin=rec.get("origin", "typed"), event_id=rec.get("event_id"))
+    new["follow_up_of"] = rid
+    rec["replaced_by"] = new["id"]
+    store.save(rec)
+    return store.save(new)

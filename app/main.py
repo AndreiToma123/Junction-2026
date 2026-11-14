@@ -96,7 +96,7 @@ class BuyRequest(BaseModel):
 
 @app.post("/api/requests")
 def new_request(req: BuyRequest):
-    return agent.handle(req.text, scenario=req.scenario)
+    return agent.handle_text(req.text, scenario=req.scenario)
 
 
 @app.get("/api/requests")
@@ -112,6 +112,8 @@ def get_request(rid: str):
     rec = store.get(rid)
     if not rec:
         raise HTTPException(404, "Unknown request")
+    if rec.get("kind") == "basket":
+        return agent.basket_view(rec)
     chosen = next((o for o in rec.get("options") or [] if o["option_id"] == rec.get("chosen")), None)
     pending = rec.get("status") == "needs_approval"
     rec["budget"] = budgets.status(rec.get("wallet") or budgets.wallet_for(rec), chosen["total_with_tax"] if chosen and pending else 0)
@@ -167,6 +169,14 @@ class SubstitutePick(BaseModel):
 def order_substitute(rid: str, body: SubstitutePick):
     try:
         return agent.order_substitute(rid, body.product_id, body.by)
+    except ValueError as e:
+        raise HTTPException(409, str(e))
+
+
+@app.post("/api/requests/{rid}/wait-for-restock")
+def wait_for_restock(rid: str, body: ByWhom):
+    try:
+        return agent.wait_for_restock(rid, body.by)
     except ValueError as e:
         raise HTTPException(409, str(e))
 
@@ -467,6 +477,25 @@ def save_ingredient(body: IngredientBody):
 @app.post("/api/kitchen/ingredients/{item_id}/remove")
 def remove_ingredient(item_id: str, body: ByWhom):
     return _kitchen_call(kitchen.remove_ingredient, body.by, item_id)
+
+
+class SwapItem(BaseModel):
+    product_id: str
+    name: Optional[str] = None
+    note: str = ""
+    dishes: List[str] = []
+    pre_approved: bool = False
+
+
+class SwapsBody(BaseModel):
+    by: str = Field(..., min_length=1)
+    swaps: List[SwapItem]
+
+
+@app.post("/api/kitchen/ingredients/{item_id}/swaps")
+def save_swaps(item_id: str, body: SwapsBody):
+    """The chef's recipe swaps for one ingredient. Pre-approved swaps may be ordered by the agent alone."""
+    return _kitchen_call(kitchen.save_swaps, body.by, item_id, [x.model_dump() for x in body.swaps])
 
 
 @app.get("/api/kitchen/find-products")

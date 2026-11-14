@@ -119,4 +119,36 @@ except kitchen.KitchenError:
     refused = True
 check("an ingredient still used in a dish can't be removed", refused)
 
+print("\n=== several products, delivery times, restock, chef's swap list")
+kitchen.reset()
+b = agent.handle_text("Usual dairy order, plus 20 kg extra butter for the weekend by Wednesday", today=T)
+butter = next(c for c in b["child_summaries"] if c["product"] == "Butter")
+check("'usual dairy order + 20 kg butter' becomes one request per product", b["kind"] == "basket" and len(b["child_summaries"]) == 5,
+      ", ".join(f"{c['product']}: {c['status']}" for c in b["child_summaries"]))
+check("extra butter is added on top of the usual 40 kg", "60 kg of butter" in (butter["text"] or ""), butter["text"])
+check("demo delivery time in the message where there is one", "06:00–08:00 (demo delivery time)" in (butter["delivery_message"] or ""), butter["delivery_message"])
+m = agent.handle_text("500 L lactose-free milk, 60 kg salmon and some potatoes by Monday", today=T)
+st = {c["product"]: c["status"] for c in m["child_summaries"]}
+check("mixed request: milk ordered, salmon to approve, potatoes asks how much",
+      st == {"Lactose-free semi-skimmed milk": "ordered", "Salmon fillet": "needs_approval", "Potatoes": "ask_buyer"}, str(st))
+c = agent.handle("I need 40 kg of carrots by Monday", today=T)
+check("no demo time: the message says only the day", "gives the day, not the time" in (c.get("delivery_message") or ""), c.get("delivery_message"))
+sal = store.get(next(x["id"] for x in m["child_summaries"] if x["product"] == "Salmon fillet"))
+check("short salmon: the restock date is offered (demo data)", (sal.get("restock") or {}).get("date") == "2026-11-18", str(sal.get("restock")))
+w = agent.wait_for_restock(sal["id"], "chef")
+check("waiting for the restock orders all 60 kg for that day", w["status"] == "ordered" and w["parsed"]["deadline"] == "2026-11-18", w.get("delivery_message"))
+sw = kitchen.ingredient("salmon")["recipe_swaps"]
+sw[0]["pre_approved"] = True
+kitchen.save_swaps("chef", "salmon", sw)
+kitchen.reset()
+k2 = kitchen.load(); k2["ingredients"][[i["item_id"] for i in k2["ingredients"]].index("salmon")]["recipe_swaps"][0]["pre_approved"] = True; kitchen.save(k2)
+auto = agent.handle(text="restock", parsed={"product": "Salmon fillet", "item_id": "salmon", "amount": 60.0, "unit": "KG",
+                                             "deadline": "2026-11-16", "parsed_by": "test"})
+check("chef pre-approves trout: the agent now orders the split by itself", auto["status"] == "ordered", auto.get("delivery_message"))
+try:
+    kitchen.save_swaps("chef", "salmon", [{"product_id": "462016", "note": ""}]); ok = False
+except kitchen.KitchenError:
+    ok = True
+check("a swap without a trade-off note is refused", ok)
+
 print(f"\n{sum(results)} of {len(results)} checks passed.")

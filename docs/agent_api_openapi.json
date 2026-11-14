@@ -243,9 +243,19 @@
    }
   },
   "/api/requests": {
-   "get": {
-    "summary": "List Requests",
-    "operationId": "list_requests_api_requests_get",
+   "post": {
+    "summary": "New Request",
+    "operationId": "new_request_api_requests_post",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/BuyRequest"
+       }
+      }
+     }
+    },
     "responses": {
      "200": {
       "description": "Successful Response",
@@ -254,22 +264,35 @@
         "schema": {}
        }
       }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
      }
     }
    },
-   "post": {
-    "summary": "New Request",
-    "operationId": "new_request_api_requests_post",
-    "requestBody": {
-     "content": {
-      "application/json": {
-       "schema": {
-        "$ref": "#/components/schemas/BuyRequest"
-       }
+   "get": {
+    "summary": "List Requests",
+    "description": "All requests, newest last. Light versions unless ?full=true (open one request for everything).",
+    "operationId": "list_requests_api_requests_get",
+    "parameters": [
+     {
+      "name": "full",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "boolean",
+       "default": false,
+       "title": "Full"
       }
-     },
-     "required": true
-    },
+     }
+    ],
     "responses": {
      "200": {
       "description": "Successful Response",
@@ -350,6 +373,234 @@
       "application/json": {
        "schema": {
         "$ref": "#/components/schemas/Decision"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/requests/{rid}/usual-only": {
+   "post": {
+    "summary": "Usual Only",
+    "description": "Order only what Valio Aimo has of the usual product (a new request, checked by all the rules).",
+    "operationId": "usual_only_api_requests__rid__usual_only_post",
+    "parameters": [
+     {
+      "name": "rid",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Rid"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ByWhom"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/requests/{rid}/substitutes": {
+   "get": {
+    "summary": "Request Substitutes",
+    "description": "Recipe-compatible substitutes for a kitchen ingredient that could not be (fully) ordered.",
+    "operationId": "request_substitutes_api_requests__rid__substitutes_get",
+    "parameters": [
+     {
+      "name": "rid",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Rid"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/requests/{rid}/substitute": {
+   "post": {
+    "summary": "Order Substitute",
+    "operationId": "order_substitute_api_requests__rid__substitute_post",
+    "parameters": [
+     {
+      "name": "rid",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Rid"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SubstitutePick"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/requests/{rid}/wait-for-restock": {
+   "post": {
+    "summary": "Wait For Restock",
+    "operationId": "wait_for_restock_api_requests__rid__wait_for_restock_post",
+    "parameters": [
+     {
+      "name": "rid",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Rid"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ByWhom"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/requests/{rid}/cancel": {
+   "post": {
+    "summary": "Cancel Request",
+    "description": "Cancel a request that is waiting, or a mock order that has not been delivered yet.",
+    "operationId": "cancel_request_api_requests__rid__cancel_post",
+    "parameters": [
+     {
+      "name": "rid",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Rid"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ByWhom"
        }
       }
      }
@@ -856,6 +1107,769 @@
     }
    }
   },
+  "/api/kitchen": {
+   "get": {
+    "summary": "Get Kitchen",
+    "operationId": "get_kitchen_api_kitchen_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/kitchen/simulate-day": {
+   "post": {
+    "summary": "Kitchen Simulate Day",
+    "description": "Mock: serve one day of the menu, then let the stock monitor send requests for what ran low.",
+    "operationId": "kitchen_simulate_day_api_kitchen_simulate_day_post",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/kitchen/check": {
+   "post": {
+    "summary": "Kitchen Check",
+    "operationId": "kitchen_check_api_kitchen_check_post",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/kitchen/receive": {
+   "post": {
+    "summary": "Kitchen Receive",
+    "description": "Mock: all orders on their way arrive now.",
+    "operationId": "kitchen_receive_api_kitchen_receive_post",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/admin/clear-requests": {
+   "post": {
+    "summary": "Clear Requests",
+    "operationId": "clear_requests_api_admin_clear_requests_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ClearBody"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/admin/reset": {
+   "post": {
+    "summary": "Reset Everything",
+    "operationId": "reset_everything_api_admin_reset_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ResetBody"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/budgets": {
+   "get": {
+    "summary": "Get Budgets",
+    "operationId": "get_budgets_api_budgets_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     }
+    }
+   },
+   "put": {
+    "summary": "Set Budgets",
+    "operationId": "set_budgets_api_budgets_put",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/WeeklyBudgets"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/kitchen/dishes": {
+   "post": {
+    "summary": "Save Dish",
+    "operationId": "save_dish_api_kitchen_dishes_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/DishBody"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/kitchen/dishes/{dish_id}/remove": {
+   "post": {
+    "summary": "Remove Dish",
+    "operationId": "remove_dish_api_kitchen_dishes__dish_id__remove_post",
+    "parameters": [
+     {
+      "name": "dish_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Dish Id"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ByWhom"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/kitchen/ingredients/{item_id}/amounts": {
+   "post": {
+    "summary": "Set Amounts",
+    "operationId": "set_amounts_api_kitchen_ingredients__item_id__amounts_post",
+    "parameters": [
+     {
+      "name": "item_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Item Id"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/IngredientAmounts"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/kitchen/ingredients": {
+   "post": {
+    "summary": "Save Ingredient",
+    "operationId": "save_ingredient_api_kitchen_ingredients_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/IngredientBody"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/kitchen/ingredients/{item_id}/remove": {
+   "post": {
+    "summary": "Remove Ingredient",
+    "operationId": "remove_ingredient_api_kitchen_ingredients__item_id__remove_post",
+    "parameters": [
+     {
+      "name": "item_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Item Id"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ByWhom"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/kitchen/ingredients/{item_id}/swaps": {
+   "post": {
+    "summary": "Save Swaps",
+    "description": "The chef's recipe swaps for one ingredient. Pre-approved swaps may be ordered by the agent alone.",
+    "operationId": "save_swaps_api_kitchen_ingredients__item_id__swaps_post",
+    "parameters": [
+     {
+      "name": "item_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Item Id"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SwapsBody"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/kitchen/find-products": {
+   "get": {
+    "summary": "Find Products",
+    "description": "Valio Aimo products to link a new ingredient to (live price and stock for the matches only).",
+    "operationId": "find_products_api_kitchen_find_products_get",
+    "parameters": [
+     {
+      "name": "q",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "minLength": 2,
+       "title": "Q"
+      }
+     },
+     {
+      "name": "unit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "pattern": "^(L|KG)$",
+       "default": "KG",
+       "title": "Unit"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/events/read": {
+   "post": {
+    "summary": "Read Event",
+    "description": "Read '40 extra guests on Monday: salmon soup and meatballs' into date, guests and dishes (to check on a form).",
+    "operationId": "read_event_api_events_read_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/EventText"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/events": {
+   "get": {
+    "summary": "List Events",
+    "operationId": "list_events_api_events_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     }
+    }
+   },
+   "post": {
+    "summary": "New Event",
+    "operationId": "new_event_api_events_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/NewEvent"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/events/{eid}": {
+   "get": {
+    "summary": "Get Event",
+    "operationId": "get_event_api_events__eid__get",
+    "parameters": [
+     {
+      "name": "eid",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Eid"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/events/{eid}/fixes/{item_id}": {
+   "get": {
+    "summary": "Event Fixes",
+    "operationId": "event_fixes_api_events__eid__fixes__item_id__get",
+    "parameters": [
+     {
+      "name": "eid",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Eid"
+      }
+     },
+     {
+      "name": "item_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Item Id"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/events/{eid}/budget": {
+   "put": {
+    "summary": "Event Budget",
+    "operationId": "event_budget_api_events__eid__budget_put",
+    "parameters": [
+     {
+      "name": "eid",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Eid"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/EventBudget"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/events/{eid}/swap-dish": {
+   "post": {
+    "summary": "Event Swap Dish",
+    "operationId": "event_swap_dish_api_events__eid__swap_dish_post",
+    "parameters": [
+     {
+      "name": "eid",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Eid"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/DishSwap"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
   "/api/usual": {
    "get": {
     "summary": "Usual",
@@ -973,10 +1987,138 @@
        }
       ],
       "title": "New Amount"
+     },
+     "new_deadline": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "New Deadline",
+      "description": "YYYY-MM-DD"
+     },
+     "new_unit": {
+      "anyOf": [
+       {
+        "type": "string",
+        "pattern": "^(L|KG)$"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "New Unit"
+     },
+     "new_item_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "New Item Id"
      }
     },
     "type": "object",
     "title": "BuyerAnswer"
+   },
+   "ByWhom": {
+    "properties": {
+     "by": {
+      "type": "string",
+      "minLength": 1,
+      "title": "By"
+     }
+    },
+    "type": "object",
+    "required": [
+     "by"
+    ],
+    "title": "ByWhom"
+   },
+   "ClearBody": {
+    "properties": {
+     "by": {
+      "type": "string",
+      "minLength": 1,
+      "title": "By"
+     },
+     "confirm": {
+      "type": "string",
+      "title": "Confirm",
+      "description": "Must be \"CLEAR\""
+     }
+    },
+    "type": "object",
+    "required": [
+     "by",
+     "confirm"
+    ],
+    "title": "ClearBody"
+   },
+   "CustomDish": {
+    "properties": {
+     "dish_id": {
+      "type": "string",
+      "title": "Dish Id"
+     },
+     "name": {
+      "type": "string",
+      "maxLength": 80,
+      "minLength": 1,
+      "title": "Name"
+     },
+     "course": {
+      "type": "string",
+      "title": "Course",
+      "default": "main"
+     },
+     "ingredients": {
+      "items": {
+       "$ref": "#/components/schemas/CustomIngredient"
+      },
+      "type": "array",
+      "title": "Ingredients"
+     },
+     "add_to_menu": {
+      "type": "boolean",
+      "title": "Add To Menu",
+      "default": false
+     }
+    },
+    "type": "object",
+    "required": [
+     "dish_id",
+     "name",
+     "ingredients"
+    ],
+    "title": "CustomDish"
+   },
+   "CustomIngredient": {
+    "properties": {
+     "item_id": {
+      "type": "string",
+      "title": "Item Id"
+     },
+     "amount": {
+      "type": "number",
+      "maximum": 5.0,
+      "exclusiveMinimum": 0.0,
+      "title": "Amount",
+      "description": "per portion, in kg or litres"
+     }
+    },
+    "type": "object",
+    "required": [
+     "item_id",
+     "amount"
+    ],
+    "title": "CustomIngredient"
    },
    "Decision": {
     "properties": {
@@ -1001,6 +2143,176 @@
     ],
     "title": "Decision"
    },
+   "DishBody": {
+    "properties": {
+     "by": {
+      "type": "string",
+      "minLength": 1,
+      "title": "By"
+     },
+     "dish_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Dish Id"
+     },
+     "name": {
+      "type": "string",
+      "maxLength": 80,
+      "minLength": 1,
+      "title": "Name"
+     },
+     "course": {
+      "type": "string",
+      "title": "Course",
+      "default": "main"
+     },
+     "portions_per_day": {
+      "type": "integer",
+      "maximum": 5000.0,
+      "minimum": 0.0,
+      "title": "Portions Per Day",
+      "default": 0
+     },
+     "ingredients": {
+      "items": {
+       "$ref": "#/components/schemas/DishIngredient"
+      },
+      "type": "array",
+      "title": "Ingredients"
+     }
+    },
+    "type": "object",
+    "required": [
+     "by",
+     "name",
+     "ingredients"
+    ],
+    "title": "DishBody"
+   },
+   "DishIngredient": {
+    "properties": {
+     "item_id": {
+      "type": "string",
+      "title": "Item Id"
+     },
+     "amount": {
+      "type": "number",
+      "maximum": 5.0,
+      "exclusiveMinimum": 0.0,
+      "title": "Amount"
+     }
+    },
+    "type": "object",
+    "required": [
+     "item_id",
+     "amount"
+    ],
+    "title": "DishIngredient"
+   },
+   "DishSwap": {
+    "properties": {
+     "from_dish": {
+      "type": "string",
+      "title": "From Dish"
+     },
+     "to_dish": {
+      "type": "string",
+      "title": "To Dish"
+     },
+     "by": {
+      "type": "string",
+      "minLength": 1,
+      "title": "By"
+     },
+     "move": {
+      "anyOf": [
+       {
+        "type": "integer",
+        "exclusiveMinimum": 0.0
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Move",
+      "description": "portions to move; default all"
+     }
+    },
+    "type": "object",
+    "required": [
+     "from_dish",
+     "to_dish",
+     "by"
+    ],
+    "title": "DishSwap"
+   },
+   "EventBudget": {
+    "properties": {
+     "budget": {
+      "anyOf": [
+       {
+        "type": "number",
+        "minimum": 0.0
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Budget"
+     },
+     "by": {
+      "type": "string",
+      "minLength": 1,
+      "title": "By"
+     }
+    },
+    "type": "object",
+    "required": [
+     "by"
+    ],
+    "title": "EventBudget"
+   },
+   "EventDish": {
+    "properties": {
+     "dish_id": {
+      "type": "string",
+      "title": "Dish Id"
+     },
+     "portions": {
+      "type": "integer",
+      "maximum": 5000.0,
+      "exclusiveMinimum": 0.0,
+      "title": "Portions"
+     }
+    },
+    "type": "object",
+    "required": [
+     "dish_id",
+     "portions"
+    ],
+    "title": "EventDish"
+   },
+   "EventText": {
+    "properties": {
+     "text": {
+      "type": "string",
+      "maxLength": 500,
+      "minLength": 1,
+      "title": "Text"
+     }
+    },
+    "type": "object",
+    "required": [
+     "text"
+    ],
+    "title": "EventText"
+   },
    "HTTPValidationError": {
     "properties": {
      "detail": {
@@ -1013,6 +2325,200 @@
     },
     "type": "object",
     "title": "HTTPValidationError"
+   },
+   "IngredientAmounts": {
+    "properties": {
+     "by": {
+      "type": "string",
+      "minLength": 1,
+      "title": "By"
+     },
+     "amounts": {
+      "additionalProperties": true,
+      "type": "object",
+      "title": "Amounts"
+     }
+    },
+    "type": "object",
+    "required": [
+     "by",
+     "amounts"
+    ],
+    "title": "IngredientAmounts"
+   },
+   "IngredientBody": {
+    "properties": {
+     "by": {
+      "type": "string",
+      "minLength": 1,
+      "title": "By"
+     },
+     "item_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Item Id"
+     },
+     "name": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Name"
+     },
+     "unit": {
+      "anyOf": [
+       {
+        "type": "string",
+        "pattern": "^(L|KG)$"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Unit"
+     },
+     "usual_product": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Usual Product"
+     },
+     "usual_amount": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Usual Amount"
+     },
+     "reorder_level": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Reorder Level"
+     },
+     "stock": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Stock"
+     },
+     "category": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Category"
+     }
+    },
+    "type": "object",
+    "required": [
+     "by"
+    ],
+    "title": "IngredientBody"
+   },
+   "NewEvent": {
+    "properties": {
+     "name": {
+      "type": "string",
+      "title": "Name",
+      "default": "Event"
+     },
+     "date": {
+      "type": "string",
+      "title": "Date",
+      "examples": [
+       "2026-11-16"
+      ]
+     },
+     "dishes": {
+      "items": {
+       "$ref": "#/components/schemas/EventDish"
+      },
+      "type": "array",
+      "title": "Dishes"
+     },
+     "by": {
+      "type": "string",
+      "minLength": 1,
+      "title": "By"
+     },
+     "scenario": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Scenario"
+     },
+     "budget": {
+      "anyOf": [
+       {
+        "type": "number",
+        "minimum": 0.0
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Budget"
+     },
+     "custom_dishes": {
+      "items": {
+       "$ref": "#/components/schemas/CustomDish"
+      },
+      "type": "array",
+      "title": "Custom Dishes",
+      "default": []
+     },
+     "add_to_menu": {
+      "type": "boolean",
+      "title": "Add To Menu",
+      "default": false
+     }
+    },
+    "type": "object",
+    "required": [
+     "date",
+     "dishes",
+     "by"
+    ],
+    "title": "NewEvent"
    },
    "OrderLine": {
     "properties": {
@@ -1159,6 +2665,31 @@
     ],
     "title": "QuoteRequest"
    },
+   "ResetBody": {
+    "properties": {
+     "by": {
+      "type": "string",
+      "minLength": 1,
+      "title": "By"
+     },
+     "confirm": {
+      "type": "string",
+      "title": "Confirm",
+      "description": "Must be \"RESET\""
+     },
+     "with_history": {
+      "type": "boolean",
+      "title": "With History",
+      "default": false
+     }
+    },
+    "type": "object",
+    "required": [
+     "by",
+     "confirm"
+    ],
+    "title": "ResetBody"
+   },
    "RuleChange": {
     "properties": {
      "action": {
@@ -1229,6 +2760,89 @@
     ],
     "title": "RuleChange"
    },
+   "SubstitutePick": {
+    "properties": {
+     "product_id": {
+      "type": "string",
+      "title": "Product Id"
+     },
+     "by": {
+      "type": "string",
+      "minLength": 1,
+      "title": "By"
+     }
+    },
+    "type": "object",
+    "required": [
+     "product_id",
+     "by"
+    ],
+    "title": "SubstitutePick"
+   },
+   "SwapItem": {
+    "properties": {
+     "product_id": {
+      "type": "string",
+      "title": "Product Id"
+     },
+     "name": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Name"
+     },
+     "note": {
+      "type": "string",
+      "title": "Note",
+      "default": ""
+     },
+     "dishes": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Dishes",
+      "default": []
+     },
+     "pre_approved": {
+      "type": "boolean",
+      "title": "Pre Approved",
+      "default": false
+     }
+    },
+    "type": "object",
+    "required": [
+     "product_id"
+    ],
+    "title": "SwapItem"
+   },
+   "SwapsBody": {
+    "properties": {
+     "by": {
+      "type": "string",
+      "minLength": 1,
+      "title": "By"
+     },
+     "swaps": {
+      "items": {
+       "$ref": "#/components/schemas/SwapItem"
+      },
+      "type": "array",
+      "title": "Swaps"
+     }
+    },
+    "type": "object",
+    "required": [
+     "by",
+     "swaps"
+    ],
+    "title": "SwapsBody"
+   },
    "Undo": {
     "properties": {
      "by": {
@@ -1275,6 +2889,26 @@
      "type"
     ],
     "title": "ValidationError"
+   },
+   "WeeklyBudgets": {
+    "properties": {
+     "weekly": {
+      "additionalProperties": true,
+      "type": "object",
+      "title": "Weekly"
+     },
+     "by": {
+      "type": "string",
+      "minLength": 1,
+      "title": "By"
+     }
+    },
+    "type": "object",
+    "required": [
+     "weekly",
+     "by"
+    ],
+    "title": "WeeklyBudgets"
    },
    "Wish": {
     "properties": {

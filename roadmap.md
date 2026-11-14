@@ -2,7 +2,7 @@
 
 Junction 2026 · Valio Aimo "Trusted Trade Agents" · final submission **Sunday 15 Nov, 10:00**
 
-Last updated: Sat 14 Nov 2026, late evening.
+Last updated: Sat 14 Nov 2026, night. Live test walk-through: [TEST_SCENARIOS.md](TEST_SCENARIOS.md).
 
 ---
 
@@ -54,7 +54,7 @@ run in a sandbox and can't touch real data.
 
 ## 2. Decisions so far (short version)
 
-Full list with reasons: [DECISIONS.md](DECISIONS.md) (55 decisions).
+Full list with reasons: [DECISIONS.md](DECISIONS.md) (60 decisions).
 
 **Scope and data**
 - Ordering is our own mock order service; nothing is sent to Aimo (1).

@@ -1,7 +1,8 @@
-# Data notes (Step 1)
+# Data notes
 
-Status: **ready for review**. Based on the files in `docs/aimo_api/` and live read-only calls
-made on Sat 14 Nov 2026 (only ping, availability and price, all read-only).
+Status: **up to date (Sat 14 Nov 2026, evening).** Sections 1–5 come from the files in `docs/aimo_api/`
+and live read-only calls (ping, availability, price). Sections 6–9 describe the data we added for the
+demo kitchen, and everything that is simulated, so nobody mistakes it for Aimo data.
 
 ---
 
@@ -62,7 +63,15 @@ Saved live samples (in `data/samples/`): `ping.json`, `availability_milk_2026-11
   Valio 464306 at **€1.15/L** (list price €1.63, so the kitchen gets a discount).
   Arla 469363 costs **€2.81/L**. Tax on milk is 13.5%.
   → 1,000 L of the usual = **€1,150**. 2,000 L = **€2,300** (over the €2,000 limit ✓).
-- The API refuses Python's default client (HTTP 403). Normal clients like curl work. Our code will send its own clear client name.
+- The API refuses Python's default client (HTTP 403). Normal clients like curl work. Our code sends its own clear client name.
+- **Some answers are incomplete**: a product can come back without a delivery date, and the server sometimes
+  drops a connection. The client retries calmly, reuses an answer for 20 seconds, and treats an incomplete
+  answer as "can't be delivered".
+- **Order steps**: most products have `allowedLotSize` 0.01 (we order whole packs), but some are real steps:
+  salmon fillet in **10 kg**, a pack of chicken breast **4.4 kg**. The agent rounds up to the product's own step.
+- **Weights**: `unitConversions[].netWeight` gives kg per pack for most food (13,711 products); otherwise
+  we read it from the name ("2,5 kg", "500 g"). Litres the same way.
+- **No restock dates and no delivery times** in the API: only the earliest delivery *day*.
 
 ### ⚠️ Big finding: there is NO search and NO ordering in the API
 
@@ -88,7 +97,9 @@ Saved live samples (in `data/samples/`): `ping.json`, `availability_milk_2026-11
 | Smallest order step | `allowedLotSize` | The order amount must be a multiple of this. |
 | Labels / claims | `synkkaData.classifications` → `nutritionalClaim` | Example: `FREE_FROM_LACTOSE` (4,178 products). Better than looking for "lactose free" in the name. |
 | Substitutes | `substitutions[]` | 250 official "use this instead" rules. Example: **Valio Eila 1 L (464306) → Arla 1 L (469363)** and 3 Valio products. Great for the split. |
-| Category | `category` | A code only, no names. 10400 seems to be milk (91 products, mostly Valio and Arla). |
+| Category | `category` | A code only, no names. 10400 seems to be milk (91 products, mostly Valio and Arla). We use it to find same-kind products (substitute candidates, a new ingredient's search). |
+| Temperature class | `temperatureCondition` | A code only. 7 looks like frozen. Shown to the AI when it picks substitutes (fresh vs frozen); no rule uses it yet. |
+| Net weight | `synkkaData.unitConversions[].netWeight` | kg per pack, for ingredients bought by weight. |
 | Delivery reliability | reliability CSV | Only 25% of products are in it. Missing = "unknown", not "bad". |
 
 Price, stock, delivery date and cut-off time are **not** in the file. They only come from the live API.
@@ -109,29 +120,23 @@ Saved sample: `data/samples/products_lactose_free_milk.json` (7 lactose-free mil
 
 ## 4. Order history
 
-**There isn't any.** Nothing in the API or the files shows past orders.
-**Decided:** we generate a mock order history for testing (`data/usual_orders.json`), e.g.:
-
-```json
-{ "kitchen": "Demo Kitchen Oy",
-  "usual": [ { "item": "lactose-free semi skimmed milk", "preferred_product": "464306",
-               "usual_amount": 1000, "unit": "L", "per": "week" } ] }
-```
-It's clearly marked as generated test data in the README.
+**There isn't any.** Nothing in the API or the files shows past orders. The kitchen's "usual orders"
+(product, usual amount) now live in the demo kitchen file (section 6), which replaced the first
+`usual_orders.json`. Three weeks of past orders exist only as generated log lines marked "[test history]".
 
 ---
 
 ## 5. Rulebook vs. data
 
-A first draft is now in [rulebook.md](rulebook.md). How each rule matches the data:
+The rulebook is [rules.yaml](rules.yaml) (readable: [rulebook.md](rulebook.md)). How each rule matches the data:
 
 | Rule | Data that checks it | Can we check it? |
 |---|---|---|
 | Spend limit | `/api/price` → `catalogPrice.valueWithTax` × amount | ✅ Yes (including tax, as you decided) |
-| Approved brands | `synkkaData.brand` (after cleanup) | ✅ Yes, but 18% of products have no brand → treat as "not approved" |
+| Approved brands | `synkkaData.brand` (after cleanup) | ✅ Yes. 18% of products have no brand (most fresh produce): the kitchen's usual product and the chef's pre-approved swaps are therefore always allowed |
 | Max brands per split | count of the cleaned-up brands in the option | ✅ Yes |
 | Deadline | `/api/availability` → `availableDate` + `closingTime` | ✅ Yes (Terminal products' cut-off has already passed for Monday) |
-| "Much bigger than usual" | our `usual_orders.json` | ✅ Yes, using made-up history |
+| "Much bigger than usual" | usual amount per ingredient in the demo kitchen file | ✅ Yes, using made-up usual orders |
 | Enough stock | `availableAmount` | ⚠️ Real numbers only for some Stock products. Terminal = unknown → "not checked". 9999999999 / 666666666 = no limit |
 | Order in allowed steps | `allowedLotSize`, `units` | ✅ Yes |
 | Deposits (returnable boxes) | `deposits[]` | ⚠️ Shown, but no price for them |
@@ -158,4 +163,44 @@ Result: 600 × €1.15 + 400 × €2.81 = **€1,814.00**. That's under the limi
 for approval is the new brand (rule C2). Every log line and summary for this scenario says
 "demo stock override".
 
-Not used: option A (making Arla the usual milk, so everything stays real data).
+Not used: option A (making Arla the usual milk, so everything stays real data). Only applied when
+"Demo options → low stock" is chosen.
+
+---
+
+## 6. The demo kitchen (made up, linked to real products)
+
+`data/kitchen.default.json` (the live copy is `data/kitchen.json`, editable on the Kitchen screen):
+
+- **11 dishes** (salmon soup, meatballs, chicken penne, mushroom risotto, beef pasta bake, oven-baked salmon,
+  chicken stew, oat porridge, oven pancake, carrot soup, breakfast buffet), each with a course, portions a day
+  and grams / ml per portion. Made up.
+- **18 ingredients**, each linked to a real Aimo product that was deliverable from stock when checked
+  (e.g. salmon fillet 462150, penne 463190), with a usual order amount, a reorder level (about two days of use),
+  a starting stock and a budget category. Amounts made up; product codes, prices and Aimo stock real.
+- **The chef's swap list** per ingredient: real Aimo products that can replace it in named dishes, a note on the
+  trade-off, and whether it is **pre-approved** (the agent may order it alone). E.g. salmon → rainbow trout
+  (462016, chef decides); penne → penne rigate (471450, pre-approved).
+- **Weekly budgets**: dairy €4,000, dry goods €1,500, fresh produce €1,500, fish & meat €4,500.
+
+## 7. Demo values (simulated, always labelled)
+
+`data/demo_stock_overrides.json`. Everything here is shown with the word "demo" wherever it appears.
+
+| What | Applies | Why |
+|---|---|---|
+| Low stock of the usual milk | only when "Demo options → low stock" is chosen | the split scenario (section 5) |
+| A price rise at approval (464306 → €1.25) | only when "Demo options → price goes up" is chosen | shows the re-check at approval |
+| Delivery times: milk 464306 and butter 464411 06:00–08:00, salmon 462150 and cheese 465256 07:00–09:00 | always | the API gives only a day; all other products say "Valio Aimo gives the day, not the time" |
+| Restock: salmon 462150, +200 kg from Wed 18 Nov | always | the API gives no restock date; all other products say the date is unknown |
+
+## 8. What the data still can't tell us
+
+Allergens and quality are in the product data but not used (out of scope). Real customer prices
+(the customer number is ignored), true stock of supplier products, restock dates, delivery times,
+order confirmation: none of these exist in the mock API; the dashboard says so where it matters.
+
+## 9. Questions for a mentor
+
+- Supplier ("Terminal") products: is a passed order cut-off really final if `availableDate` still shows Monday?
+- Do `9999999999` and `666666666` really mean "no stock limit"?

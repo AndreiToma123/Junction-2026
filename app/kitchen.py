@@ -414,3 +414,45 @@ def find_products(words, unit, limit=12):
                     "stock": "no limit" if x.get("stock_status") == "no_limit" else x.get("stock_amount")})
     out.sort(key=lambda o: (not o["orderable"], o["price_per"] or 1e9))
     return out[:limit]
+
+
+def save_swaps(by, item_id, swaps):
+    """The chef's list of recipe swaps for one ingredient: which product, a note on the trade-off,
+    which dishes it works in, and whether it is PRE-APPROVED (the agent may then order it alone, rule C2)."""
+    with _lock:
+        doc = load()
+        i = ingredient(item_id, doc)
+        if not i:
+            raise KitchenError("Unknown ingredient")
+        uses = {d["dish_id"] for d in doc["dishes"] if any(g["item_id"] == item_id for g in d["ingredients"])}
+        clean, seen = [], set()
+        for sw in swaps or []:
+            p = catalog.get(sw.get("product_id") or "")
+            if not p:
+                raise KitchenError(f"Unknown product {sw.get('product_id')}")
+            if p["id"] == i["usual_product"] or p["id"] in seen:
+                raise KitchenError(f"{p['name_en'] or p['id']} is the usual product or listed twice.")
+            if not catalog.content_per_sales_unit(p, i["unit"]):
+                raise KitchenError(f"The size of {p['name_en'] or p['id']} in {'kg' if i['unit'] == 'KG' else 'litres'} is not known.")
+            note = (sw.get("note") or "").strip()[:300]
+            if not note:
+                raise KitchenError(f"Add a short note on the trade-off for {p['name_en'] or p['id']} (the approver reads it).")
+            dishes = [d for d in sw.get("dishes") or [] if d in uses]
+            clean.append({"product_id": p["id"], "name": sw.get("name") or p["name_en"] or p["name_fi"], "dishes": dishes,
+                          "pre_approved": bool(sw.get("pre_approved")), "note": note})
+            seen.add(p["id"])
+        before = i.get("recipe_swaps", [])
+        i["recipe_swaps"] = clean
+        save(doc)
+    b = {x["product_id"]: x for x in before}
+    a = {x["product_id"]: x for x in clean}
+    changes = [f"added {x['name']} ({pid}){' as PRE-APPROVED' if x['pre_approved'] else ''}" for pid, x in a.items() if pid not in b]
+    changes += [f"removed {x['name']} ({pid})" for pid, x in b.items() if pid not in a]
+    changes += [f"{a[pid]['name']} ({pid}) is now {'PRE-APPROVED: the agent may order it alone' if a[pid]['pre_approved'] else 'chef decides'}"
+                for pid in a if pid in b and a[pid]["pre_approved"] != b[pid].get("pre_approved")]
+    changes += [f"note or dishes changed for {a[pid]['name']} ({pid})" for pid in a if pid in b
+                and (a[pid]["note"] != b[pid].get("note") or a[pid]["dishes"] != b[pid].get("dishes"))]
+    if changes:
+        log.write("menu", f"Recipe swaps for {i['name']} changed by {by}: " + "; ".join(changes) + ".", "kitchen menu",
+                  actor=f"person:{by}", data={"item_id": item_id, "before": before, "after": clean})
+    return clean
