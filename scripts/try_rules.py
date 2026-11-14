@@ -3,6 +3,7 @@
 Run: .venv/bin/python -m scripts.try_rules
 The agent will build these options by itself in the next step; here we only test the rules.
 """
+from scripts import _sandbox  # noqa: F401  (must be first: tests run in a sandbox)
 from app import aimo, demo, rules
 
 DEADLINE = "2026-11-16"

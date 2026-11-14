@@ -17,7 +17,7 @@ from datetime import datetime
 
 from . import config
 
-LOG_FILE = config.DATA / "log.jsonl"
+LOG_FILE = config.STATE / "log.jsonl"
 _lock = threading.Lock()
 GENESIS = "0" * 64
 
@@ -50,7 +50,7 @@ def write(step, message, source, actor="agent", request_id=None, data=None, time
             "prev_hash": lines[-1]["hash"] if lines else GENESIS,
         }
         entry["hash"] = _hash(entry)
-        config.DATA.mkdir(exist_ok=True)
+        config.STATE.mkdir(parents=True, exist_ok=True)
         with open(LOG_FILE, "a", encoding="utf-8") as f:
             f.write(json.dumps(entry, ensure_ascii=False) + "\n")
         return entry

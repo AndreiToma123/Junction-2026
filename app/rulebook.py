@@ -4,7 +4,7 @@ from datetime import datetime
 from . import config, rules
 from .rule_types import TYPES
 
-RULEBOOK_MD = config.ROOT / "rulebook.md"
+RULEBOOK_MD = config.RULEBOOK_MD
 
 
 def render():
@@ -30,7 +30,7 @@ def render():
         out += [f"## {title}", ""]
         for r in rs:
             lock = " 🔒" if TYPES[r["type"]]["locked"] else ""
-            out += [f"### {r['id']}. {r['name']}{lock}", f"- {rules.describe(r)}", ""]
+            out += [f"### {r['id']} - {r['name']}{lock}", f"- {rules.describe(r)}", ""]
     out += ["🔒 = safety rule: its settings can be changed, but it can't be removed.", "",
             "## D. Choosing between options",
             "If several options can be used, the agent picks the one that:",

@@ -5,10 +5,12 @@ Part 2: a stand-in pretends to be Gemini and returns good, wrong and broken answ
         to prove the safety checks accept the good ones and catch the bad ones.
 The real Gemini is never called here.
 
-Run: .venv/bin/python -m scripts.try_ai      (resets the demo data first and afterwards)
+Runs in a sandbox with a copy of the DEFAULT rulebook: your real rules and data are not touched.
+Run: .venv/bin/python -m scripts.try_ai
 """
 from datetime import date
 
+from scripts import _sandbox  # noqa: F401  (must be first: tests run in a sandbox)
 from app import agent, ai, llm
 
 TODAY = date(2026, 11, 14)
@@ -69,6 +71,7 @@ if __name__ == "__main__":
         check(f"rule wish '{wish}' -> {want}", p["status"] == want, shown)
 
     print("\n===== PART 2: stand-in Gemini (checks on the AI's answers) =====")
+    ai.PARSE_MODE = "always"  # test the reading checks even for clear requests
     good = {"product": "lactose-free milk", "item_id": "lf-semi-skimmed-milk", "amount": 1000, "unit": "L", "deadline": "2026-11-16"}
     fake(good)
     r = ai.parse_request("We need 1 000 l of lactose free milk for Monday", TODAY)

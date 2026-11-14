@@ -1,12 +1,13 @@
 {
-  "_note": "SIMULATED STOCK for demo scenario 2 only (see DECISIONS.md #4). Prices, dates and cut-offs stay real.",
+  "_note": "SIMULATED values for demo scenarios only (see DECISIONS.md). Everything else stays real.",
   "scenarios": {
     "split": {
-      "464306": 600,
-      "464398": 0,
-      "464201": 0,
-      "463779": 0,
-      "469363": 500
+      "_what": "Low stock of the usual milk, so the agent must split with another brand.",
+      "stock": { "464306": 600, "464398": 0, "464201": 0, "463779": 0, "469363": 500 }
+    },
+    "price_change": {
+      "_what": "The price of the usual milk goes up between the first check and the approval.",
+      "price_at_approval": { "464306": 1.25 }
     }
   }
 }

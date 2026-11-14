@@ -4,6 +4,7 @@ It also turns the raw answers into plain facts, e.g. the special stock numbers:
   999999        on a Terminal product  -> stock unknown (documented)
   >= 666666666  on a Stock product     -> no stock limit (not documented, our reading)
 """
+import time
 from datetime import datetime
 
 import httpx
@@ -13,6 +14,10 @@ from . import config
 TERMINAL_UNKNOWN = 999999
 NO_LIMIT_FROM = 666666666
 MAX_PER_CALL = 1000  # API limit per request
+
+
+REUSE_SECONDS = 20
+_recent = {}
 
 
 class AimoError(Exception):
@@ -30,10 +35,13 @@ def _client():
 
 
 def ping():
-    with _client() as c:
-        r = c.get("/api/ping")
-        r.raise_for_status()
-        return r.json()
+    try:
+        with _client() as c:
+            r = c.get("/api/ping")
+            r.raise_for_status()
+            return r.json()
+    except httpx.HTTPError as e:
+        raise AimoError(f"Valio Aimo did not answer the ping ({type(e).__name__})")
 
 
 def _post(path, product_ids, date):
@@ -43,11 +51,29 @@ def _post(path, product_ids, date):
     if len(ids) > MAX_PER_CALL:
         raise AimoError(f"Too many products in one call ({len(ids)} > {MAX_PER_CALL})")
     body = {"customer": config.CUSTOMER_ID, "requestedDate": date, "products": ids}
-    with _client() as c:
-        r = c.post(path, json=body)
-        if r.status_code != 200:
-            raise AimoError(f"{path} returned HTTP {r.status_code}: {r.text[:200]}")
-        return r.json()
+    # Same question within a short time: reuse the answer (the API has rate limits; prices don't change by the second).
+    key = (path, date, tuple(sorted(ids)))
+    hit = _recent.get(key)
+    if hit and time.time() - hit[0] < REUSE_SECONDS:
+        return hit[1]
+    last = None
+    for attempt in range(3):  # the mock API sometimes drops a connection: try again, calmly
+        try:
+            with _client() as c:
+                r = c.post(path, json=body)
+            if r.status_code == 200:
+                data = r.json()
+                if len(_recent) > 200:
+                    _recent.clear()
+                _recent[key] = (time.time(), data)
+                return data
+            last = f"HTTP {r.status_code}"
+            if r.status_code not in (429, 500, 502, 503, 504):
+                break
+        except httpx.HTTPError as e:
+            last = f"no answer ({type(e).__name__})"
+        time.sleep(1.5 * (attempt + 1))
+    raise AimoError(f"Valio Aimo did not answer {path}: {last}")
 
 
 def availability_raw(product_ids, date):
@@ -82,19 +108,21 @@ def quote(product_ids, date):
     for a in av.get("products", []):
         pid = a["productId"]
         line = a["scheduleLines"][0] if a.get("scheduleLines") else None
+        if line and not (line.get("availableDate") and line.get("availableAmount") is not None):
+            line = None  # incomplete answer (seen in the mock API): treat as "cannot be delivered"
         stock_status, stock_amount = _stock_fact(
             a.get("logisticModel"), line["availableAmount"] if line else None
         )
         closing = a.get("closingTime")
         p = prices.get(pid) or {}
-        priced = bool(p) and not p.get("error")
+        priced = bool(p) and not p.get("error") and bool(p.get("catalogPrice")) and p["catalogPrice"].get("valueWithTax") is not None
         out[pid] = {
             "product_id": pid,
             "deliverable": line is not None,
             "sales_block": bool(a.get("salesBlock") or (line and line.get("salesBlock"))),
             "logistic_model": a.get("logisticModel"),
             "available_date": line["availableDate"] if line else None,
-            "sales_unit": line["salesUnit"] if line else None,
+            "sales_unit": line.get("salesUnit") if line else None,
             "stock_status": stock_status,   # known | no_limit | unknown | none
             "stock_amount": stock_amount,   # only when stock_status == known
             "raw_available_amount": line["availableAmount"] if line else None,
@@ -103,11 +131,11 @@ def quote(product_ids, date):
             "priced": priced,
             "price_per_unit_with_tax": p["catalogPrice"]["valueWithTax"] if priced else None,
             "price_per_unit_without_tax": p["catalogPrice"]["value"] if priced else None,
-            "tax_rate": p["tax"]["taxRate"] if priced else None,
-            "comparison_price_with_tax": p["comparisonPrice"]["valueWithTax"] if priced and p.get("comparisonPrice") else None,
+            "tax_rate": (p.get("tax") or {}).get("taxRate") if priced else None,
+            "comparison_price_with_tax": (p.get("comparisonPrice") or {}).get("valueWithTax") if priced else None,
             "comparison_unit": p.get("comparisonUnit") if priced else None,
-            "list_price_with_tax": p["listPrice"]["valueWithTax"] if priced and p.get("listPrice") else None,
+            "list_price_with_tax": (p.get("listPrice") or {}).get("valueWithTax") if priced else None,
             "currency": pr.get("currency"),
-            "price_valid_to": p["catalogPrice"]["validTo"] if priced else None,
+            "price_valid_to": p["catalogPrice"].get("validTo") if priced else None,
         }
     return {"checked_at": av["timeNow"], "requested_date": date, "products": out}

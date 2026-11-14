@@ -1,12 +1,15 @@
 """Reset the demo to a clean start and write 3 weeks of GENERATED TEST HISTORY into the log.
 
-Clears: requests, mock orders, audit log, rule-change history. Keeps: rules.yaml as it is.
+Clears: requests, mock orders, audit log, rule-change history. Keeps: rules.yaml as it is,
+unless you add --rules, which also puts the DEFAULT rulebook back (rules.default.yaml).
 The history lines are marked "test_history": true and their messages start with "[test history]".
 They match data/usual_orders.json (24 Oct usual Valio, 31 Oct split with Arla, 7 Nov Valio UHT).
 
-Run: .venv/bin/python -m scripts.reset_demo
+Run: .venv/bin/python -m scripts.reset_demo            (keep my rules)
+     .venv/bin/python -m scripts.reset_demo --rules    (also restore the default rules)
 """
 import shutil
+import sys
 
 from app import config, log, rule_edit, store
 
@@ -20,7 +23,7 @@ HISTORY = [
     ("2026-10-31T09:41:10+02:00", "REQ-H02", "agent", "request", "Read request: 1,000 L Lactose-free semi-skimmed milk, deadline Mon 2 Nov.", "simple pattern reader"),
     ("2026-10-31T09:41:12+02:00", "REQ-H02", "agent", "split", "No single product can cover the full amount, so the agent built split options.", "agent"),
     ("2026-10-31T09:41:12+02:00", "REQ-H02", "agent", "choose", "Chose O15: 600 × 464306 (Valio) + 400 × 469363 (Arla), €1,814.00 incl. tax. It is the only usable option.", "agent"),
-    ("2026-10-31T09:41:12+02:00", "REQ-H02", "agent", "rules", "C2 Approved brands: approve. Arla is not an approved brand (approved: Valio).", "rules.yaml"),
+    ("2026-10-31T09:41:12+02:00", "REQ-H02", "agent", "rules", "C2 - Approved brands: approve. Arla is not an approved brand (approved: Valio).", "rules.yaml"),
     ("2026-10-31T09:41:12+02:00", "REQ-H02", "agent", "approval", "Sent to the dashboard for a person to approve or reject.", "agent"),
     ("2026-10-31T10:05:40+02:00", "REQ-H02", "person:kitchen manager", "decision", "Approved by kitchen manager.", "dashboard"),
     ("2026-10-31T10:05:41+02:00", "REQ-H02", "agent", "order", "Placed mock order H-0002, €1,814.00 incl. tax, delivery Mon 2 Nov. Placed by human:kitchen manager.", "mock order service"),
@@ -37,6 +40,13 @@ if __name__ == "__main__":
     log.LOG_FILE.unlink(missing_ok=True)
     rule_edit.CHANGES_FILE.unlink(missing_ok=True)
     shutil.rmtree(rule_edit.VERSIONS_DIR, ignore_errors=True)
+    from app import kitchen
+    kitchen.STATE_FILE.unlink(missing_ok=True)  # kitchen stock and menu back to the default
+    if "--rules" in sys.argv:
+        from app import rulebook
+        shutil.copy(config.RULES_DEFAULT_FILE, config.RULES_FILE)
+        rulebook.write()
+        print("Default rules restored.")
     for time, rid, actor, step, msg, src in HISTORY:
         log.write(step, H + msg, src, actor=actor, request_id=rid, time=time, test_history=True)
-    print(f"Demo reset. {len(HISTORY)} test-history lines written to {log.LOG_FILE.relative_to(config.ROOT)}.")
+    print(f"Demo reset. {len(HISTORY)} test-history lines written to {log.LOG_FILE}.")

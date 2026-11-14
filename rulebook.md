@@ -2,7 +2,7 @@
 
 > **Generated from `rules.yaml`. Don't edit this file by hand.** Change the rules on the dashboard's
 > Rules screen (or edit `rules.yaml`); this file is rewritten automatically after every change.
-> Last generated: Sat 14 Nov 2026 11:51
+> Last generated: Sat 14 Nov 2026 14:59
 
 The agent checks **every** option against these rules. The checks are plain code, no AI.
 When a rule is not met, it gives one of these results:
@@ -18,38 +18,38 @@ When a rule is not met, it gives one of these results:
 
 ## A. The request (checked before searching)
 
-### A2. Request is clear 🔒
+### A2 - Request is clear 🔒
 - The request must say product, amount, unit, deadline. If anything is missing: ask the buyer.
 
-### A1. Much bigger than usual
+### A1 - Much bigger than usual
 - More than 3× the kitchen's usual amount: ask the buyer. If the buyer confirms: needs approval. Item never ordered before: needs approval.
 
 ## B. Each product in an option
 
-### B1. Can be sold 🔒
+### B1 - Can be sold 🔒
 - The product must have a price, a delivery date and no sales block. Otherwise it can't be used.
 
-### B2. Matches the request 🔒
+### B2 - Matches the request 🔒
 - The product must have every label the request needs (e.g. lactose-free). Otherwise it can't be used.
 
-### B3. Arrives by the deadline 🔒
+### B3 - Arrives by the deadline 🔒
 - Delivery must be on or before the deadline, and the order cut-off must not have passed. Otherwise it can't be used.
 
-### B4. Enough stock 🔒
+### B4 - Enough stock 🔒
 - The amount can't be more than the stock. Otherwise it can't be used. Supplier products with unknown stock: allowed, with a warning.
 
 ## C. The whole order
 
-### C4. Allowed order steps 🔒
+### C4 - Allowed order steps 🔒
 - Orders are in whole packs, rounded up. If that adds more than 5% to the amount asked: needs approval.
 
-### C1. Spend limit
+### C1 - Spend limit
 - One order may cost at most €2,000.00 (including tax). Over the limit: needs approval.
 
-### C2. Approved brands
+### C2 - Approved brands
 - Only these brands without asking: Valio. Any other brand: needs approval.
 
-### C3. Brands per split
+### C3 - Brands per split
 - One order may mix at most 2 brands. More: can't be used.
 
 🔒 = safety rule: its settings can be changed, but it can't be removed.

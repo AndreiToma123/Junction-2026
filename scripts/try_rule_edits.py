@@ -1,12 +1,11 @@
 """Try rule editing: preview, apply, refuse bad changes, manual text edit, undo.
 Uses live Aimo data to show how a rule change changes the agent's decision.
-At the end the rulebook is restored exactly as it was, and the test changes are removed.
+Runs in a sandbox with a copy of the DEFAULT rulebook: your real rules and data are not touched.
 
 Run: .venv/bin/python -m scripts.try_rule_edits
 """
-import shutil
-
-from app import agent, config, rule_edit, rules, store
+from scripts import _sandbox  # noqa: F401  (must be first: tests run in a sandbox)
+from app import agent, rule_edit, rules
 
 PERSON = "test person"
 
@@ -36,9 +35,7 @@ def run(text, scenario=None):
 
 
 if __name__ == "__main__":
-    original_rules = rules.RULES_FILE.read_text(encoding="utf-8")
-    original_book = (config.ROOT / "rulebook.md").read_text(encoding="utf-8")
-    try:
+    if True:
         say("1 Edit: raise spend limit to €2,500, then 2,000 L is ordered without approval")
         show_preview({"action": "edit", "rule_id": "C1", "settings": {"limit_eur": 2500}})
         c1 = rule_edit.apply(PERSON, {"action": "edit", "rule_id": "C1", "settings": {"limit_eur": 2500}})
@@ -76,11 +73,4 @@ if __name__ == "__main__":
         for c in rule_edit.list_changes():
             print(f"   {c['change_id']} {c['time'][11:19]} by {c['by']} ({c['source']}): "
                   + "; ".join(f"{d['change']} {d['rule_id']}" for d in c["diff"]))
-    finally:
-        rules.RULES_FILE.write_text(original_rules, encoding="utf-8")
-        (config.ROOT / "rulebook.md").write_text(original_book, encoding="utf-8")
-        rule_edit.CHANGES_FILE.unlink(missing_ok=True)
-        shutil.rmtree(rule_edit.VERSIONS_DIR, ignore_errors=True)
-        shutil.rmtree(store.DIR, ignore_errors=True)
-        config.ORDERS_FILE.unlink(missing_ok=True)
-        print("\n(rulebook restored, test requests/orders/changes removed)")
+    print("\n(sandbox removed; your real rulebook and data were never touched)")

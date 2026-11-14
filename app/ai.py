@@ -18,12 +18,17 @@ from datetime import date, timedelta
 from . import catalog, llm, log, parse, rule_edit, rules
 from .rule_types import TYPES
 
+import os
+
+# "when_needed" (default): Gemini reads a request only if the simple reader could not read all of it.
+# "always": Gemini reads every request. Costs one call per request.
+PARSE_MODE = os.getenv("GEMINI_PARSE", "when_needed")
 AI = "Gemini"
 CODE = "plain code (no AI)"
 
 
 def status():
-    return {"gemini": llm.available(), "model": llm.MODEL if llm.available() else None,
+    return {"gemini": llm.available(), "model": llm.MODEL if llm.available() else None, "usage": llm.usage(),
             "mode": "Gemini is connected" if llm.available() else "Simple mode: no Gemini key yet, plain-code fallbacks are used"}
 
 
@@ -45,6 +50,10 @@ def parse_request(text, today=None):
     simple = parse.parse(text, today)
     if not llm.available():
         simple["parsed_by"] = "simple pattern reader (no Gemini key yet)"
+        return simple
+    complete = all(simple.get(k) not in (None, "") for k in ("product", "amount", "unit", "deadline")) and simple.get("item_id")
+    if complete and PARSE_MODE != "always":
+        simple["parsed_by"] = "simple pattern reader (clear request, no AI needed)"
         return simple
     items = [{"item_id": i["item_id"], "name": i["name"], "aliases": i["aliases"]} for i in rules.usual_orders()["items"]]
     system = ("You read purchase requests for a professional kitchen and return JSON with exactly these keys: "
@@ -107,6 +116,7 @@ def summarize(rec):
     system = ("Write a summary of at most 2 short sentences for a kitchen manager who must approve or reject a purchase. "
               "Say why a decision is needed and the one or two facts that matter most. Use ONLY the facts in the JSON. "
               "Do not list products or repeat the order lines. Do not add numbers that are not in the JSON. "
+              "'delivery_date' is the day the goods will be delivered (not a deadline). "
               "Plain words, no jargon. Return JSON: {\"summary\": \"...\"}")
     try:
         g = llm.generate_json(system, json.dumps(facts, ensure_ascii=False))
@@ -220,7 +230,7 @@ def ask_log(question, today=None):
     item = _item_in(question)
     everything = [e for e in log.read() if not since or e["time"][:10] >= since]
     cands = [e for e in everything if e["step"] in IMPORTANT_STEPS or (e["step"] == "rules" and ": pass." not in e["message"])]
-    cands = cands[-150:]
+    cands = cands[-60:]  # keeps the question small for the free tier
     by_id = {e["id"]: e for e in cands}
     facts = _order_facts(everything, item) if item else []
     scope_text = f"Looked at {scope}: {len(cands)} important log lines" + (f", item: {item['name']}" if item else "") + "."
@@ -305,7 +315,7 @@ def propose_rule(text):
                            "current_rules": [{k: r[k] for k in ("id", "type", "name", "settings", "result")} for r in doc["rules"]],
                            "rule_types": {k: {"title": t["title"], "locked": t["locked"], "results": t["results"],
                                               "settings": t["settings"]} for k, t in TYPES.items()},
-                           "known_brands_sample": sorted(_brands())[:400]}, ensure_ascii=False)
+                           "brands_that_look_like_words_in_the_wish": _brands_like(text)}, ensure_ascii=False)
         try:
             g = llm.generate_json(system, user)
             if g.get("status") == "question" and isinstance(g.get("question"), str):
@@ -334,6 +344,14 @@ def _brands():
     if "b" not in _brand_cache:
         _brand_cache["b"] = {p["brand"] for p in catalog.load().values() if p["brand"]}
     return _brand_cache["b"]
+
+
+def _brands_like(text):
+    by_lower = {b.lower(): b for b in _brands()}
+    out = []
+    for w in re.findall(r"[\w'&-]{3,}", text.lower()):
+        out += [by_lower[m] for m in difflib.get_close_matches(w, by_lower, n=3, cutoff=0.75)]
+    return sorted(set(out))[:20]
 
 
 def _find_brand(words):
@@ -370,8 +388,8 @@ def _propose_by_patterns(text, doc):
         if not r:
             return ask(f"There is no rule {rid}. Which rule do you want to remove?")
         if TYPES[r["type"]]["locked"]:
-            return ask(f"{rid} {r['name']} is a safety rule and can't be removed. Do you want to change its settings instead?")
-        return ok({"action": "remove", "rule_id": rid}, f"Remove rule {rid} {r['name']}.")
+            return ask(f"{rid} - {r['name']} is a safety rule and can't be removed. Do you want to change its settings instead?")
+        return ok({"action": "remove", "rule_id": rid}, f"Remove rule {rid} - {r['name']}.")
 
     # spend limit: "raise the spend limit to 2,500"
     if re.search(r"\b(spend|spending|budget|order)\b.*\blimit\b|\blimit\b.*\b(spend|order|€|eur)", t):

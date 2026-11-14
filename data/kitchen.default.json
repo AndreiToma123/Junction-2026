@@ -1,0 +1,729 @@
+{
+ "_note": "GENERATED TEST DATA: a mock menu, kitchen stock and usual orders for the demo. Product codes, prices and Aimo stock are real (from the Valio Aimo mock API); the menu, amounts and kitchen stock are made up.",
+ "kitchen": "Demo Kitchen Oy",
+ "ingredients": [
+  {
+   "item_id": "lf-semi-skimmed-milk",
+   "name": "Lactose-free semi-skimmed milk",
+   "aliases": [
+    "lactose-free milk",
+    "lactose free milk",
+    "laktoositon maito",
+    "eila",
+    "milk"
+   ],
+   "unit": "L",
+   "usual_product": "464306",
+   "search": {
+    "words": "semi skimmed",
+    "labels": [
+     "FREE_FROM_LACTOSE"
+    ],
+    "category": "10400"
+   },
+   "usual_amount": 1000,
+   "per": "order",
+   "reorder_level": 200,
+   "stock": 256,
+   "lead_days": 2,
+   "category": "dairy",
+   "history": [
+    {
+     "date": "2026-10-24",
+     "amount": 1000,
+     "products": {
+      "464306": 1000
+     }
+    },
+    {
+     "date": "2026-10-31",
+     "amount": 1000,
+     "products": {
+      "464306": 600,
+      "469363": 400
+     }
+    },
+    {
+     "date": "2026-11-07",
+     "amount": 1000,
+     "products": {
+      "464398": 1000
+     }
+    }
+   ]
+  },
+  {
+   "item_id": "butter",
+   "name": "Butter",
+   "aliases": [
+    "butter",
+    "voi"
+   ],
+   "unit": "KG",
+   "usual_product": "464411",
+   "search": {
+    "words": "butter",
+    "category": "10500"
+   },
+   "usual_amount": 40,
+   "per": "order",
+   "reorder_level": 11.5,
+   "stock": 29,
+   "lead_days": 2,
+   "category": "dairy"
+  },
+  {
+   "item_id": "cooking-cream",
+   "name": "Cooking cream",
+   "aliases": [
+    "cooking cream",
+    "cream",
+    "ruokakerma"
+   ],
+   "unit": "L",
+   "usual_product": "464249",
+   "search": {
+    "words": "cream",
+    "category": "10401",
+    "labels": [
+     "FREE_FROM_LACTOSE"
+    ]
+   },
+   "usual_amount": 60,
+   "per": "order",
+   "reorder_level": 15.0,
+   "stock": 34,
+   "lead_days": 2,
+   "category": "dairy"
+  },
+  {
+   "item_id": "eggs",
+   "name": "Eggs",
+   "aliases": [
+    "eggs",
+    "egg",
+    "kananmuna"
+   ],
+   "unit": "KG",
+   "usual_product": "463982",
+   "search": {
+    "words": "egg",
+    "category": "10590"
+   },
+   "usual_amount": 110,
+   "per": "order",
+   "reorder_level": 34,
+   "stock": 68,
+   "lead_days": 2,
+   "category": "dairy"
+  },
+  {
+   "item_id": "cheese",
+   "name": "Grated mozzarella cheese",
+   "aliases": [
+    "cheese",
+    "mozzarella",
+    "juustoraaste"
+   ],
+   "unit": "KG",
+   "usual_product": "465256",
+   "search": {
+    "words": "",
+    "category": "10603"
+   },
+   "usual_amount": 15,
+   "per": "order",
+   "reorder_level": 5.5,
+   "stock": 14.0,
+   "lead_days": 2,
+   "category": "dairy"
+  },
+  {
+   "item_id": "wheat-flour",
+   "name": "Wheat flour",
+   "aliases": [
+    "wheat flour",
+    "flour",
+    "vehnäjauho"
+   ],
+   "unit": "KG",
+   "usual_product": "470169",
+   "search": {
+    "words": "wheat flour",
+    "category": "21300"
+   },
+   "usual_amount": 40,
+   "per": "order",
+   "reorder_level": 4.5,
+   "stock": 17.5,
+   "lead_days": 2,
+   "category": "dry goods"
+  },
+  {
+   "item_id": "arborio-rice",
+   "name": "Risotto rice",
+   "aliases": [
+    "risotto rice",
+    "arborio",
+    "rice"
+   ],
+   "unit": "KG",
+   "usual_product": "468926",
+   "search": {
+    "words": "rice",
+    "category": "21340"
+   },
+   "usual_amount": 20,
+   "per": "order",
+   "reorder_level": 3.5,
+   "stock": 10.5,
+   "lead_days": 2,
+   "category": "dry goods"
+  },
+  {
+   "item_id": "penne",
+   "name": "Penne pasta",
+   "aliases": [
+    "penne",
+    "pasta"
+   ],
+   "unit": "KG",
+   "usual_product": "463190",
+   "search": {
+    "words": "penne"
+   },
+   "usual_amount": 40,
+   "per": "order",
+   "reorder_level": 13.5,
+   "stock": 17.5,
+   "lead_days": 2,
+   "category": "dry goods"
+  },
+  {
+   "item_id": "crushed-tomato",
+   "name": "Crushed tomatoes",
+   "aliases": [
+    "crushed tomatoes",
+    "crushed tomato",
+    "tomaattimurska",
+    "tomatoes"
+   ],
+   "unit": "KG",
+   "usual_product": "466203",
+   "search": {
+    "words": "tomatoes",
+    "category": "21590"
+   },
+   "usual_amount": 40,
+   "per": "order",
+   "reorder_level": 17.5,
+   "stock": 35,
+   "lead_days": 2,
+   "category": "dry goods"
+  },
+  {
+   "item_id": "oat-flakes",
+   "name": "Oat flakes",
+   "aliases": [
+    "oat flakes",
+    "oats",
+    "kaurahiutale"
+   ],
+   "unit": "KG",
+   "usual_product": "466983",
+   "search": {
+    "words": "oat",
+    "category": "21370"
+   },
+   "usual_amount": 60,
+   "per": "order",
+   "reorder_level": 18.0,
+   "stock": 40,
+   "lead_days": 2,
+   "category": "dry goods"
+  },
+  {
+   "item_id": "lingonberry-jam",
+   "name": "Lingonberry jam",
+   "aliases": [
+    "lingonberry jam",
+    "lingonberry",
+    "puolukkahillo"
+   ],
+   "unit": "KG",
+   "usual_product": "466552",
+   "search": {
+    "words": "lingonberry",
+    "category": "21450"
+   },
+   "usual_amount": 36,
+   "per": "order",
+   "reorder_level": 14.0,
+   "stock": 28,
+   "lead_days": 2,
+   "category": "dry goods"
+  },
+  {
+   "item_id": "potato",
+   "name": "Potatoes",
+   "aliases": [
+    "potatoes",
+    "potato",
+    "peruna"
+   ],
+   "unit": "KG",
+   "usual_product": "460573",
+   "search": {
+    "words": "potato",
+    "category": "17421"
+   },
+   "usual_amount": 150,
+   "per": "order",
+   "reorder_level": 59,
+   "stock": 118,
+   "lead_days": 2,
+   "category": "fresh produce"
+  },
+  {
+   "item_id": "onion",
+   "name": "Onions",
+   "aliases": [
+    "onions",
+    "onion",
+    "sipuli"
+   ],
+   "unit": "KG",
+   "usual_product": "460195",
+   "search": {
+    "words": "onion",
+    "category": "17405"
+   },
+   "usual_amount": 30,
+   "per": "order",
+   "reorder_level": 10.5,
+   "stock": 27,
+   "lead_days": 2,
+   "category": "fresh produce"
+  },
+  {
+   "item_id": "carrot",
+   "name": "Carrots",
+   "aliases": [
+    "carrots",
+    "carrot",
+    "porkkana"
+   ],
+   "unit": "KG",
+   "usual_product": "460824",
+   "search": {
+    "words": "carrot",
+    "category": "17431"
+   },
+   "usual_amount": 30,
+   "per": "order",
+   "reorder_level": 13.0,
+   "stock": 17.5,
+   "lead_days": 2,
+   "category": "fresh produce"
+  },
+  {
+   "item_id": "mushroom",
+   "name": "Fresh mushrooms",
+   "aliases": [
+    "mushrooms",
+    "mushroom",
+    "herkkusieni"
+   ],
+   "unit": "KG",
+   "usual_product": "461266",
+   "search": {
+    "words": "mushroom",
+    "category": "17471"
+   },
+   "usual_amount": 18,
+   "per": "order",
+   "reorder_level": 7.0,
+   "stock": 14.0,
+   "lead_days": 2,
+   "category": "fresh produce"
+  },
+  {
+   "item_id": "salmon",
+   "name": "Salmon fillet",
+   "aliases": [
+    "salmon fillet",
+    "salmon",
+    "lohi"
+   ],
+   "unit": "KG",
+   "usual_product": "462150",
+   "search": {
+    "words": "fillet",
+    "category": "18706"
+   },
+   "usual_amount": 60,
+   "per": "order",
+   "reorder_level": 17.5,
+   "stock": 21,
+   "lead_days": 2,
+   "category": "fish & meat"
+  },
+  {
+   "item_id": "chicken",
+   "name": "Chicken breast fillet",
+   "aliases": [
+    "chicken breast",
+    "chicken",
+    "broileri"
+   ],
+   "unit": "KG",
+   "usual_product": "462281",
+   "search": {
+    "words": "chicken",
+    "category": "18750"
+   },
+   "usual_amount": 44,
+   "per": "order",
+   "reorder_level": 16.0,
+   "stock": 32,
+   "lead_days": 2,
+   "category": "fish & meat"
+  },
+  {
+   "item_id": "minced-beef",
+   "name": "Minced beef",
+   "aliases": [
+    "minced beef",
+    "ground beef",
+    "jauheliha"
+   ],
+   "unit": "KG",
+   "usual_product": "470418",
+   "search": {
+    "words": "minced",
+    "category": "18760"
+   },
+   "usual_amount": 60,
+   "per": "order",
+   "reorder_level": 20.0,
+   "stock": 45,
+   "lead_days": 2,
+   "category": "fish & meat"
+  }
+ ],
+ "dishes": [
+  {
+   "dish_id": "salmon-soup",
+   "name": "Creamy salmon soup (lohikeitto)",
+   "portions_per_day": 40,
+   "ingredients": [
+    {
+     "item_id": "salmon",
+     "amount": 0.12
+    },
+    {
+     "item_id": "potato",
+     "amount": 0.15
+    },
+    {
+     "item_id": "cooking-cream",
+     "amount": 0.08
+    },
+    {
+     "item_id": "onion",
+     "amount": 0.03
+    },
+    {
+     "item_id": "carrot",
+     "amount": 0.04
+    },
+    {
+     "item_id": "butter",
+     "amount": 0.01
+    }
+   ]
+  },
+  {
+   "dish_id": "meatballs",
+   "name": "Meatballs with mashed potato and lingonberry",
+   "portions_per_day": 45,
+   "ingredients": [
+    {
+     "item_id": "minced-beef",
+     "amount": 0.14
+    },
+    {
+     "item_id": "potato",
+     "amount": 0.25
+    },
+    {
+     "item_id": "lf-semi-skimmed-milk",
+     "amount": 0.06
+    },
+    {
+     "item_id": "butter",
+     "amount": 0.015
+    },
+    {
+     "item_id": "onion",
+     "amount": 0.02
+    },
+    {
+     "item_id": "eggs",
+     "amount": 0.01
+    },
+    {
+     "item_id": "lingonberry-jam",
+     "amount": 0.03
+    }
+   ]
+  },
+  {
+   "dish_id": "chicken-penne",
+   "name": "Chicken penne in tomato-cream sauce",
+   "portions_per_day": 35,
+   "ingredients": [
+    {
+     "item_id": "chicken",
+     "amount": 0.13
+    },
+    {
+     "item_id": "penne",
+     "amount": 0.11
+    },
+    {
+     "item_id": "crushed-tomato",
+     "amount": 0.12
+    },
+    {
+     "item_id": "cooking-cream",
+     "amount": 0.05
+    },
+    {
+     "item_id": "onion",
+     "amount": 0.02
+    },
+    {
+     "item_id": "cheese",
+     "amount": 0.02
+    }
+   ]
+  },
+  {
+   "dish_id": "mushroom-risotto",
+   "name": "Mushroom risotto",
+   "portions_per_day": 20,
+   "ingredients": [
+    {
+     "item_id": "arborio-rice",
+     "amount": 0.09
+    },
+    {
+     "item_id": "mushroom",
+     "amount": 0.1
+    },
+    {
+     "item_id": "onion",
+     "amount": 0.03
+    },
+    {
+     "item_id": "butter",
+     "amount": 0.02
+    },
+    {
+     "item_id": "cheese",
+     "amount": 0.03
+    }
+   ]
+  },
+  {
+   "dish_id": "beef-pasta-bake",
+   "name": "Beef and tomato pasta bake",
+   "portions_per_day": 30,
+   "ingredients": [
+    {
+     "item_id": "minced-beef",
+     "amount": 0.12
+    },
+    {
+     "item_id": "penne",
+     "amount": 0.1
+    },
+    {
+     "item_id": "crushed-tomato",
+     "amount": 0.15
+    },
+    {
+     "item_id": "cheese",
+     "amount": 0.05
+    },
+    {
+     "item_id": "onion",
+     "amount": 0.02
+    },
+    {
+     "item_id": "lf-semi-skimmed-milk",
+     "amount": 0.08
+    },
+    {
+     "item_id": "wheat-flour",
+     "amount": 0.008
+    },
+    {
+     "item_id": "butter",
+     "amount": 0.008
+    }
+   ]
+  },
+  {
+   "dish_id": "baked-salmon",
+   "name": "Oven-baked salmon with root vegetables",
+   "portions_per_day": 25,
+   "ingredients": [
+    {
+     "item_id": "salmon",
+     "amount": 0.16
+    },
+    {
+     "item_id": "potato",
+     "amount": 0.2
+    },
+    {
+     "item_id": "carrot",
+     "amount": 0.08
+    },
+    {
+     "item_id": "butter",
+     "amount": 0.015
+    }
+   ]
+  },
+  {
+   "dish_id": "chicken-stew",
+   "name": "Chicken and mushroom stew with potatoes",
+   "portions_per_day": 25,
+   "ingredients": [
+    {
+     "item_id": "chicken",
+     "amount": 0.14
+    },
+    {
+     "item_id": "mushroom",
+     "amount": 0.06
+    },
+    {
+     "item_id": "cooking-cream",
+     "amount": 0.06
+    },
+    {
+     "item_id": "potato",
+     "amount": 0.2
+    },
+    {
+     "item_id": "onion",
+     "amount": 0.03
+    },
+    {
+     "item_id": "wheat-flour",
+     "amount": 0.005
+    }
+   ]
+  },
+  {
+   "dish_id": "oat-porridge",
+   "name": "Oat porridge with lingonberry",
+   "portions_per_day": 150,
+   "ingredients": [
+    {
+     "item_id": "oat-flakes",
+     "amount": 0.06
+    },
+    {
+     "item_id": "lf-semi-skimmed-milk",
+     "amount": 0.25
+    },
+    {
+     "item_id": "lingonberry-jam",
+     "amount": 0.03
+    },
+    {
+     "item_id": "butter",
+     "amount": 0.005
+    }
+   ]
+  },
+  {
+   "dish_id": "pannukakku",
+   "name": "Finnish oven pancake (pannukakku) with lingonberry jam",
+   "portions_per_day": 30,
+   "ingredients": [
+    {
+     "item_id": "lf-semi-skimmed-milk",
+     "amount": 0.2
+    },
+    {
+     "item_id": "eggs",
+     "amount": 0.05
+    },
+    {
+     "item_id": "wheat-flour",
+     "amount": 0.06
+    },
+    {
+     "item_id": "butter",
+     "amount": 0.012
+    },
+    {
+     "item_id": "lingonberry-jam",
+     "amount": 0.04
+    }
+   ]
+  },
+  {
+   "dish_id": "carrot-soup",
+   "name": "Carrot and potato soup",
+   "portions_per_day": 20,
+   "ingredients": [
+    {
+     "item_id": "carrot",
+     "amount": 0.15
+    },
+    {
+     "item_id": "potato",
+     "amount": 0.12
+    },
+    {
+     "item_id": "onion",
+     "amount": 0.03
+    },
+    {
+     "item_id": "cooking-cream",
+     "amount": 0.05
+    },
+    {
+     "item_id": "butter",
+     "amount": 0.008
+    }
+   ]
+  },
+  {
+   "dish_id": "breakfast-buffet",
+   "name": "Breakfast buffet (milk, scrambled eggs, butter)",
+   "portions_per_day": 250,
+   "ingredients": [
+    {
+     "item_id": "lf-semi-skimmed-milk",
+     "amount": 0.25
+    },
+    {
+     "item_id": "eggs",
+     "amount": 0.06
+    },
+    {
+     "item_id": "butter",
+     "amount": 0.01
+    }
+   ]
+  }
+ ]
+}

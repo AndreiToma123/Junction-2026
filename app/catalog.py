@@ -68,9 +68,41 @@ def _litres_per_sales_unit(p):
     return None, "no size found"
 
 
+_WEIGHT = re.compile(r"(\d+(?:[.,]\d+)?)\s*(kg|g)\b", re.I)
+
+
+def _kg_per_sales_unit(p):
+    """How many kilograms one sales unit holds, and where the number came from."""
+    if p["salesUnit"] == "KG":
+        return 1.0, "sold by the kilogram"
+    sizes = {u["unitId"]: u["sizeInBaseUnits"] for u in p.get("units", [])}
+    in_sales_unit = sizes.get(p["salesUnit"], 1.0)
+    for u in p.get("synkkaData", {}).get("unitConversions") or []:
+        w = u.get("netWeight")
+        if w and w.get("unit") in ("GRM", "KGM"):
+            kg = w["value"] / (1000 if w["unit"] == "GRM" else 1)
+            if u["synkkaPackagingType"] == "BASE_UNIT_OR_EACH":
+                return round(kg * in_sales_unit, 4), "product data (net weight per piece)"
+            if u["synkkaPackagingType"] == "CASE" and p["salesUnit"] != p["baseUnit"]:
+                return round(kg, 4), "product data (net weight per case)"
+    name = _name(p, "en") or _name(p, "fi") or ""
+    m = _WEIGHT.findall(name)
+    if m:
+        value, unit = m[-1]
+        per_piece = float(value.replace(",", ".")) * (1 if unit.lower() == "kg" else 0.001)
+        return round(per_piece * in_sales_unit, 4), "product name"
+    return None, "no weight found"
+
+
+def content_per_sales_unit(p, unit):
+    """Litres (unit "L") or kilograms (unit "KG") in one sales unit of a product from the index."""
+    return p.get("litres_per_sales_unit") if unit == "L" else p.get("kg_per_sales_unit") if unit == "KG" else None
+
+
 def _slim(p):
     s = p.get("synkkaData", {})
     litres, litres_source = _litres_per_sales_unit(p)
+    kg, kg_source = _kg_per_sales_unit(p)
     return {
         "id": p["id"],
         "name_en": _name(p, "en"),
@@ -85,6 +117,9 @@ def _slim(p):
         "allowed_lot_size": p.get("allowedLotSize"),
         "litres_per_sales_unit": litres,
         "litres_source": litres_source,
+        "kg_per_sales_unit": kg,
+        "kg_source": kg_source,
+        "temperature": p.get("temperatureCondition"),
         "labels": _labels(p),
         "substitutes": [x["substituteProduct"] for x in p.get("substitutions") or []],
         "deposits": p.get("deposits") or [],

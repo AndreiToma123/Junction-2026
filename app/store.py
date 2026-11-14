@@ -5,7 +5,7 @@ import threading
 
 from . import config
 
-DIR = config.DATA / "requests"
+DIR = config.STATE / "requests"
 _lock = threading.Lock()
 
 

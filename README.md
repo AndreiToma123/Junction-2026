@@ -38,7 +38,7 @@ You need Python 3.10+ and the Valio Aimo API key.
 ### The four demo scenarios
 
 ```bash
-.venv/bin/python -m scripts.reset_demo        # clean start + 3 weeks of test history
+.venv/bin/python -m scripts.reset_demo --rules   # clean start, default rules, 3 weeks of test history
 .venv/bin/python -m scripts.run_scenarios     # all four; or add: normal | split | spend | typo
 ```
 
@@ -52,7 +52,7 @@ You need Python 3.10+ and the Valio Aimo API key.
 Each request then appears on the dashboard, where you approve, reject or answer it. You can also
 type the same sentences on the dashboard yourself (for `split`, tick "Demo options").
 
-Other checks you can run (they leave test lines in the log, so run `reset_demo` again afterwards):
+Other checks you can run (they use a sandbox copy, so your data and rules are never touched):
 
 ```bash
 .venv/bin/python -m scripts.try_rules         # 9 rule cases with live data
@@ -101,13 +101,13 @@ The worst result decides: can't be used > ask the buyer > needs approval > pass.
 
 | Rule | If not met |
 |---|---|
-| A2 Request is clear 🔒 | ask the buyer (never guesses an amount or date) |
-| A1 Much bigger than usual (over 3×) | ask the buyer; if confirmed, still needs approval |
-| B1 Can be sold 🔒 · B2 Matches the request 🔒 · B3 Arrives by the deadline 🔒 · B4 Enough stock 🔒 | option can't be used |
-| C4 Whole packs, rounding adds at most 5% 🔒 | needs approval |
-| C1 Spend limit €2,000 incl. tax | needs approval |
-| C2 Approved brands (Valio) | needs approval |
-| C3 At most 2 brands in one order | option can't be used |
+| A2 - Request is clear 🔒 | ask the buyer (never guesses an amount or date) |
+| A1 - Much bigger than usual (over 3×) | ask the buyer; if confirmed, still needs approval |
+| B1 - Can be sold 🔒 · B2 - Matches the request 🔒 · B3 - Arrives by the deadline 🔒 · B4 - Enough stock 🔒 | option can't be used |
+| C4 - Whole packs, rounding adds at most 5% 🔒 | needs approval |
+| C1 - Spend limit €2,000 incl. tax | needs approval |
+| C2 - Approved brands (Valio) | needs approval |
+| C3 - At most 2 brands in one order | option can't be used |
 
 🔒 = safety rule: can be tuned, not removed. More rule types can be added from the dashboard:
 avoid brands, avoid products, max price per litre, minimum delivery reliability, required labels.
@@ -156,7 +156,7 @@ No proprietary formats: every file opens in a text editor.
 
 ## Assumptions
 
-All 22 decisions, with reasons, are in **[DECISIONS.md](DECISIONS.md)**. The ones that matter most:
+All 34 decisions, with reasons, are in **[DECISIONS.md](DECISIONS.md)**. Progress and what could come next: **[roadmap.md](roadmap.md)**. The ones that matter most:
 
 - **Stock numbers.** `999999` on a supplier ("Terminal") product means *unknown* (documented by Aimo).
   `9999999999` and `666666666` on stocked products mean *no limit* (our reading, not documented).
@@ -169,7 +169,7 @@ All 22 decisions, with reasons, are in **[DECISIONS.md](DECISIONS.md)**. The one
   the product file and ask the API only about the matches (14 products for the milk request).
 - **Spend limit includes tax.**
 
-What the agent does **not** check (listed on every request): allergens and food quality,
+What the agent does **not** check (saved with every request): allergens and food quality,
 customer-specific prices (the mock API ignores the customer number), real order confirmation.
 
 More detail on the data: [DATA_NOTES.md](DATA_NOTES.md).

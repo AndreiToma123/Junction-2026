@@ -52,10 +52,15 @@ def _check_usual_size(rule, req, ctx):
     ratio = req["amount"] / item["usual_amount"]
     facts = {"requested": req["amount"], "usual": item["usual_amount"], "unit": item["unit"],
              "ratio": round(ratio, 2), "max_ratio": s["max_ratio"]}
-    base = (f"{NUM(req['amount'])} {item['unit']} is {NUM(round(ratio, 1))}× the usual "
+    times = NUM(round(ratio, 1))
+    if ratio > s["max_ratio"] and round(ratio, 1) <= s["max_ratio"]:
+        times = f"just over {NUM(s['max_ratio'])}"  # e.g. 3,001 L against a 3× limit
+    base = (f"{NUM(req['amount'])} {item['unit']} is {times}× the usual "
             f"{NUM(item['usual_amount'])} {item['unit']} per {item['per']} (limit {NUM(s['max_ratio'])}×)")
     if ratio > s["max_ratio"] and req.get("buyer_confirmed_amount"):
-        return s["if_buyer_confirms"], base + ". The buyer confirmed it, but it is still unusual.", facts
+        if s["if_buyer_confirms"] == "pass":
+            return "pass", base + ". The buyer confirmed the amount.", facts
+        return s["if_buyer_confirms"], base + ". The buyer confirmed the amount; an order this unusual also needs a person's approval.", facts
     if ratio > s["max_ratio"]:
         return rule["result"], base + ". Ask the buyer to confirm.", facts
     return "pass", base + ".", facts
@@ -129,10 +134,11 @@ def _check_avoid_products(rule, line, q, p, req, ctx):
 
 
 def _check_max_price_per_litre(rule, line, q, p, req, ctx):
-    if not q or not q.get("priced") or not p["litres_per_sales_unit"]:
+    per = catalog.content_per_sales_unit(p, "L")
+    if not q or not q.get("priced") or not per or req.get("unit") != "L":
         return None
     pid, limit = line["product_id"], rule["settings"]["max_eur_per_litre"]
-    per_l = q["price_per_unit_with_tax"] / p["litres_per_sales_unit"]
+    per_l = q["price_per_unit_with_tax"] / per
     facts = {"product": pid, "price_per_litre": round(per_l, 3), "max": limit}
     if per_l > limit + 1e-9:
         return rule["result"], f"{pid}: {EUR(per_l)}/L is over the {EUR(limit)}/L limit.", facts
@@ -167,10 +173,11 @@ def _check_order_steps(rule, option, quote, req, ctx):
     litres, bad = 0.0, []
     for line in option["lines"]:
         p = catalog.get(line["product_id"])
-        step = p["allowed_lot_size"] or 1
-        if abs(round(line["quantity"] / step) * step - line["quantity"]) > 1e-9:
+        step = p.get("allowed_lot_size") or 1
+        step = step if step >= 1 else 1  # tiny lot sizes mean "any amount": whole packs only
+        if abs(round(line["quantity"] / step) * step - line["quantity"]) > 1e-6:
             bad.append(line["product_id"])
-        litres += line["quantity"] * (p["litres_per_sales_unit"] or 0)
+        litres += line["quantity"] * (catalog.content_per_sales_unit(p, req["unit"]) or 0)
     over = (litres - req["amount"]) / req["amount"] * 100 if req["amount"] else 0
     facts = {"asked": req["amount"], "ordered": round(litres, 3), "overshoot_pct": round(over, 2), "max": s["max_overshoot_pct"]}
     ctx["litres"] = round(litres, 3)
@@ -215,11 +222,18 @@ def _brands(option):
 def _check_approved_brands(rule, option, quote, req, ctx):
     ok = rule["settings"]["brands"]
     brands = _brands(option)
-    others = sorted({b or "no brand" for b in brands.values() if b not in ok})
-    facts = {"brands": brands, "approved": ok}
+    # The kitchen's usual product for this item is always fine: it is their stated preference.
+    usual = ctx.get("usual_product") if rule["settings"].get("usual_product_ok", True) else None
+    others = sorted({b or "no brand" for pid, b in brands.items() if b not in ok and pid != usual})
+    facts = {"brands": brands, "approved": ok, "usual_product": usual}
+    if not others and usual and any(pid == usual and b not in ok for pid, b in brands.items()):
+        return "pass", f"{usual} is the kitchen's usual product for this item.", facts
     if others:
-        return rule["result"], (f"{', '.join(others)} {'is' if len(others) == 1 else 'are'} not an approved brand "
-                                f"(approved: {', '.join(ok)})."), facts
+        names = [f"{(catalog.get(pid) or {}).get('name_en') or pid} ({pid}, {b or 'no brand'})"
+                 for pid, b in brands.items() if b not in ok and pid != usual]
+        return rule["result"], (f"{'; '.join(names)} {'is' if len(names) == 1 else 'are'} not "
+                                + ("the kitchen's usual product and not " if usual else "")
+                                + f"an approved brand (approved: {', '.join(ok)})."), facts
     return "pass", f"{', '.join(sorted(set(brands.values())))}: approved.", facts
 
 
@@ -296,8 +310,10 @@ TYPES = {
                                f"({'including' if s['includes_tax'] else 'excluding'} tax). Over the limit: {RESULT_WORDS[r]}.")),
     "approved_brands": dict(scope="order", category="Order", locked=False, results=["approve", "blocked"],
         title="Approved brands", check=_check_approved_brands,
-        settings={"brands": dict(kind="list", min_items=1)},
-        describe=lambda s, r: f"Only these brands without asking: {', '.join(s['brands'])}. Any other brand: {RESULT_WORDS[r]}."),
+        settings={"brands": dict(kind="list", min_items=1), "usual_product_ok": dict(kind="bool", default=True)},
+        describe=lambda s, r: (f"Only these brands without asking: {', '.join(s['brands'])}"
+                               + (", plus the kitchen's usual product for each item" if s.get("usual_product_ok", True) else "")
+                               + f". Anything else: {RESULT_WORDS[r]}.")),
     "max_brands": dict(scope="order", category="Order", locked=False, results=["blocked", "approve"],
         title="Brands per split", check=_check_max_brands,
         settings={"max_brands": dict(kind="number", min=1, max=10, integer=True)},

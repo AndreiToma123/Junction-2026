@@ -12,3 +12,4 @@ data/requests/
 data/rule_changes.jsonl
 data/rule_versions/
 data/log.jsonl
+data/kitchen.json

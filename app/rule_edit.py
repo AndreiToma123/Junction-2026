@@ -19,8 +19,8 @@ import yaml
 from . import config, log, rulebook, rules
 from .rule_types import TYPES
 
-CHANGES_FILE = config.DATA / "rule_changes.jsonl"
-VERSIONS_DIR = config.DATA / "rule_versions"
+CHANGES_FILE = config.STATE / "rule_changes.jsonl"
+VERSIONS_DIR = config.STATE / "rule_versions"
 HEADER = """# THE RULEBOOK (single source). rulebook.md is generated from this file.
 # Edit via the dashboard (Rules screen) or by hand; every change is checked before it is saved.
 # Rule types and their settings: app/rule_types.py. Results: approve | ask | blocked.
@@ -39,7 +39,7 @@ def _now():
 
 
 def _plain(rule):
-    return f"{rule['id']} {rule['name']}: {rules.describe(rule)}"
+    return f"{rule['id']} - {rule['name']}: {rules.describe(rule)}"
 
 
 def apply_change_to(doc, change):
@@ -69,7 +69,7 @@ def apply_change_to(doc, change):
         if not r:
             return new, [f"There is no rule {change.get('rule_id')}."]
         if TYPES[r["type"]]["locked"]:
-            return new, [f"{r['id']} {r['name']} is a locked safety rule. You can change its settings, not remove it."]
+            return new, [f"{r['id']} - {r['name']} is a locked safety rule. You can change its settings, not remove it."]
         new["rules"].remove(r)
     else:
         return new, ["action must be add, edit or remove."]
@@ -151,7 +151,7 @@ def apply(by, change=None, text=None, source="manual", request_text=None):
     _write(p["new_rules"])
     entry = {"change_id": f"RC-{len(_changes()) + 1:04d}", "time": _now(), "by": by, "source": source,
              "request_text": request_text, "change": change, "diff": p["diff"], "previous_version": version}
-    config.DATA.mkdir(exist_ok=True)
+    config.STATE.mkdir(parents=True, exist_ok=True)
     with open(CHANGES_FILE, "a", encoding="utf-8") as f:
         f.write(json.dumps(entry, ensure_ascii=False) + "\n")
     how = {"manual": "on the Rules screen", "text": "by editing the rules file", "ai": "as proposed by the AI"}.get(source, f"({source})")
@@ -199,4 +199,5 @@ def overview():
         "types": [{"type": k, "title": t["title"], "category": t["category"], "locked": t["locked"],
                    "results": t["results"], "settings": t["settings"]} for k, t in TYPES.items()],
         "yaml": rules.RULES_FILE.read_text(encoding="utf-8"),
+        "default_yaml": config.RULES_DEFAULT_FILE.read_text(encoding="utf-8") if config.RULES_DEFAULT_FILE.exists() else None,
     }

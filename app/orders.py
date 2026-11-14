@@ -75,7 +75,7 @@ def place_order(lines, delivery_date, placed_by, request_id=None, note=None):
             "note": note,
             "mock": True,
         }
-        config.DATA.mkdir(exist_ok=True)
+        config.STATE.mkdir(parents=True, exist_ok=True)
         with open(config.ORDERS_FILE, "a", encoding="utf-8") as f:
             f.write(json.dumps(order, ensure_ascii=False) + "\n")
     return order

@@ -19,8 +19,7 @@ import yaml
 from . import catalog, config
 from .rule_types import ID_PREFIX, NUM, TYPES
 
-RULES_FILE = config.ROOT / "rules.yaml"
-USUAL_FILE = config.DATA / "usual_orders.json"
+RULES_FILE = config.RULES_FILE
 SEVERITY = {"pass": 0, "approve": 1, "ask": 2, "blocked": 3}
 VALID_RESULTS = {"approve", "ask", "blocked", "pass"}
 
@@ -54,7 +53,10 @@ def active(scope):
 
 
 def usual_orders():
-    return json.load(open(USUAL_FILE, encoding="utf-8"))
+    """The kitchen's usual orders = its ingredient list (see kitchen.py). One source for both."""
+    from . import kitchen
+    doc = kitchen.load()
+    return {"kitchen": doc["kitchen"], "items": doc["ingredients"]}
 
 
 def find_usual_item(item_id):
@@ -106,7 +108,8 @@ def check_request(req):
 def check_option(option, quote, req, required_labels):
     """Product rules for every line, then whole-order rules.
     Returns {"results", "outcome", "total_with_tax", "litres", "warnings"}."""
-    ctx = {"required_labels": required_labels}
+    usual = find_usual_item(req.get("item_id")) if req.get("item_id") else None
+    ctx = {"required_labels": required_labels, "usual_product": usual["usual_product"] if usual else None}
     results = []
     for line in option["lines"]:
         q = quote["products"].get(line["product_id"])
@@ -124,7 +127,7 @@ def check_option(option, quote, req, required_labels):
         q = quote["products"].get(line["product_id"])
         if q and q["priced"]:
             total += line["quantity"] * q["price_per_unit_with_tax"]
-    litres = sum(l["quantity"] * (catalog.get(l["product_id"])["litres_per_sales_unit"] or 0) for l in option["lines"])
+    litres = sum(l["quantity"] * (catalog.content_per_sales_unit(catalog.get(l["product_id"]), req["unit"]) or 0) for l in option["lines"])
     return {"results": [r.to_dict() for r in results], "outcome": outcome(results),
             "total_with_tax": round(total, 2), "litres": round(litres, 3),
             "warnings": sorted({r.warning for r in results if r.warning})}
@@ -135,13 +138,27 @@ def outcome(results):
     return {0: "auto_order", 1: "needs_approval", 2: "ask_buyer", 3: "blocked"}[worst]
 
 
-def units_for(product_id, litres):
-    """Smallest whole number of sales units covering `litres` (rounded up; whole packs only)."""
+def units_for(product_id, litres, unit="L"):
+    """Smallest whole number of sales units covering the amount (in litres or kg; rounded up, whole packs only)."""
     p = catalog.get(product_id)
-    per, step = p["litres_per_sales_unit"], p["allowed_lot_size"] or 1
+    per = catalog.content_per_sales_unit(p, unit)
     if not per:
         return None
-    return float(max(math.ceil(litres / per - 1e-9), step))
+    step = order_step(p)
+    return round(max(math.ceil(litres / per / step - 1e-9), 1) * step, 4)
+
+
+def order_step(p):
+    """The step a product is ordered in. Aimo's data gives a lot size (e.g. 10 kg for salmon fillet,
+    4.4 kg for a pack of chicken). Tiny lot sizes (0.01) mean "any amount": we then use whole packs."""
+    lot = p.get("allowed_lot_size") or 1
+    return lot if lot >= 1 else 1
+
+
+def whole_steps_within(p, units):
+    """The largest orderable quantity that fits in `units` of stock."""
+    step = order_step(p)
+    return round(math.floor(units / step + 1e-9) * step, 4)
 
 
 # ---------------------------------------------------------------- validating a rulebook
@@ -176,6 +193,8 @@ def validate(doc):
             if key not in t["settings"]:
                 problems.append(f"{where}: unknown setting '{key}'.")
         for key, spec in t["settings"].items():
+            if key not in s and "default" in spec:
+                s[key] = spec["default"]  # newer setting missing from an older rulebook
             if key not in s:
                 problems.append(f"{where}: missing setting '{key}'.")
                 continue

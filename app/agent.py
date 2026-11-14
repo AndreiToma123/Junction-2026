@@ -50,28 +50,30 @@ def _candidates(req):
     else:
         hits = catalog.search(req["product"] or "", [], None, limit=200)
         labels = []
-    # Only products we can convert to the requested unit (litres for now).
-    usable = [p for p in hits if req["unit"] != "L" or p["litres_per_sales_unit"]]
+    # Only products whose pack size is known in the requested unit (litres or kilograms).
+    usable = [p for p in hits if catalog.content_per_sales_unit(p, req["unit"])]
     return item, usable, labels
 
 
 # ---------------------------------------------------------------- building options
 
-def _line(pid, qty, role, quote):
+def _line(pid, qty, role, quote, unit="L"):
     q = quote["products"].get(pid) or {}
     p = catalog.get(pid)
+    per = catalog.content_per_sales_unit(p, unit)
     price = q.get("price_per_unit_with_tax")
     return {"product_id": pid, "name": _name(pid), "brand": p["brand"], "quantity": qty,
-            "sales_unit": p["sales_unit"], "litres": round(qty * (p["litres_per_sales_unit"] or 0), 3),
+            "sales_unit": p["sales_unit"], "unit": unit, "litres": round(qty * (per or 0), 3),  # "litres" = amount in `unit`
             "price_per_unit_with_tax": price,
             "line_total_with_tax": round(qty * price, 2) if price is not None else None,
             "role": role,
             # facts for the dashboard, straight from the API answer
-            "litres_per_sales_unit": p["litres_per_sales_unit"],
+            "litres_per_sales_unit": per, "content_per_sales_unit": per,
             "stock_status": q.get("stock_status"), "stock_amount": q.get("stock_amount"),
             "demo_stock_override": bool(q.get("demo_stock_override")),
             "available_date": q.get("available_date"), "closing_time": q.get("closing_time"),
-            "tax_rate": q.get("tax_rate")}
+            "tax_rate": q.get("tax_rate"), "price_valid_to": q.get("price_valid_to"),
+            "demo_price_override": bool(q.get("demo_price_override"))}
 
 
 def _usable_stock_units(q):
@@ -91,22 +93,23 @@ def _role(pid, usual):
     return "alternative"
 
 
-def _price_per_litre(pid, quote):
+def _price_per_litre(pid, quote, unit="L"):
+    """Price per litre or per kilogram (whichever unit the request uses)."""
     q = quote["products"].get(pid) or {}
-    p = catalog.get(pid)
-    if not q.get("priced") or not p["litres_per_sales_unit"]:
+    per = catalog.content_per_sales_unit(catalog.get(pid), unit)
+    if not q.get("priced") or not per:
         return float("inf")
-    return q["price_per_unit_with_tax"] / p["litres_per_sales_unit"]
+    return q["price_per_unit_with_tax"] / per
 
 
 def build_options(req, usual, cand_ids, quote):
-    amount = req["amount"]
+    amount, unit = req["amount"], req["unit"]
     options = []
     # 1) One product covers everything.
     for pid in cand_ids:
-        qty = rules.units_for(pid, amount)
+        qty = rules.units_for(pid, amount, unit)
         if qty:
-            options.append({"kind": "single", "lines": [_line(pid, qty, _role(pid, usual), quote)]})
+            options.append({"kind": "single", "lines": [_line(pid, qty, _role(pid, usual), quote, unit)]})
 
     # 2) Split (rule C4): only if no single product can cover the amount by the deadline.
     def covers(o):
@@ -121,21 +124,21 @@ def build_options(req, usual, cand_ids, quote):
             base = usual["usual_product"]
         else:
             with_stock = [pid for pid in cand_ids if _usable_stock_units(quote["products"].get(pid))]
-            base = min(with_stock, key=lambda x: _price_per_litre(x, quote)) if with_stock else None
+            base = min(with_stock, key=lambda x: _price_per_litre(x, quote, unit)) if with_stock else None
         if base:
             base_units = _usable_stock_units(quote["products"][base])
-            per = catalog.get(base)["litres_per_sales_unit"]
-            base_units = min(base_units, rules.units_for(base, amount))
+            per = catalog.content_per_sales_unit(catalog.get(base), unit)
+            base_units = min(rules.whole_steps_within(catalog.get(base), base_units), rules.units_for(base, amount, unit))
             rest = amount - base_units * per
             subs = (catalog.get(usual["usual_product"]) or {}).get("substitutes", []) if usual else []
             partners = [pid for pid in cand_ids if pid != base and _usable_stock_units(quote["products"].get(pid)) != 0]
-            partners.sort(key=lambda x: (x not in subs, _price_per_litre(x, quote)))  # official substitutes first
+            partners.sort(key=lambda x: (x not in subs, _price_per_litre(x, quote, unit)))  # official substitutes first
             for pid in partners[:MAX_SPLIT_PARTNERS]:
-                qty = rules.units_for(pid, rest)
+                qty = rules.units_for(pid, rest, unit)
                 if qty:
                     options.append({"kind": "split", "lines": [
-                        _line(base, float(base_units), _role(base, usual), quote),
-                        _line(pid, qty, _role(pid, usual), quote)]})
+                        _line(base, float(base_units), _role(base, usual), quote, unit),
+                        _line(pid, qty, _role(pid, usual), quote, unit)]})
     return options, split_needed
 
 
@@ -153,10 +156,14 @@ def _first_problem(o):
 
 # ---------------------------------------------------------------- main entry
 
-def handle(text=None, parsed=None, scenario=None, today=None, record=None):
-    """Run the whole flow for one request. Returns the saved record."""
+def handle(text=None, parsed=None, scenario=None, today=None, record=None, origin="typed", trigger=None):
+    """Run the whole flow for one request. Returns the saved record.
+    origin: "typed" (a person wrote it) or "auto" (the stock monitor sent it; `trigger` says why)."""
     rec = record or {"id": store.new_id(), "received_at": _now(), "text": text, "scenario": scenario,
-                     "steps": [], "history": []}
+                     "origin": origin, "steps": [], "history": []}
+    if trigger and not record:
+        rec["trigger"] = trigger
+        _step(rec, "trigger", trigger, "stock monitor", actor="system")
     req = parsed or ai.parse_request(text, today)
     rec["parsed"] = req
     rec["not_checked"] = list(rules.rules()["not_checked"])
@@ -182,7 +189,7 @@ def handle(text=None, parsed=None, scenario=None, today=None, record=None):
     req_results = rules.check_request(req)
     rec["request_checks"] = [r.to_dict() for r in req_results]
     for r in req_results:
-        _step(rec, "rules", f"{r.rule} {r.name}: {r.result}. {r.detail}", "rules.yaml")
+        _step(rec, "rules", f"{r.rule} - {r.name}: {r.result}. {r.detail}", "rules.yaml")
     if rules.outcome(req_results) in ("ask_buyer", "blocked"):
         bad = [r for r in req_results if r.result != "pass"]
         rec.update(status="ask_buyer", outcome="ask_buyer", options=[], chosen=None,
@@ -232,6 +239,7 @@ def handle(text=None, parsed=None, scenario=None, today=None, record=None):
     for i, o in enumerate(options, 1):
         o["option_id"] = f"O{i}"
         o.update(rules.check_option(o, quote, req, labels))
+        o["unit"] = req["unit"]
         o["results"] = req_results_dicts = [r.to_dict() for r in req_results] + o["results"]
         o["outcome"] = rules.outcome(req_results_dicts)
     usable = sorted([o for o in options if o["outcome"] != "blocked"], key=lambda o: _rank_key(o, usual))
@@ -245,7 +253,7 @@ def handle(text=None, parsed=None, scenario=None, today=None, record=None):
         for o in blocked:
             for r in {(r["rule"], r["name"]) for r in o["results"] if r["result"] == "blocked"}:
                 counts[r] = counts.get(r, 0) + 1
-        parts = [f"{n} option{'s' if n != 1 else ''} failed {rid} {name}"
+        parts = [f"{n} option{'s' if n != 1 else ''} failed {rid} - {name}"
                  for (rid, name), n in sorted(counts.items(), key=lambda x: -x[1])]
         rec.update(status="cannot_fulfil", outcome="cannot_fulfil", chosen=None,
                    reason=f"None of the {len(blocked)} options can be used: " + "; ".join(parts) + ".",
@@ -268,7 +276,7 @@ def handle(text=None, parsed=None, scenario=None, today=None, record=None):
           f"{rec['why_chosen']}", "agent", option=best["option_id"])
     problems = [r for r in best["results"] if r["result"] != "pass" and not r["rule"].startswith("A")]
     for r in problems:
-        _step(rec, "rules", f"{r['rule']} {r['name']}: {r['result']}. {r['detail']}", "rules.yaml")
+        _step(rec, "rules", f"{r['rule']} - {r['name']}: {r['result']}. {r['detail']}", "rules.yaml")
     for w in best.get("warnings", []):
         rec["not_checked"].insert(0, f"Stock: {w}")
 
@@ -299,6 +307,10 @@ def _place(rec, option, req, placed_by):
     order = orders.place_order(option["lines"], req["deadline"], placed_by, rec["id"],
                                note=f"demo scenario: {rec['scenario']}" if rec.get("scenario") else None)
     rec.update(status="ordered", outcome="ordered", order_id=order["order_id"])
+    if req.get("item_id"):
+        from . import kitchen  # so the kitchen knows this is on its way and does not reorder
+        kitchen.add_incoming(req["item_id"], sum(l["litres"] for l in option["lines"]), order["order_id"],
+                             req["deadline"], rec["id"])
     _step(rec, "order", f"Placed mock order {order['order_id']}, €{order['total_with_tax']:,.2f} incl. tax, "
           f"delivery {rules.nice_date(req['deadline'])}. Placed by {placed_by}.", "mock order service", order_id=order["order_id"])
 
@@ -317,9 +329,59 @@ def decide(rid, decision, by):
         return _finish(rec)
     if decision != "approve":
         raise ValueError("decision must be 'approve' or 'reject'")
+    # Before ordering, ask Valio Aimo again: is the price and stock still what the approver saw?
+    req = rec["parsed"]
+    checked_before = rec.get("quote_checked_at")
+    try:
+        fresh = aimo.quote([l["product_id"] for l in option["lines"]], req["deadline"])
+    except aimo.AimoError as e:
+        rec["notice"] = {"kind": "blocked", "text": f"Could not re-check price and stock with Valio Aimo ({e}). Nothing was ordered. Please try again."}
+        _step(rec, "recheck", rec["notice"]["text"], "Aimo API")
+        return _finish(rec)
+    fresh = demo.apply_stock_overrides(fresh, rec.get("scenario"), phase="approval")
+    changes = []
+    for l in option["lines"]:
+        q = fresh["products"].get(l["product_id"]) or {}
+        old, new = l["price_per_unit_with_tax"], q.get("price_per_unit_with_tax")
+        if new is not None and old is not None and abs(new - old) > 0.0001:
+            changes.append(f"{l['product_id']} went from {rules.eur(old)} to {rules.eur(new)} per unit"
+                           + (" (demo price change)" if q.get("demo_price_override") else ""))
+    old_total = option["total_with_tax"]
+    new_lines = [_line(l["product_id"], l["quantity"], l["role"], fresh, req["unit"]) for l in option["lines"]]
+    check = rules.check_option({"lines": new_lines}, fresh, req, rec.get("required_labels", []))
+    results = [r for r in option["results"] if r["rule"].startswith("A")] + check["results"]
+    rec["quote_checked_at"] = fresh["checked_at"]
+    when = rules.nice_time(checked_before) if checked_before else "the first check"
+
+    if rules.outcome(results) == "blocked":
+        why = " ".join(r["detail"] for r in check["results"] if r["result"] == "blocked")
+        option.update(lines=new_lines, results=results, outcome="blocked", total_with_tax=check["total_with_tax"])
+        rec.update(status="cannot_fulfil", outcome="cannot_fulfil",
+                   reason=f"{by} pressed Approve, but the re-check with Valio Aimo shows this can no longer be ordered: {why} "
+                          f"Nothing was ordered. Send the request again to get new options.")
+        rec["notice"] = {"kind": "blocked", "text": rec["reason"]}
+        _step(rec, "recheck", rec["reason"], "Aimo API")
+        return _finish(rec)
+
+    if changes:
+        option.update(lines=new_lines, results=results, outcome=rules.outcome(results), total_with_tax=check["total_with_tax"])
+        text = (f"The price changed since it was checked ({when}): " + "; ".join(changes) +
+                f". The total is now {rules.eur(check['total_with_tax'])} (was {rules.eur(old_total)}). "
+                f"Nothing was ordered. Approve again if the new price is OK.")
+        rec["notice"] = {"kind": "changed", "text": text, "old_total": old_total, "new_total": check["total_with_tax"]}
+        _step(rec, "recheck", f"{by} pressed Approve. " + text, "Aimo API", actor=f"person:{by}",
+              old_total=old_total, new_total=check["total_with_tax"])
+        return _finish(rec)
+
+    valid = min((l["price_valid_to"] for l in new_lines if l.get("price_valid_to")), default=None)
+    ok_text = (f"Re-checked with Valio Aimo at approval: price and stock are unchanged since {when}."
+               + (f" Price valid until {rules.nice_date(valid)}." if valid and not valid.startswith("9999") else ""))
+    option.update(lines=new_lines, results=results)
     rec["decided_by"] = by
     _step(rec, "decision", f"Approved by {by}.", "dashboard", actor=f"person:{by}")
-    _place(rec, option, rec["parsed"], placed_by=f"human:{by}")
+    _step(rec, "recheck", ok_text, "Aimo API")
+    _place(rec, option, req, placed_by=f"human:{by}")
+    rec["notice"] = {"kind": "ok", "text": f"Approved and ordered as {rec['order_id']}. {ok_text}"}
     return _finish(rec)
 
 
@@ -331,7 +393,10 @@ def answer(rid, confirm=False, new_amount=None):
     req = dict(rec["parsed"])
     if new_amount is not None:
         req["amount"] = float(new_amount)
-        req["buyer_confirmed_understanding"] = True  # the buyer typed the amount themselves
+        # The buyer typed this amount themselves: that IS their confirmation. Never ask twice.
+        req["buyer_confirmed_understanding"] = True
+        req["buyer_confirmed_amount"] = True
+        rec["amount_changed_from"] = rec["parsed"].get("amount")
         _step(rec, "answer", f"The buyer changed the amount to {rules.num(float(new_amount))} {req['unit']}.", "buyer", actor="buyer")
     elif confirm and rec.get("ask_kind") == "understanding":
         req["buyer_confirmed_understanding"] = True
@@ -345,4 +410,7 @@ def answer(rid, confirm=False, new_amount=None):
     for k in ("question", "options", "chosen", "why_chosen", "alternatives", "alternatives_detail", "reason", "blocked_by"):
         rec.pop(k, None)
     req["parsed_by"] = rec["parsed"].get("parsed_by", "parser") + " + buyer answer"
+    # What the request is NOW, in plain words (the dashboard shows this, with the original text below it).
+    rec["current_request"] = (f"{rules.num(req['amount'])} {req['unit']} of {(req.get('product') or 'product').lower()}"
+                              + (f" by {rules.nice_date(req['deadline'])}" if req.get("deadline") else ""))
     return handle(parsed=req, scenario=rec.get("scenario"), record=rec)

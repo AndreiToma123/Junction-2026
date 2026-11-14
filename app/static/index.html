@@ -99,6 +99,7 @@ tr.hist td{background:#FCFCFA;color:var(--ink2)}
   <div class="tabs" id="tabs">
     <a href="#/new" data-tab="new">New request</a>
     <a href="#/requests" data-tab="requests">Requests <span class="badge" id="badge" hidden>0</span></a>
+    <a href="#/kitchen" data-tab="kitchen">Kitchen</a>
     <a href="#/log" data-tab="log">Audit log</a>
     <a href="#/rules" data-tab="rules">Rules</a>
   </div>
@@ -175,11 +176,11 @@ function outcomeBanner(r, withLink) {
   const o = chosen(r), link = withLink ? `<a class="btn" href="#/requests/${esc(r.id)}">Open details</a>` : "";
   const dl = o ? niceDate(o.lines[0].available_date) : "";
   if (r.status === "ordered") return `<div class="banner t-ok"><div><div class="label" style="color:inherit">Ordered</div>
-    <h3>${esc(r.order_id)} · ${num(o.litres)} L · ${eur(o.total_with_tax)} incl. tax · delivery ${dl}</h3>
+    <h3>${esc(r.order_id)} · ${num(o.litres)} ${esc(o.unit || "L")} · ${eur(o.total_with_tax)} incl. tax · delivery ${dl}</h3>
     <div class="small">${r.decided_by ? "Approved by " + esc(r.decided_by) : "Every rule passed, so the agent ordered by itself"}. Mock order, nothing is sent to Valio Aimo.</div></div>${link}</div>`;
   if (r.status === "needs_approval") { const why = o.results.filter(x => x.result === "approve").map(x => x.detail).join(" ");
     return `<div class="banner t-approve"><div><div class="label" style="color:inherit">Waiting for approval · nothing ordered yet</div>
-    <h3>${num(o.litres)} L · ${eur(o.total_with_tax)} incl. tax · delivery ${dl}</h3><div class="small">${esc(why)}</div></div>
+    <h3>${num(o.litres)} ${esc(o.unit || "L")} · ${eur(o.total_with_tax)} incl. tax · delivery ${dl}</h3><div class="small">${esc(why)}</div></div>
     ${withLink ? `<a class="btn primary" href="#/requests/${esc(r.id)}">Open to approve or reject</a>` : ""}</div>`; }
   if (r.status === "ask_buyer") return `<div class="banner t-ask"><div><div class="label" style="color:inherit">The agent needs your answer · nothing ordered</div>
     <h3>${esc(r.question)}</h3></div><div class="row">${answerButtons(r)}</div></div>`;
@@ -190,7 +191,7 @@ function outcomeBanner(r, withLink) {
 }
 const STEP_TITLE = { request: "Read the request", rules: "Checked a rule", search: "Searched the product list", lookup: "Asked Valio Aimo for price, stock and delivery",
   demo: "Demo stock", split: "Split needed", options: "Built options", choose: "Chose an option", approval: "Sent for approval", order: "Placed the order",
-  ask: "Asked the buyer", answer: "Buyer answered", decision: "Decision", result: "Result" };
+  recheck: "Re-checked price and stock", trigger: "Stock ran low", ask: "Asked the buyer", answer: "Buyer answered", decision: "Decision", result: "Result" };
 function stepDot(s) {
   if (/: approve\./.test(s.message) || s.step === "approval") return "warn";
   if (/: ask\./.test(s.message) || s.step === "ask") return "ask";
@@ -222,11 +223,14 @@ async function viewNew(params) {
     <div class="card stack" style="gap:14px">
       <label class="label" for="need">Your request</label>
       <textarea id="need" rows="3" style="font-size:18px" placeholder="e.g. I need 1,000 litres of lactose-free milk by Monday">${esc(params.get("text") || "")}</textarea>
-      ${usual.items.length ? `<div class="row" style="gap:8px"><span class="small mute">Your usual:</span>${usual.items.map(i =>
+      ${usual.items.length ? `<div class="row" style="gap:8px"><span class="small mute">Your usual:</span>${usual.items.slice(0, 4).map(i =>
         `<button class="chip" data-fill="${esc(`I need ${num(i.usual_amount)} ${i.unit === "L" ? "litres" : i.unit} of ${i.name.toLowerCase()} by Monday.`)}">${num(i.usual_amount)} ${esc(i.unit)} ${esc(i.name)}</button>`).join("")}</div>` : ""}
       <div class="row between">
         <details class="small mute"><summary style="cursor:pointer;min-height:32px">Demo options</summary>
-          <label class="row" style="gap:8px;margin-top:6px"><input type="checkbox" id="demoSplit"> Simulate low stock of the usual milk (shows the split). Marked "demo stock" everywhere.</label></details>
+          <label class="row" style="gap:8px;margin-top:6px">Simulate: <select id="demoScenario"><option value="">nothing (all real data)</option>
+            <option value="split">low stock of the usual milk (shows the split)</option>
+            <option value="price_change">the price goes up before approval (shows the re-check)</option></select></label>
+          <div style="margin-top:4px">Simulated values are marked "demo" everywhere.</div></details>
         <button class="btn primary big" id="send">Send to agent</button>
       </div>
     </div>
@@ -239,7 +243,7 @@ async function viewNew(params) {
     const btn = $("#send"); btn.disabled = true; btn.textContent = "Working…";
     $("#result").innerHTML = `<div class="card mute">The agent is reading your request and asking Valio Aimo…</div>`;
     try {
-      const r = await api("/api/requests", { body: { text, scenario: $("#demoSplit").checked ? "split" : null } });
+      const r = await api("/api/requests", { body: { text, scenario: $("#demoScenario").value || null } });
       await loadRequests(); showRun(r);
     } catch (e) { $("#result").innerHTML = `<div class="problem">${esc(e.message)}</div>`; }
     btn.disabled = false; btn.textContent = "Send to agent";
@@ -272,15 +276,16 @@ async function viewRequests(params, id) {
       <a class="btn primary" href="#/new">New request</a></div></div>
     ${!REQS.length ? `<div class="card">No requests yet. <a href="#/new">Make the first one</a>.</div>` : `<div class="split">
       <div class="list">${list.length ? list.map(r => { const o = chosen(r); return `<button class="item ${cur && r.id === cur.id ? "on" : ""}" data-open="${esc(r.id)}">
-        <span class="row between" style="gap:6px;width:100%"><span class="small mute">${esc(r.id)} · ${esc(niceTime(r.received_at))}</span>${statusPill(r)}</span>
-        <b>${esc(r.text || "")}</b><span class="small" style="color:var(--ink2)">${esc(o ? eur(o.total_with_tax) + " · " + headline(r) : headline(r))}</span></button>`; }).join("")
+        <span class="row between" style="gap:6px;width:100%"><span class="small mute">${esc(r.id)} · ${esc(niceTime(r.received_at))}${r.origin === "auto" ? " · automatic" : ""}</span>${statusPill(r)}</span>
+        <b>${esc(r.current_request ? r.current_request[0].toUpperCase() + r.current_request.slice(1) : r.text || "")}</b><span class="small" style="color:var(--ink2)">${esc(o ? eur(o.total_with_tax) + " · " + headline(r) : headline(r))}</span></button>`; }).join("")
         : `<div class="card small">Nothing needs action. <button class="chip" data-filter="all">Show all</button></div>`}</div>
       <div class="detail">${cur ? detail(cur) : ""}</div></div>`}</div>`;
   $("#view").querySelectorAll("[data-filter]").forEach(b => b.onclick = () => { FILTER = b.dataset.filter; viewRequests(params, null); });
   $("#view").querySelectorAll("[data-open]").forEach(b => b.onclick = () => { location.hash = "#/requests/" + b.dataset.open; });
   $("#view").querySelectorAll("[data-decide]").forEach(b => b.onclick = async () => {
     const by = me(); if (!by) return; b.disabled = true;
-    try { await api(`/api/requests/${cur.id}/decision`, { body: { decision: b.dataset.decide, by } }); FILTER = "all"; await viewRequests(params, cur.id); window.scrollTo(0, 0); }
+    try { const r = await api(`/api/requests/${cur.id}/decision`, { body: { decision: b.dataset.decide, by } }); FILTER = "all"; await viewRequests(params, cur.id); window.scrollTo(0, 0);
+      if (r.notice) toast(r.notice.kind === "ok" ? "Approved and ordered. Price and stock re-checked: unchanged." : r.notice.kind === "changed" ? "The price changed. Nothing was ordered. Please look again." : "This can no longer be ordered. Nothing was ordered."); }
     catch (e) { toast(e.message); b.disabled = false; }
   });
   const tp = $("#togglePassed"); if (tp) tp.onclick = () => { const el = $("#passed"); el.hidden = !el.hidden; tp.textContent = (el.hidden ? "Show" : "Hide") + tp.dataset.rest; };
@@ -300,8 +305,8 @@ function detail(r) {
   const limit = results.find(x => x.facts && x.facts.limit != null)?.facts.limit;
   const cut = o ? o.lines.map(l => l.closing_time).filter(Boolean).sort()[0] : null;
   let tiles = "";
-  if (r.status === "needs_approval") tiles = tile("Decision needed", "Approve or reject", problems.map(p => p.name).join(", "), "warn") + tile("Reason", problems.map(p => p.rule + " " + p.name).join(" · "), problems.map(p => p.detail).join(" "), "warn");
-  else if (r.status === "ask_buyer") tiles = tile("Decision needed", "Buyer must answer", "", "ask") + tile("Reason", problems.map(p => p.rule + " " + p.name).join(" · "), r.question, "ask");
+  if (r.status === "needs_approval") tiles = tile("Decision needed", "Approve or reject", problems.map(p => p.name).join(", "), "warn") + tile("Reason", problems.map(p => p.rule + " - " + p.name).join(" · "), problems.map(p => p.detail).join(" "), "warn");
+  else if (r.status === "ask_buyer") tiles = tile("Decision needed", "Buyer must answer", "", "ask") + tile("Reason", problems.map(p => p.rule + " - " + p.name).join(" · "), r.question, "ask");
   else if (r.status === "ordered") tiles = tile("Decision needed", "None", r.decided_by ? "Approved by " + r.decided_by : "Ordered automatically", "ok") + tile("Order", r.order_id, "Mock order, demo only", "ok");
   else if (r.status === "rejected") tiles = tile("Decision", "Rejected", "By " + r.decided_by + ". Nothing was ordered.", "bad");
   else tiles = tile("Result", "Can't be done", r.reason, "bad");
@@ -312,11 +317,11 @@ function detail(r) {
       <th>Product</th><th>Role</th><th>Stock</th><th class="num">Amount</th><th class="num">Price</th><th class="num">Total</th></tr></thead><tbody>
       ${o.lines.map(l => `<tr><td><div style="font-weight:500">${esc(l.name)}</div><div class="small mute">${esc(l.brand || "no brand")} · ${esc(l.product_id)}</div></td>
         <td>${esc(l.role[0].toUpperCase() + l.role.slice(1))}</td><td>${esc(stockText(l))}</td>
-        <td class="num">${num(l.quantity)} × ${num(l.litres_per_sales_unit)} L</td><td class="num">${eur(l.price_per_unit_with_tax)}</td><td class="num"><b>${eur(l.line_total_with_tax)}</b></td></tr>`).join("")}
+        <td class="num">${num(l.quantity)} × ${num(l.litres_per_sales_unit)} ${esc((l.unit || "L").toLowerCase() === "kg" ? "kg" : "L")}</td><td class="num">${eur(l.price_per_unit_with_tax)}</td><td class="num"><b>${eur(l.line_total_with_tax)}</b></td></tr>`).join("")}
       </tbody></table></div><div class="small mute" style="margin-top:6px">Prices include tax${o.lines[0].tax_rate != null ? ` (${o.lines[0].tax_rate}%)` : ""}. Checked with Valio Aimo at ${esc(niceTime(r.quote_checked_at))}.</div></section>` : "";
   const rules = `<section><div class="label" style="margin-bottom:8px">Rule checks</div><div class="stack" style="gap:8px">
       ${problems.map(p => { const done = p.result === "approve" && r.decided_by ? (r.status === "ordered" ? ["Approved by " + r.decided_by, "t-ok"] : ["Rejected by " + r.decided_by, "t-bad"]) : RESULT[p.result];
-        return `<div class="rule ${done[1]}"><span class="k">${esc(done[0])}</span><span style="color:var(--ink);flex:1 1 300px"><b>${esc(p.rule)} ${esc(p.name)}.</b> ${esc(p.detail)}</span></div>`; }).join("")}
+        return `<div class="rule ${done[1]}"><span class="k">${esc(done[0])}</span><span style="color:var(--ink);flex:1 1 300px"><b>${esc(p.rule)} - ${esc(p.name)}.</b> ${esc(p.detail)}</span></div>`; }).join("")}
       ${passed.length ? `<button class="btn" id="togglePassed" data-rest=" the ${passed.length} passed checks" style="align-self:flex-start;color:var(--green)">Show the ${passed.length} passed checks</button>
       <div id="passed" hidden>${passed.map(p => `<div class="passed"><b style="flex:0 0 34px;color:var(--green)">${esc(p.rule)}</b><span style="flex:0 0 170px;font-weight:500">${esc(p.name)}</span><span style="color:var(--ink2)">${esc(p.detail)}</span></div>`).join("")}</div>` : ""}
     </div></section>`;
@@ -329,14 +334,56 @@ function detail(r) {
   else if (r.status === "ask_buyer") actions = `<div class="row" style="border-top:1px solid var(--line);padding-top:20px">${answerButtons(r)}</div>`;
   return `<div class="card stack" style="gap:24px">
     <div class="row between" style="align-items:flex-start"><div><div class="small mute">${esc(r.id)} · received ${esc(niceTime(r.received_at))}${r.scenario ? " · demo scenario: " + esc(r.scenario) : ""}</div>
-      <h2 style="margin-top:4px">“${esc(r.text || "")}”</h2></div>${statusPill(r)}</div>
+      ${r.current_request ? `<h2 style="margin-top:4px">${esc(r.current_request[0].toUpperCase() + r.current_request.slice(1))}</h2>
+        <div class="small mute" style="margin-top:4px">${r.amount_changed_from != null ? `Amount changed by the buyer (was ${num(r.amount_changed_from)}). ` : "Confirmed by the buyer. "}First written as: “${esc(r.text || "")}”</div>`
+        : r.origin === "auto" ? `<h2 style="margin-top:4px">${esc(r.text || "")}</h2>` : `<h2 style="margin-top:4px">“${esc(r.text || "")}”</h2>`}</div>${statusPill(r)}</div>
+    ${r.trigger ? `<div class="small" style="background:var(--blue-t2);border-radius:10px;padding:10px 14px"><b>Sent automatically by the stock monitor.</b> ${esc(r.trigger)}</div>` : ""}
+    ${r.notice ? `<div class="banner ${r.notice.kind === "ok" ? "t-ok" : r.notice.kind === "changed" ? "t-approve" : "t-bad"}" style="padding:14px 16px"><div><div class="label" style="color:inherit">${r.notice.kind === "ok" ? "Re-checked at approval" : r.notice.kind === "changed" ? "Price changed · please look again" : "Re-check failed"}</div>
+      <div style="font-weight:500;color:var(--ink)">${esc(r.notice.text)}</div></div></div>` : ""}
     ${r.summary ? `<div style="background:var(--bg);border-radius:12px;padding:12px 16px"><span class="label">In short</span>
       <span class="small mute"> · written by ${esc(r.summary.written_by)} from the rule results</span><div style="margin-top:4px;font-size:16px">${esc(r.summary.text)}</div></div>` : ""}
     <div class="tiles">${tiles}</div>${lines}${rules}
-    <div class="row" style="align-items:stretch;gap:16px"><div class="box dashed"><b class="small">Not checked by the agent</b><ul>${(r.not_checked || []).map(n => `<li>${esc(n)}</li>`).join("")}</ul></div>${alts}</div>
     ${actions}
     <details><summary style="cursor:pointer;font-weight:600;min-height:32px">What the agent did (${r.steps.length} steps) · <a href="#/log?request_id=${esc(r.id)}">open in audit log</a></summary><div style="margin-top:14px">${timeline(r.steps)}</div></details>
   </div>`;
+}
+
+// ---------- screen: kitchen (menu, stock, automatic restock)
+const K_STATE = { ok: ["OK", "t-ok"], low: ["Low", "t-approve"], on_order: ["On its way", "t-ask"], waiting_for_person: ["Waiting for a person", "t-approve"], failed: ["Could not order", "t-bad"] };
+let K_NOTE = "";
+async function viewKitchen() {
+  const k = await api("/api/kitchen");
+  const amt = (n, u) => `${num(n)} ${u === "KG" ? "kg" : u}`;
+  $("#view").innerHTML = `<div class="stack">
+    <div class="row between"><div><h1>Kitchen</h1><p class="mute" style="margin:4px 0 0">Stock goes down as dishes are served. When an ingredient reaches its reorder level, the agent sends the usual order by itself, through the same rules as a typed request.</p></div>
+      <div class="row" style="gap:8px"><button class="btn primary" id="simDay">Simulate a day of service</button><button class="btn" id="recv">Receive deliveries</button></div></div>
+    ${K_NOTE}
+    <div class="card" style="padding:8px"><div class="row between" style="padding:8px 10px"><h2>Stock</h2><span class="small mute">Day ${k.day} · kitchen stock and menu are mock data; products and prices are real</span></div>
+      <div style="overflow-x:auto"><table style="min-width:940px"><thead><tr><th>Ingredient</th><th class="num">In stock</th><th class="num">Reorder at</th><th class="num">Used per day</th><th class="num">Lasts</th><th class="num">Usual order</th><th>Status</th><th>Used in</th></tr></thead><tbody>
+      ${k.ingredients.map(i => { const st = K_STATE[i.state]; const pct = Math.max(4, Math.min(100, Math.round(i.stock / Math.max(i.reorder_level * 3, 1) * 100)));
+        return `<tr><td><div style="font-weight:600">${esc(i.name)}</div><div class="small mute">${esc(i.usual_product_name || "")} · ${esc(i.usual_product)}</div></td>
+        <td class="num"><b>${amt(i.stock, i.unit)}</b><div style="height:6px;border-radius:3px;background:var(--grey-t);margin-top:4px;min-width:70px"><div style="height:6px;border-radius:3px;width:${pct}%;background:${i.stock <= i.reorder_level ? "#B86A00" : "var(--green)"}"></div></div></td>
+        <td class="num">${amt(i.reorder_level, i.unit)}</td><td class="num">${amt(i.daily_use, i.unit)}</td><td class="num">${i.days_left == null ? "–" : num(i.days_left) + " days"}</td><td class="num">${amt(i.usual_amount, i.unit)}</td>
+        <td>${pill(st[0], st[1])}${i.incoming.length ? `<div class="small mute" style="margin-top:4px">${i.incoming.map(x => `${amt(x.amount, x.unit)} · ${esc(x.order_id)} · ${esc(niceDate(x.delivery_date))}`).join("<br>")}</div>` : ""}
+          ${i.open_request ? `<div class="small" style="margin-top:4px"><a href="#/requests/${esc(i.open_request)}">Open ${esc(i.open_request)}</a></div>` : ""}</td>
+        <td class="small">${i.used_by.length} dish${i.used_by.length === 1 ? "" : "es"}<div class="mute">${i.used_by.slice(0, 3).map(d => esc(d.name.split(" (")[0])).join(", ")}${i.used_by.length > 3 ? ", …" : ""}</div></td></tr>`; }).join("")}
+      </tbody></table></div></div>
+    <div class="card stack" style="gap:12px"><div class="row between"><h2>Menu</h2><span class="small mute">${k.dishes.length} dishes · ${k.dishes.reduce((a, d) => a + d.portions_per_day, 0)} portions a day</span></div>
+      ${k.dishes.map(d => `<div class="rulecard"><div class="row between"><b>${esc(d.name)}</b><span class="small mute">${num(d.portions_per_day)} portions a day</span></div>
+        <div class="small" style="color:var(--ink2)">${d.ingredients.map(g => { const ing = k.ingredients.find(x => x.item_id === g.item_id); return `${esc(ing ? ing.name : g.item_id)} ${num(g.amount * 1000)} ${ing && ing.unit === "L" ? "ml" : "g"}`; }).join(" · ")} <span class="mute">per portion</span></div></div>`).join("")}
+    </div></div>`;
+  $("#simDay").onclick = async e => { e.target.disabled = true; e.target.textContent = "Serving…";
+    try { const r = await api("/api/kitchen/simulate-day", { body: {} }); await loadRequests();
+      const sent = r.restock.sent, sk = r.restock.skipped;
+      K_NOTE = `<div class="banner ${sent.some(s => s.status !== "ordered") ? "t-approve" : "t-ok"}" style="padding:14px 16px"><div><div class="label" style="color:inherit">Day ${r.day} served</div>
+        <div style="color:var(--ink);font-weight:500">${sent.length ? `${sent.length} ingredient${sent.length === 1 ? "" : "s"} reached the reorder level: ` + sent.map(s => `<a href="#/requests/${esc(s.request_id)}">${esc(s.name)}</a> → ${esc((STATUS[s.status] || [s.status])[0].toLowerCase())}${s.order_id ? " (" + esc(s.order_id) + ")" : ""}`).join("; ") + "." : "Nothing reached its reorder level."}
+        ${sk.length ? `<div class="small" style="font-weight:400;margin-top:4px">Not re-ordered: ${sk.map(s => esc(s.name) + " (" + esc(s.why) + ")").join("; ")}.</div>` : ""}
+        ${r.ran_out.length ? `<div class="small" style="margin-top:4px;color:var(--red)">Ran out during service: ${r.ran_out.map(esc).join("; ")}.</div>` : ""}</div></div></div>`;
+    } catch (err) { toast(err.message); }
+    viewKitchen(); };
+  $("#recv").onclick = async e => { e.target.disabled = true;
+    try { const r = await api("/api/kitchen/receive", { body: {} }); K_NOTE = `<div class="banner t-ok" style="padding:14px 16px"><div style="color:var(--ink);font-weight:500">${r.arrived.length ? `${r.arrived.length} deliver${r.arrived.length === 1 ? "y" : "ies"} received and added to stock (mock).` : "Nothing was on its way."}</div></div>`; } catch (err) { toast(err.message); }
+    viewKitchen(); };
 }
 
 // ---------- screen 3: audit log
@@ -457,12 +504,14 @@ async function viewRules() {
     <div id="addBox"></div>
     ${cats.map(([c, title]) => { const rs = RULES.rules.filter(r => r.category === c); return rs.length ? `<div class="card stack" style="gap:12px"><h2>${title}</h2>
       ${rs.map(r => `<div class="rulecard" data-rule="${esc(r.id)}"><div class="row between" style="align-items:flex-start;gap:8px 16px">
-        <div style="flex:1 1 420px;min-width:0"><b>${esc(r.id)} · ${esc(r.name)}</b> ${r.locked ? pill("safety rule", "t-grey") : ""}<div style="color:var(--ink2);margin-top:2px">${esc(r.description)}</div></div>
+        <div style="flex:1 1 420px;min-width:0"><b>${esc(r.id)} - ${esc(r.name)}</b> ${r.locked ? pill("safety rule", "t-grey") : ""}<div style="color:var(--ink2);margin-top:2px">${esc(r.description)}</div></div>
         <div class="row" style="gap:8px"><button class="btn" data-edit="${esc(r.id)}">Edit</button>${r.locked ? "" : `<button class="btn danger" data-remove="${esc(r.id)}">Remove</button>`}</div></div><div data-slot></div></div>`).join("")}</div>` : ""; }).join("")}
     <p class="small mute" style="margin:0">Safety rules can be adjusted but not removed. The readable rulebook (rulebook.md) is rewritten automatically after every change.</p>
     <details class="card"><summary style="cursor:pointer;font-weight:600">Edit the rules file as text (advanced)</summary>
       <div class="stack" style="gap:12px;margin-top:14px"><textarea id="yaml" rows="22" spellcheck="false" style="font-family:ui-monospace,Menlo,monospace;font-size:13px">${esc(RULES.yaml)}</textarea>
       <div class="row"><button class="btn primary" id="yamlPreview">Preview change</button></div><div id="yamlBox"></div></div></details>
+    ${RULES.default_yaml ? `<div class="card stack" style="gap:12px"><div class="row between"><div><b>Restore the default rules</b><div class="small mute">Puts back the original rulebook (the one the demo scenarios expect). You see what changes first.</div></div>
+      <button class="btn" id="restoreBtn">Preview restore</button></div><div id="restoreBox"></div></div>` : ""}
     <div class="card stack" style="gap:12px"><h2>Change history</h2>${changes.length ? changes.map(c => `<div class="rulecard"><div class="row between"><div><b>${esc(c.change_id)}</b> · ${esc(niceTime(c.time))} · by ${esc(c.by)} <span class="pill t-grey">${esc(c.source)}</span></div>
       <button class="btn" data-undo="${esc(c.change_id)}">Undo this change</button></div>${c.diff.map(d => `<div class="small"><b>${esc(d.change)} ${esc(d.rule_id)}</b>${d.before ? `<div class="mute">Before: ${esc(d.before)}</div>` : ""}${d.after ? `<div>After: ${esc(d.after)}</div>` : ""}</div>`).join("")}</div>`).join("")
       : `<div class="mute">No rule changes yet.</div>`}</div></div>`;
@@ -494,6 +543,7 @@ async function viewRules() {
       form.onsubmit = e => { e.preventDefault(); previewAndApply($("[data-preview]", form), { change: { action: "add", type: t.type, name: form.elements["name"].value, result: form.elements["result"].value, settings: readSettings(form, t.settings) } }, "manual"); }; };
     $("#addType").onchange = draw; draw(); box.scrollIntoView({ behavior: "smooth", block: "nearest" });
   };
+  if ($("#restoreBtn")) $("#restoreBtn").onclick = () => previewAndApply($("#restoreBox"), { text: RULES.default_yaml }, "restore defaults");
   $("#yamlPreview").onclick = () => previewAndApply($("#yamlBox"), { text: $("#yaml").value }, "text");
   v.querySelectorAll("[data-undo]").forEach(b => b.onclick = async () => { const by = me(); if (!by) return; b.disabled = true;
     try { await api(`/api/rules/changes/${b.dataset.undo}/undo`, { body: { by } }); toast("Change undone."); viewRules(); } catch (e) { toast(e.message); b.disabled = false; } });
@@ -509,6 +559,7 @@ async function route() {
     if (CURRENT === "requests") await viewRequests(params, parts[1]);
     else if (CURRENT === "log") { await loadRequests(); await viewLog(params); }
     else if (CURRENT === "rules") { loadRequests(); await viewRules(); }
+    else if (CURRENT === "kitchen") { loadRequests(); await viewKitchen(); }
     else { loadRequests(); await viewNew(params); }
   } catch (e) { $("#view").innerHTML = `<div class="problem">Could not load this screen: ${esc(e.message)}</div>`; }
   window.scrollTo(0, 0);

@@ -7,7 +7,7 @@ from typing import List, Optional
 from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel, Field
 
-from . import agent, ai, aimo, catalog, config, log, orders, rule_edit, store
+from . import agent, ai, aimo, catalog, config, kitchen, log, orders, rule_edit, store
 
 app = FastAPI(
     title="Trusted Trade Agent: buying agent backend",
@@ -19,7 +19,10 @@ app = FastAPI(
 
 @app.get("/api/health")
 def health():
-    return {"ok": True, "aimo": aimo.ping()}
+    try:
+        return {"ok": True, "aimo": aimo.ping()}
+    except aimo.AimoError as e:
+        return {"ok": False, "aimo": str(e)}
 
 
 @app.get("/api/products/search")
@@ -253,6 +256,30 @@ class Wish(BaseModel):
 def propose_rule(w: Wish):
     """Turn a plain-language wish into a proposed rule change. Nothing is saved: a person must apply it."""
     return ai.propose_rule(w.text)
+
+
+# ---------------------------------------------------------------- the kitchen: menu, stock, automatic restock
+
+@app.get("/api/kitchen")
+def get_kitchen():
+    return kitchen.overview()
+
+
+@app.post("/api/kitchen/simulate-day")
+def kitchen_simulate_day():
+    """Mock: serve one day of the menu, then let the stock monitor send requests for what ran low."""
+    return kitchen.simulate_day()
+
+
+@app.post("/api/kitchen/check")
+def kitchen_check():
+    return kitchen.check_restock()
+
+
+@app.post("/api/kitchen/receive")
+def kitchen_receive():
+    """Mock: all orders on their way arrive now."""
+    return kitchen.receive_deliveries()
 
 
 # ---------------------------------------------------------------- for the dashboard

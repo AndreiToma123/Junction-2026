@@ -20,4 +20,12 @@ PRODUCT_FILE = DOCS / "valio_aimo_junction26_product_data.json"
 RELIABILITY_FILE = DOCS / "valio_aimo_junction26_delivery_reliability.csv"
 DATA = ROOT / "data"
 CATALOG_INDEX = DATA / "catalog_index.json"   # small cache built from PRODUCT_FILE
-ORDERS_FILE = DATA / "orders.jsonl"           # mock orders (ours, not Aimo's)
+
+# Things that change while the app runs (requests, orders, log, rule history) live in STATE.
+# Normally that is ./data. Test scripts point it at a throw-away sandbox folder (see scripts/_sandbox.py)
+# so that tests can never touch the real demo data or the real rulebook.
+STATE = Path(os.getenv("TTA_STATE_DIR") or DATA)
+RULES_FILE = Path(os.getenv("TTA_RULES_FILE") or ROOT / "rules.yaml")
+RULES_DEFAULT_FILE = ROOT / "rules.default.yaml"
+RULEBOOK_MD = RULES_FILE.parent / "rulebook.md"
+ORDERS_FILE = STATE / "orders.jsonl"          # mock orders (ours, not Aimo's)
