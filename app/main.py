@@ -7,7 +7,7 @@ from typing import List, Optional
 from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel, Field
 
-from . import agent, aimo, catalog, log, orders, rule_edit, store
+from . import agent, ai, aimo, catalog, config, log, orders, rule_edit, store
 
 app = FastAPI(
     title="Trusted Trade Agent: buying agent backend",
@@ -226,3 +226,45 @@ def download_log():
     if not log.LOG_FILE.exists():
         raise HTTPException(404, "The log is empty")
     return FileResponse(log.LOG_FILE, media_type="application/jsonl", filename="audit_log.jsonl")
+
+
+# ---------------------------------------------------------------- AI helpers (Gemini, with plain-code fallbacks)
+
+@app.get("/api/ai/status")
+def ai_status():
+    return ai.status()
+
+
+class Question(BaseModel):
+    question: str = Field(..., min_length=1, max_length=500)
+
+
+@app.post("/api/log/ask")
+def ask_log(q: Question):
+    """Answer a plain-language question from the audit log, citing the exact lines used."""
+    return ai.ask_log(q.question)
+
+
+class Wish(BaseModel):
+    text: str = Field(..., min_length=1, max_length=500)
+
+
+@app.post("/api/rules/propose")
+def propose_rule(w: Wish):
+    """Turn a plain-language wish into a proposed rule change. Nothing is saved: a person must apply it."""
+    return ai.propose_rule(w.text)
+
+
+# ---------------------------------------------------------------- for the dashboard
+
+@app.get("/api/usual")
+def usual():
+    """The kitchen's usual orders (generated test data), for one-tap ordering."""
+    from . import rules
+    return rules.usual_orders()
+
+
+@app.get("/", include_in_schema=False)
+def dashboard():
+    from fastapi.responses import FileResponse
+    return FileResponse(config.ROOT / "app" / "static" / "index.html", headers={"Cache-Control": "no-store"})

@@ -203,7 +203,7 @@ def _check_value(v, spec):
             return [f"must be one of {', '.join(spec['options'])}."]
     elif k == "list":
         if not isinstance(v, list) or len(v) < spec.get("min_items", 0):
-            return [f"must be a list with at least {spec.get('min_items', 0)} item(s)."]
+            return ["needs at least one entry."]
         if spec.get("options") and any(x not in spec["options"] for x in v):
             return [f"items must be from {', '.join(spec['options'])}."]
         if spec.get("product_codes"):

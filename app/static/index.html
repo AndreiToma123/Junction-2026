@@ -1,0 +1,522 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Buying agent · Demo Kitchen Oy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F5F5F2;--card:#fff;--ink:#1A1D21;--ink2:#3D4248;--mute:#5B6168;--line:#E3E4E6;--line2:#D5D7DA;
+--blue:#1F4FD1;--blue-t:#E7EEFC;--blue-t2:#F1F5FE;--green:#1D5E3A;--green-t:#E3F1E8;--amber:#7A4300;--amber-t:#FCEFD9;
+--red:#8B1D1D;--red-t:#F9E3E3;--grey-t:#EFEFEF}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,sans-serif;font-size:15px;line-height:1.45}
+h1,h2,h3{font-family:'Space Grotesk',Inter,sans-serif;font-weight:600;margin:0}
+h1{font-size:30px}h2{font-size:22px}
+a{color:var(--blue)}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+.wrap{max-width:1280px;margin:0 auto;padding:0 16px}
+nav{background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+nav .wrap{display:flex;flex-wrap:wrap;align-items:center;gap:8px 20px;min-height:64px}
+.brand{font-family:'Space Grotesk',Inter,sans-serif;font-weight:600;font-size:18px;margin-right:auto}
+.tabs{display:flex;flex-wrap:wrap;gap:4px}
+.tabs a{display:flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;border-radius:8px;color:var(--ink2);text-decoration:none;font-weight:500}
+.tabs a.on{background:var(--blue-t);color:var(--blue);font-weight:600}
+.badge{background:var(--blue);color:#fff;border-radius:999px;padding:1px 8px;font-size:12px;font-weight:600}
+.me{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--mute)}
+.me input{width:160px}
+main{padding:28px 0 64px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px}
+.stack{display:flex;flex-direction:column;gap:20px}
+.row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.between{justify-content:space-between}
+.mute{color:var(--mute)}.small{font-size:13px}
+.label{font-size:12px;font-weight:600;color:var(--mute);text-transform:uppercase;letter-spacing:.05em}
+input[type=text],input[type=search],input[type=number],input[type=date],select,textarea{border:1px solid var(--line2);border-radius:10px;padding:0 12px;min-height:44px;background:#fff;max-width:100%}
+textarea{padding:12px 14px;width:100%;resize:vertical}
+input:focus,select:focus,textarea:focus,button:focus-visible,a:focus-visible{outline:3px solid #9DB6F2;outline-offset:1px}
+.btn{min-height:44px;padding:0 18px;border-radius:10px;border:1px solid var(--line2);background:#fff;font-weight:600;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;color:var(--ink);white-space:nowrap}
+.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn.big{min-height:52px;padding:0 28px;font-size:16px}
+.btn.danger{color:var(--red)}
+.btn:disabled{opacity:.55;cursor:default}
+.pill{display:inline-block;font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px;white-space:nowrap}
+.t-approve{color:var(--amber);background:var(--amber-t)}.t-ask{color:var(--blue);background:var(--blue-t)}
+.t-ok{color:var(--green);background:var(--green-t)}.t-bad{color:var(--red);background:var(--red-t)}.t-grey{color:var(--mute);background:var(--grey-t)}
+.chip{min-height:40px;padding:0 14px;border-radius:999px;border:1px solid var(--line2);background:#FAFAF8;font-weight:500;font-size:14px}
+.chip.on{background:var(--blue-t);border-color:var(--blue);color:var(--blue);font-weight:600}
+/* requests */
+.split{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start}
+.list{flex:1 1 290px;min-width:0;display:flex;flex-direction:column;gap:10px}
+.detail{flex:999 1 600px;min-width:0}
+.item{text-align:left;display:flex;flex-direction:column;gap:6px;padding:14px 16px;border-radius:12px;background:#FBFBF9;border:2px solid var(--line);width:100%}
+.item.on{background:#fff;border-color:var(--blue)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.tile{display:flex;flex-direction:column;gap:4px;padding:14px 16px;border-radius:12px;background:#FAFAF8;border:1px solid var(--line)}
+.tile b{font-size:17px;font-weight:600;line-height:1.3}
+.tile.warn{background:#FFF7EA;border-color:#F2D3A0}.tile.warn b{color:var(--amber)}
+.tile.ask{background:var(--blue-t2);border-color:#C9D7F8}.tile.ask b{color:var(--blue)}
+.tile.ok{background:#F1F8F3;border-color:#C6E2CF}.tile.ok b{color:var(--green)}
+.tile.bad{background:#FDF1F1;border-color:#EBC4C4}.tile.bad b{color:var(--red)}
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:12px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;font-weight:600;color:var(--mute);padding:10px 12px;background:#FAFAF8;white-space:nowrap}
+td{padding:10px 12px;border-top:1px solid var(--line);vertical-align:top}
+.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.rule{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:baseline;padding:10px 14px;border-radius:10px}
+.rule .k{font-size:12px;font-weight:700;min-width:112px}
+.passed{display:flex;gap:12px;padding:6px 2px;border-bottom:1px solid #EFEFEF;font-size:14px}
+.box{flex:1 1 280px;min-width:0;border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.box.dashed{border-style:dashed;border-color:#B9BCC1}
+.box ul{margin:8px 0 0;padding-left:18px}.box li{margin:4px 0}
+/* timeline */
+.step{display:flex;gap:14px}
+.dot{flex:none;width:26px;height:26px;border-radius:999px;background:var(--green);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.dot.warn{background:#B86A00}.dot.ask{background:var(--blue)}.dot.bad{background:var(--red)}
+.rail{display:flex;flex-direction:column;align-items:center}.rail i{flex:1;width:2px;min-height:10px;background:var(--line)}
+.step .body{padding-bottom:14px;min-width:0;flex:1}
+.banner{padding:18px 20px;border-radius:12px;display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between}
+.banner h3{font-size:19px}
+/* log */
+tr.hist td{background:#FCFCFA;color:var(--ink2)}
+/* rules */
+.rulecard{border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;padding:14px;background:#FAFAF8;border-radius:10px}
+.form label{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:600;color:var(--ink2)}
+.checks{display:flex;flex-wrap:wrap;gap:10px;font-weight:400}
+.diff{border-radius:10px;padding:12px 14px;background:var(--blue-t2);border:1px solid #C9D7F8;display:flex;flex-direction:column;gap:8px}
+.diff .b{color:var(--ink2);text-decoration:line-through}.diff .a{font-weight:500}
+.problem{border-radius:10px;padding:12px 14px;background:var(--red-t);color:var(--red);font-weight:500}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 18px;border-radius:10px;font-weight:500;display:none;z-index:9;max-width:90vw}
+@media (max-width:640px){h1{font-size:24px}.card{padding:16px}.me input{width:120px}nav{position:static}nav .wrap{padding-top:8px;padding-bottom:8px}.brand{flex-basis:100%}}
+</style>
+</head>
+<body>
+<nav><div class="wrap">
+  <div class="brand">Demo Kitchen Oy · Buying agent</div>
+  <div class="tabs" id="tabs">
+    <a href="#/new" data-tab="new">New request</a>
+    <a href="#/requests" data-tab="requests">Requests <span class="badge" id="badge" hidden>0</span></a>
+    <a href="#/log" data-tab="log">Audit log</a>
+    <a href="#/rules" data-tab="rules">Rules</a>
+  </div>
+  <span class="pill t-grey" id="aiPill" title="">AI: …</span>
+  <label class="me">You are <input type="text" id="me" placeholder="your name" autocomplete="name"></label>
+</div></nav>
+<main><div class="wrap" id="view"></div></main>
+<div id="toast" role="status"></div>
+
+<script>
+"use strict";
+// ---------- small helpers
+const $ = (s, el = document) => el.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const eur = n => n == null ? "–" : "€" + Number(n).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const num = n => Number(n).toLocaleString("en-US", { maximumFractionDigits: 2 });
+const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"], MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+function niceDate(iso) { if (!iso) return "–"; const [y, m, d] = iso.slice(0, 10).split("-").map(Number); const dt = new Date(Date.UTC(y, m - 1, d)); return `${DAYS[dt.getUTCDay()]} ${d} ${MONTHS[m - 1]}`; }
+function niceTime(iso) { return iso ? `${niceDate(iso)} ${iso.slice(11, 16)}` : "–"; }
+async function api(path, opts) {
+  const r = await fetch(path, opts && { method: opts.method || "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(opts.body) });
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) { const d = data.detail; throw new Error(d?.problems ? d.problems.join(" ") : typeof d === "string" ? d : "Something went wrong (" + r.status + ")"); }
+  return data;
+}
+let toastTimer;
+function toast(msg) { const t = $("#toast"); t.textContent = msg; t.style.display = "block"; clearTimeout(toastTimer); toastTimer = setTimeout(() => t.style.display = "none", 4500); }
+const meInput = $("#me");
+try { meInput.value = localStorage.getItem("me") || ""; } catch (e) {}
+meInput.addEventListener("input", () => { try { localStorage.setItem("me", meInput.value); } catch (e) {} });
+function me() { const v = meInput.value.trim(); if (!v) { meInput.focus(); toast("Type your name first (top right). It goes into the audit log."); } return v; }
+
+api("/api/ai/status").then(a => { const el = $("#aiPill"); el.textContent = a.gemini ? "AI: Gemini" : "AI: simple mode"; el.className = "pill " + (a.gemini ? "t-ok" : "t-grey"); el.title = a.mode; }).catch(() => {});
+
+const STATUS = {
+  needs_approval: ["Needs approval", "t-approve"], ask_buyer: ["Needs your answer", "t-ask"], ordered: ["Ordered", "t-ok"],
+  rejected: ["Rejected", "t-bad"], cannot_fulfil: ["Can't be done", "t-bad"]
+};
+const RESULT = { pass: ["Passed", "t-ok"], approve: ["Needs approval", "t-approve"], ask: ["Ask buyer", "t-ask"], blocked: ["Can't be used", "t-bad"] };
+const pill = (text, cls) => `<span class="pill ${cls}">${esc(text)}</span>`;
+const statusPill = r => pill(...(STATUS[r.status] || [r.status, "t-grey"]));
+const chosen = r => (r.options || []).find(o => o.option_id === r.chosen);
+const needsAction = r => r.status === "needs_approval" || r.status === "ask_buyer";
+
+let REQS = [];
+async function loadRequests() {
+  REQS = (await api("/api/requests")).reverse();
+  const n = REQS.filter(needsAction).length, b = $("#badge");
+  b.hidden = !n; b.textContent = n;
+  return REQS;
+}
+
+// ---------- pieces shared by screens
+function stockText(l) {
+  const demo = l.demo_stock_override ? " (demo stock)" : "";
+  if (l.stock_status === "known") return `${num(l.stock_amount)} in stock${demo}`;
+  if (l.stock_status === "no_limit") return "No limit reported";
+  if (l.stock_status === "unknown") return "Unknown (supplier product)";
+  return "–";
+}
+function answerButtons(r) {
+  if (r.ask_kind === "understanding") return `<button class="btn primary" data-answer="${esc(r.id)}" data-confirm="1">Yes, that's right</button>
+    <a class="btn" href="#/new?text=${encodeURIComponent(r.text || "")}">No, let me rewrite it</a>`;
+  const a1 = (r.request_checks || []).find(c => c.rule === "A1" && c.result === "ask" && c.facts?.usual);
+  if (!a1) return `<a class="btn primary" href="#/new?text=${encodeURIComponent(r.text || "")}">Write the request again</a>`;
+  const u = a1.facts.unit, usual = a1.facts.usual, asked = a1.facts.requested;
+  return `<button class="btn primary" data-answer="${esc(r.id)}" data-amount="${usual}">Change to ${num(usual)} ${esc(u)}</button>
+    <button class="btn" data-answer="${esc(r.id)}" data-confirm="1">Yes, I meant ${num(asked)} ${esc(u)}</button>
+    <span class="row" style="gap:6px"><label class="small mute" for="amt-${esc(r.id)}">or another amount</label>
+    <input type="number" id="amt-${esc(r.id)}" min="1" style="width:110px" placeholder="${esc(u)}">
+    <button class="btn" data-answer="${esc(r.id)}" data-custom="1">Use it</button></span>`;
+}
+function outcomeBanner(r, withLink) {
+  const o = chosen(r), link = withLink ? `<a class="btn" href="#/requests/${esc(r.id)}">Open details</a>` : "";
+  const dl = o ? niceDate(o.lines[0].available_date) : "";
+  if (r.status === "ordered") return `<div class="banner t-ok"><div><div class="label" style="color:inherit">Ordered</div>
+    <h3>${esc(r.order_id)} · ${num(o.litres)} L · ${eur(o.total_with_tax)} incl. tax · delivery ${dl}</h3>
+    <div class="small">${r.decided_by ? "Approved by " + esc(r.decided_by) : "Every rule passed, so the agent ordered by itself"}. Mock order, nothing is sent to Valio Aimo.</div></div>${link}</div>`;
+  if (r.status === "needs_approval") { const why = o.results.filter(x => x.result === "approve").map(x => x.detail).join(" ");
+    return `<div class="banner t-approve"><div><div class="label" style="color:inherit">Waiting for approval · nothing ordered yet</div>
+    <h3>${num(o.litres)} L · ${eur(o.total_with_tax)} incl. tax · delivery ${dl}</h3><div class="small">${esc(why)}</div></div>
+    ${withLink ? `<a class="btn primary" href="#/requests/${esc(r.id)}">Open to approve or reject</a>` : ""}</div>`; }
+  if (r.status === "ask_buyer") return `<div class="banner t-ask"><div><div class="label" style="color:inherit">The agent needs your answer · nothing ordered</div>
+    <h3>${esc(r.question)}</h3></div><div class="row">${answerButtons(r)}</div></div>`;
+  if (r.status === "rejected") return `<div class="banner t-bad"><div><div class="label" style="color:inherit">Rejected</div>
+    <h3>Rejected by ${esc(r.decided_by)}. Nothing was ordered.</h3></div>${link}</div>`;
+  return `<div class="banner t-bad"><div><div class="label" style="color:inherit">Can't be done · nothing ordered</div>
+    <h3>${esc(r.reason || "No usable option")}</h3><div class="small">Try a later deadline, a smaller amount or a different product.</div></div>${link}</div>`;
+}
+const STEP_TITLE = { request: "Read the request", rules: "Checked a rule", search: "Searched the product list", lookup: "Asked Valio Aimo for price, stock and delivery",
+  demo: "Demo stock", split: "Split needed", options: "Built options", choose: "Chose an option", approval: "Sent for approval", order: "Placed the order",
+  ask: "Asked the buyer", answer: "Buyer answered", decision: "Decision", result: "Result" };
+function stepDot(s) {
+  if (/: approve\./.test(s.message) || s.step === "approval") return "warn";
+  if (/: ask\./.test(s.message) || s.step === "ask") return "ask";
+  if (/: blocked\./.test(s.message) || s.step === "result" || /Rejected/.test(s.message)) return "bad";
+  return "";
+}
+function timeline(steps) {
+  return steps.map((s, i) => `<div class="step" data-step><div class="rail"><span class="dot ${stepDot(s)}">${i + 1}</span><i></i></div>
+    <div class="body"><div class="row between" style="gap:4px 12px"><b>${esc(STEP_TITLE[s.step] || s.step)}</b>
+    <span class="small mute">${esc(s.source)} · ${esc(s.time.slice(11, 19))}</span></div><div class="mute" style="color:var(--ink2)">${esc(s.message)}</div></div></div>`).join("");
+}
+async function doAnswer(btn) {
+  const id = btn.dataset.answer; let body;
+  if (btn.dataset.confirm) body = { confirm: true };
+  else if (btn.dataset.custom) { const v = parseFloat($("#amt-" + CSS.escape(id)).value); if (!(v > 0)) return toast("Type an amount first."); body = { new_amount: v }; }
+  else body = { new_amount: parseFloat(btn.dataset.amount) };
+  btn.disabled = true;
+  try { const r = await api(`/api/requests/${id}/answer`, { body }); await loadRequests(); FILTER = "all"; location.hash = "#/requests/" + r.id; if (CURRENT === "requests") route(); }
+  catch (e) { toast(e.message); btn.disabled = false; }
+}
+document.addEventListener("click", e => { const b = e.target.closest("[data-answer]"); if (b) doAnswer(b); });
+
+// ---------- screen 1: new request
+async function viewNew(params) {
+  const usual = await api("/api/usual").catch(() => ({ items: [] }));
+  const v = $("#view");
+  v.innerHTML = `<div class="stack" style="max-width:880px;margin:0 auto">
+    <div><h1>What do you need?</h1><p class="mute" style="margin:6px 0 0;font-size:16px">Write it the way you would tell a colleague: what, how much, and by when. The agent orders by itself only when every rule passes.</p></div>
+    <div class="card stack" style="gap:14px">
+      <label class="label" for="need">Your request</label>
+      <textarea id="need" rows="3" style="font-size:18px" placeholder="e.g. I need 1,000 litres of lactose-free milk by Monday">${esc(params.get("text") || "")}</textarea>
+      ${usual.items.length ? `<div class="row" style="gap:8px"><span class="small mute">Your usual:</span>${usual.items.map(i =>
+        `<button class="chip" data-fill="${esc(`I need ${num(i.usual_amount)} ${i.unit === "L" ? "litres" : i.unit} of ${i.name.toLowerCase()} by Monday.`)}">${num(i.usual_amount)} ${esc(i.unit)} ${esc(i.name)}</button>`).join("")}</div>` : ""}
+      <div class="row between">
+        <details class="small mute"><summary style="cursor:pointer;min-height:32px">Demo options</summary>
+          <label class="row" style="gap:8px;margin-top:6px"><input type="checkbox" id="demoSplit"> Simulate low stock of the usual milk (shows the split). Marked "demo stock" everywhere.</label></details>
+        <button class="btn primary big" id="send">Send to agent</button>
+      </div>
+    </div>
+    <div id="result" class="stack"></div>
+    <p class="small mute" style="margin:0">Prices, stock and delivery dates come live from the Valio Aimo mock API. Orders are mock orders for the demo; nothing is sent to Valio Aimo.</p></div>`;
+  const ta = $("#need");
+  v.querySelectorAll("[data-fill]").forEach(b => b.onclick = () => { ta.value = b.dataset.fill; ta.focus(); });
+  const send = async () => {
+    const text = ta.value.trim(); if (!text) { ta.focus(); return toast("Write what you need first."); }
+    const btn = $("#send"); btn.disabled = true; btn.textContent = "Working…";
+    $("#result").innerHTML = `<div class="card mute">The agent is reading your request and asking Valio Aimo…</div>`;
+    try {
+      const r = await api("/api/requests", { body: { text, scenario: $("#demoSplit").checked ? "split" : null } });
+      await loadRequests(); showRun(r);
+    } catch (e) { $("#result").innerHTML = `<div class="problem">${esc(e.message)}</div>`; }
+    btn.disabled = false; btn.textContent = "Send to agent";
+  };
+  $("#send").onclick = send;
+  ta.addEventListener("keydown", e => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) send(); });
+  ta.focus();
+}
+function showRun(r) {
+  $("#result").innerHTML = `<div id="outcome"></div><div class="card"><div class="row between" style="margin-bottom:14px"><h2>What the agent did</h2>
+    <span class="small mute">${esc(r.id)} · every step is in the audit log</span></div><div id="tl">${timeline(r.steps)}</div></div>`;
+  const steps = [...document.querySelectorAll("#tl [data-step]")];
+  steps.forEach(s => s.style.display = "none");
+  let i = 0;
+  const tick = () => { if (i < steps.length) { steps[i++].style.display = "flex"; setTimeout(tick, 180); } else { $("#outcome").innerHTML = outcomeBanner(r, true); $("#outcome").scrollIntoView({ behavior: "smooth", block: "nearest" }); } };
+  tick();
+}
+
+// ---------- screen 2: requests & approvals
+let FILTER = "action";
+async function viewRequests(params, id) {
+  await loadRequests();
+  const shown = REQS.filter(r => FILTER === "all" || needsAction(r));
+  let cur = REQS.find(r => r.id === id) || shown[0] || REQS[0];
+  const list = shown.length ? shown : [];
+  $("#view").innerHTML = `<div class="stack">
+    <div class="row between"><h1>Requests</h1><div class="row" style="gap:8px">
+      <button class="chip ${FILTER === "action" ? "on" : ""}" data-filter="action">Needs action (${REQS.filter(needsAction).length})</button>
+      <button class="chip ${FILTER === "all" ? "on" : ""}" data-filter="all">All (${REQS.length})</button>
+      <a class="btn primary" href="#/new">New request</a></div></div>
+    ${!REQS.length ? `<div class="card">No requests yet. <a href="#/new">Make the first one</a>.</div>` : `<div class="split">
+      <div class="list">${list.length ? list.map(r => { const o = chosen(r); return `<button class="item ${cur && r.id === cur.id ? "on" : ""}" data-open="${esc(r.id)}">
+        <span class="row between" style="gap:6px;width:100%"><span class="small mute">${esc(r.id)} · ${esc(niceTime(r.received_at))}</span>${statusPill(r)}</span>
+        <b>${esc(r.text || "")}</b><span class="small" style="color:var(--ink2)">${esc(o ? eur(o.total_with_tax) + " · " + headline(r) : headline(r))}</span></button>`; }).join("")
+        : `<div class="card small">Nothing needs action. <button class="chip" data-filter="all">Show all</button></div>`}</div>
+      <div class="detail">${cur ? detail(cur) : ""}</div></div>`}</div>`;
+  $("#view").querySelectorAll("[data-filter]").forEach(b => b.onclick = () => { FILTER = b.dataset.filter; viewRequests(params, null); });
+  $("#view").querySelectorAll("[data-open]").forEach(b => b.onclick = () => { location.hash = "#/requests/" + b.dataset.open; });
+  $("#view").querySelectorAll("[data-decide]").forEach(b => b.onclick = async () => {
+    const by = me(); if (!by) return; b.disabled = true;
+    try { await api(`/api/requests/${cur.id}/decision`, { body: { decision: b.dataset.decide, by } }); FILTER = "all"; await viewRequests(params, cur.id); window.scrollTo(0, 0); }
+    catch (e) { toast(e.message); b.disabled = false; }
+  });
+  const tp = $("#togglePassed"); if (tp) tp.onclick = () => { const el = $("#passed"); el.hidden = !el.hidden; tp.textContent = (el.hidden ? "Show" : "Hide") + tp.dataset.rest; };
+}
+function headline(r) {
+  const o = chosen(r);
+  if (r.status === "ordered") return r.order_id + (r.decided_by ? " · approved by " + r.decided_by : " · by the agent");
+  if (r.status === "needs_approval") return o.results.filter(x => x.result === "approve").map(x => x.name).join(", ");
+  if (r.status === "ask_buyer") return "Waiting for the buyer's answer";
+  if (r.status === "rejected") return "Rejected by " + r.decided_by;
+  return "No usable option";
+}
+function tile(k, v, sub, tone) { return `<div class="tile ${tone || ""}"><span class="label">${esc(k)}</span><b>${esc(v)}</b>${sub ? `<span class="small" style="color:var(--ink2)">${esc(sub)}</span>` : ""}</div>`; }
+function detail(r) {
+  const o = chosen(r), results = o ? o.results : (r.request_checks || []);
+  const problems = results.filter(x => x.result !== "pass"), passed = results.filter(x => x.result === "pass");
+  const limit = results.find(x => x.facts && x.facts.limit != null)?.facts.limit;
+  const cut = o ? o.lines.map(l => l.closing_time).filter(Boolean).sort()[0] : null;
+  let tiles = "";
+  if (r.status === "needs_approval") tiles = tile("Decision needed", "Approve or reject", problems.map(p => p.name).join(", "), "warn") + tile("Reason", problems.map(p => p.rule + " " + p.name).join(" · "), problems.map(p => p.detail).join(" "), "warn");
+  else if (r.status === "ask_buyer") tiles = tile("Decision needed", "Buyer must answer", "", "ask") + tile("Reason", problems.map(p => p.rule + " " + p.name).join(" · "), r.question, "ask");
+  else if (r.status === "ordered") tiles = tile("Decision needed", "None", r.decided_by ? "Approved by " + r.decided_by : "Ordered automatically", "ok") + tile("Order", r.order_id, "Mock order, demo only", "ok");
+  else if (r.status === "rejected") tiles = tile("Decision", "Rejected", "By " + r.decided_by + ". Nothing was ordered.", "bad");
+  else tiles = tile("Result", "Can't be done", r.reason, "bad");
+  if (o) tiles += tile("Total incl. tax", eur(o.total_with_tax), limit != null ? "Limit " + eur(limit) : "") + tile("Delivery", niceDate(o.lines[0].available_date), cut ? "Order by " + niceTime(cut) : "")
+    + tile("Rules", `${passed.length} passed` + (problems.length ? ` · ${problems.length} ${r.status === "ordered" ? "approved by a person" : "not"}` : ""), "") + tile("Why this option", o.kind === "split" ? "Split order" : "Single product", r.why_chosen || "");
+  else if (r.status === "ask_buyer") tiles += tile("Searched", "Nothing yet", "Waits for the buyer's answer");
+  const lines = o ? `<section><div class="label" style="margin-bottom:8px">Order</div><div class="scroll"><table style="min-width:640px"><thead><tr>
+      <th>Product</th><th>Role</th><th>Stock</th><th class="num">Amount</th><th class="num">Price</th><th class="num">Total</th></tr></thead><tbody>
+      ${o.lines.map(l => `<tr><td><div style="font-weight:500">${esc(l.name)}</div><div class="small mute">${esc(l.brand || "no brand")} · ${esc(l.product_id)}</div></td>
+        <td>${esc(l.role[0].toUpperCase() + l.role.slice(1))}</td><td>${esc(stockText(l))}</td>
+        <td class="num">${num(l.quantity)} × ${num(l.litres_per_sales_unit)} L</td><td class="num">${eur(l.price_per_unit_with_tax)}</td><td class="num"><b>${eur(l.line_total_with_tax)}</b></td></tr>`).join("")}
+      </tbody></table></div><div class="small mute" style="margin-top:6px">Prices include tax${o.lines[0].tax_rate != null ? ` (${o.lines[0].tax_rate}%)` : ""}. Checked with Valio Aimo at ${esc(niceTime(r.quote_checked_at))}.</div></section>` : "";
+  const rules = `<section><div class="label" style="margin-bottom:8px">Rule checks</div><div class="stack" style="gap:8px">
+      ${problems.map(p => { const done = p.result === "approve" && r.decided_by ? (r.status === "ordered" ? ["Approved by " + r.decided_by, "t-ok"] : ["Rejected by " + r.decided_by, "t-bad"]) : RESULT[p.result];
+        return `<div class="rule ${done[1]}"><span class="k">${esc(done[0])}</span><span style="color:var(--ink);flex:1 1 300px"><b>${esc(p.rule)} ${esc(p.name)}.</b> ${esc(p.detail)}</span></div>`; }).join("")}
+      ${passed.length ? `<button class="btn" id="togglePassed" data-rest=" the ${passed.length} passed checks" style="align-self:flex-start;color:var(--green)">Show the ${passed.length} passed checks</button>
+      <div id="passed" hidden>${passed.map(p => `<div class="passed"><b style="flex:0 0 34px;color:var(--green)">${esc(p.rule)}</b><span style="flex:0 0 170px;font-weight:500">${esc(p.name)}</span><span style="color:var(--ink2)">${esc(p.detail)}</span></div>`).join("")}</div>` : ""}
+    </div></section>`;
+  const alts = (r.alternatives_detail || []).length ? `<div class="box"><b class="small">Other options considered</b><ul>${r.alternatives_detail.map(a =>
+      `<li>${a.lines.map(l => `${num(l.quantity)} × ${esc(l.name)} (${esc(l.product_id)})`).join(" + ")}: ${eur(a.total_with_tax)}. ${esc(a.outcome === "auto_order" ? "Usable, but ranked lower." : a.note)}</li>`).join("")}</ul></div>` : "";
+  let actions = "";
+  if (r.status === "needs_approval") actions = `<div class="row" style="border-top:1px solid var(--line);padding-top:20px">
+      <button class="btn primary big" data-decide="approve">Approve &amp; place order</button><button class="btn big" data-decide="reject">Reject</button>
+      <span class="small mute">Your name (top right) is written to the audit log.</span></div>`;
+  else if (r.status === "ask_buyer") actions = `<div class="row" style="border-top:1px solid var(--line);padding-top:20px">${answerButtons(r)}</div>`;
+  return `<div class="card stack" style="gap:24px">
+    <div class="row between" style="align-items:flex-start"><div><div class="small mute">${esc(r.id)} · received ${esc(niceTime(r.received_at))}${r.scenario ? " · demo scenario: " + esc(r.scenario) : ""}</div>
+      <h2 style="margin-top:4px">“${esc(r.text || "")}”</h2></div>${statusPill(r)}</div>
+    ${r.summary ? `<div style="background:var(--bg);border-radius:12px;padding:12px 16px"><span class="label">In short</span>
+      <span class="small mute"> · written by ${esc(r.summary.written_by)} from the rule results</span><div style="margin-top:4px;font-size:16px">${esc(r.summary.text)}</div></div>` : ""}
+    <div class="tiles">${tiles}</div>${lines}${rules}
+    <div class="row" style="align-items:stretch;gap:16px"><div class="box dashed"><b class="small">Not checked by the agent</b><ul>${(r.not_checked || []).map(n => `<li>${esc(n)}</li>`).join("")}</ul></div>${alts}</div>
+    ${actions}
+    <details><summary style="cursor:pointer;font-weight:600;min-height:32px">What the agent did (${r.steps.length} steps) · <a href="#/log?request_id=${esc(r.id)}">open in audit log</a></summary><div style="margin-top:14px">${timeline(r.steps)}</div></details>
+  </div>`;
+}
+
+// ---------- screen 3: audit log
+async function viewLog(params) {
+  const f = { q: params.get("q") || "", request_id: params.get("request_id") || "", actor: params.get("actor") || "", since: params.get("since") || "", until: params.get("until") || "" };
+  $("#view").innerHTML = `<div class="stack">
+    <div class="row between"><h1>Audit log</h1><div class="row" style="gap:8px"><span id="verify" class="pill t-grey">Checking…</span><a class="btn" href="/api/log/download">Download (JSON Lines)</a></div></div>
+    <div class="card stack" style="gap:12px">
+      <label for="askQ" style="font-weight:600">Ask the log in your own words</label>
+      <form class="row" id="askForm"><input type="search" id="askQ" placeholder="e.g. why did the milk taste different the past 3 weeks?" style="flex:1 1 340px;min-height:48px;font-size:16px" value="${esc(params.get("ask") || "")}">
+        <button class="btn primary big" style="min-height:48px">Ask</button></form>
+      <div class="row" style="gap:8px"><span class="small mute">Try:</span>${["Why did the milk taste different the past 3 weeks?", "What needed approval this week?", "Who approved orders with Arla?"].map(q => `<button class="chip" data-ask="${esc(q)}">${esc(q)}</button>`).join("")}</div>
+      <div id="askBox"></div>
+    </div>
+    <form class="card row" id="logForm" style="align-items:flex-end">
+      <label style="flex:1 1 280px" class="small"><span class="label">Search</span><br><input type="search" name="q" value="${esc(f.q)}" placeholder="words, e.g. Arla, spend limit, MOCK-0002" style="width:100%"></label>
+      <label class="small"><span class="label">Request</span><br><input type="text" name="request_id" value="${esc(f.request_id)}" placeholder="REQ-0001" style="width:130px"></label>
+      <label class="small"><span class="label">Who</span><br><select name="actor"><option value="">Everyone</option>${[["agent", "The agent"], ["person", "People"], ["buyer", "The buyer"]].map(([v, t]) => `<option value="${v}" ${f.actor === v ? "selected" : ""}>${t}</option>`).join("")}</select></label>
+      <label class="small"><span class="label">From</span><br><input type="date" name="since" value="${esc(f.since)}"></label>
+      <label class="small"><span class="label">Until</span><br><input type="date" name="until" value="${esc(f.until)}"></label>
+      <button class="btn primary">Search</button><a class="btn" href="#/log">Clear</a>
+    </form>
+    <div class="card" style="padding:8px"><div class="small mute" id="logCount" style="padding:8px 10px"></div><div style="overflow-x:auto"><table style="min-width:860px"><thead><tr><th>When</th><th>Request</th><th>Who</th><th>Step</th><th>What happened</th><th>Source</th></tr></thead><tbody id="logRows"></tbody></table></div></div>
+    <p class="small mute" style="margin:0">Lines marked “test history” are generated test data. Lines are only ever added; each one carries a fingerprint of the line before it, so any later edit or deletion is detected.</p></div>`;
+  $("#logForm").onsubmit = e => { e.preventDefault(); const p = new URLSearchParams([...new FormData(e.target)].filter(([, v]) => v)); location.hash = "#/log" + (p.toString() ? "?" + p : ""); };
+  api("/api/log/verify").then(v => { const el = $("#verify"); if (!el) return; el.className = "pill " + (v.ok ? "t-ok" : "t-bad"); el.textContent = v.ok ? `Log intact · ${v.lines} lines` : "Log was changed: " + v.problem; });
+  const runAsk = async q => {
+    const box = $("#askBox"); if (!q.trim()) return toast("Type a question first.");
+    $("#askQ").value = q; box.innerHTML = `<div class="mute">Reading the log…</div>`;
+    try {
+      const a = await api("/api/log/ask", { body: { question: q } });
+      box.innerHTML = `<div class="diff"><div class="row between"><span class="label" style="color:var(--blue)">Answer · by ${esc(a.answered_by)}</span><span class="small mute">${esc(a.scope)}</span></div>
+        <div style="font-size:16px;font-weight:500">${esc(a.answer)}</div>
+        ${a.points.map(p => `<div class="row" style="background:#fff;border-radius:10px;padding:10px 12px;gap:6px 14px;align-items:baseline">
+          <a href="#/log?request_id=${esc(p.request_id)}" style="font-weight:700;white-space:nowrap">${esc(niceTime(p.time))}</a><span class="small mute">${esc(p.request_id)} · line ${esc(p.line_id)}</span>
+          <span style="flex:1 1 320px">${esc(p.text)}</span></div>`).join("")}
+        ${a.cannot_tell ? `<div class="small" style="color:var(--ink2)">${esc(a.cannot_tell)}</div>` : ""}
+        ${a.lines.length ? `<details ${a.points.length ? "" : "open"}><summary style="cursor:pointer;font-weight:600">The ${a.lines.length} log lines behind this</summary><div style="overflow-x:auto;margin-top:8px"><table style="background:#fff;min-width:700px">
+          ${a.lines.map(e => `<tr><td class="mute" style="white-space:nowrap">${esc(niceTime(e.time))}</td><td style="white-space:nowrap">${esc(e.request_id || "–")}</td><td><b>${esc(e.step)}</b></td><td>${esc(e.message)}</td></tr>`).join("")}</table></div></details>` : ""}
+        <div class="small mute">Answers only use what is in the log. Every point links to the exact line it comes from.</div></div>`;
+    } catch (e) { box.innerHTML = `<div class="problem">${esc(e.message)}</div>`; }
+  };
+  $("#askForm").onsubmit = e => { e.preventDefault(); runAsk($("#askQ").value); };
+  $("#view").querySelectorAll("[data-ask]").forEach(b => b.onclick = () => runAsk(b.dataset.ask));
+  if (params.get("ask")) runAsk(params.get("ask"));
+  const qs = new URLSearchParams(Object.entries(f).filter(([, v]) => v));
+  const d = await api("/api/log?" + qs);
+  const known = new Set(REQS.map(r => r.id));
+  $("#logCount").textContent = `${d.count} line${d.count === 1 ? "" : "s"}, newest first`;
+  $("#logRows").innerHTML = d.lines.map(e => `<tr class="${e.test_history ? "hist" : ""}"><td style="white-space:nowrap" class="mute">${esc(niceTime(e.time))}:${esc(e.time.slice(17, 19))}</td>
+    <td style="white-space:nowrap">${e.request_id ? (known.has(e.request_id) ? `<a href="#/requests/${esc(e.request_id)}">${esc(e.request_id)}</a>` : esc(e.request_id)) : "–"}</td>
+    <td style="white-space:nowrap">${esc(e.actor.replace("person:", ""))}</td><td style="white-space:nowrap"><b>${esc(e.step)}</b></td>
+    <td>${e.test_history ? pill("test history", "t-grey") + " " : ""}${esc(e.message.replace("[test history] ", ""))}</td><td class="mute" style="white-space:nowrap">${esc(e.source)}</td></tr>`).join("")
+    || `<tr><td colspan="6" class="mute">No lines match.</td></tr>`;
+}
+
+// ---------- screen 4: rules
+const SET_LABEL = { limit_eur: "Limit (€)", includes_tax: "Count tax in the total", max_ratio: "Times the usual amount", brands: "Brands (comma separated)",
+  products: "Product codes (comma separated)", labels: "Labels (comma separated)", max_brands: "Max brands in one order", max_overshoot_pct: "Max extra from rounding (%)",
+  min_score: "Minimum score (0 to 1)", if_unknown: "If the product has no score", if_stock_unknown: "If stock is unknown", if_buyer_confirms: "If the buyer confirms",
+  if_new_item: "If the item was never ordered before", max_eur_per_litre: "Max price per litre (€)", required_fields: "The request must say" };
+const CHOICE = { approve: "Needs approval", ask: "Ask the buyer", blocked: "Can't be used", pass: "Allow", allow_with_warning: "Allow, with a warning" };
+let RULES = null;
+function settingInput(key, spec, val) {
+  const name = `s_${key}`, lab = esc(SET_LABEL[key] || key.replace(/_/g, " "));
+  if (spec.kind === "bool") return `<label><span>${lab}</span><span class="checks"><label class="row" style="gap:6px;flex-direction:row"><input type="checkbox" name="${name}" ${val ? "checked" : ""}> Yes</label></span></label>`;
+  if (spec.kind === "choice") return `<label>${lab}<select name="${name}">${spec.options.map(o => `<option value="${o}" ${o === val ? "selected" : ""}>${esc(CHOICE[o] || o)}</option>`).join("")}</select></label>`;
+  if (spec.kind === "list" && spec.options) return `<label><span>${lab}</span><span class="checks">${spec.options.map(o => `<label class="row" style="gap:6px;flex-direction:row"><input type="checkbox" name="${name}" value="${o}" ${(val || []).includes(o) ? "checked" : ""}> ${esc(o)}</label>`).join("")}</span></label>`;
+  if (spec.kind === "list") return `<label>${lab}<input type="text" name="${name}" value="${esc((val || []).join(", "))}"></label>`;
+  return `<label>${lab}<input type="number" name="${name}" value="${esc(val ?? "")}" step="any" min="${spec.min}" max="${spec.max}"></label>`;
+}
+function readSettings(form, specs) {
+  const out = {};
+  for (const [key, spec] of Object.entries(specs)) {
+    const els = [...form.querySelectorAll(`[name="s_${key}"]`)];
+    if (spec.kind === "bool") out[key] = els[0].checked;
+    else if (spec.kind === "list" && spec.options) out[key] = els.filter(e => e.checked).map(e => e.value);
+    else if (spec.kind === "list") out[key] = els[0].value.split(",").map(s => s.trim()).filter(Boolean);
+    else if (spec.kind === "number") out[key] = els[0].value === "" ? null : Number(els[0].value);
+    else out[key] = els[0].value;
+  }
+  return out;
+}
+function ruleForm(type, rule) {
+  return `<form class="stack" style="gap:12px" data-form><div class="form">
+    <label>Name<input type="text" name="name" value="${esc(rule?.name || type.title)}"></label>
+    ${Object.entries(type.settings).map(([k, spec]) => settingInput(k, spec, rule?.settings?.[k])).join("")}
+    <label>If the rule is not met<select name="result">${type.results.map(o => `<option value="${o}" ${o === rule?.result ? "selected" : ""}>${esc(CHOICE[o] || o)}</option>`).join("")}</select></label>
+  </div><div class="row"><button class="btn primary">Preview change</button><button type="button" class="btn" data-cancel>Cancel</button></div><div data-preview></div></form>`;
+}
+function previewHtml(p) {
+  if (!p.ok) return `<div class="problem">${p.problems.map(esc).join("<br>")}</div>`;
+  return `<div class="diff"><b>This is what will change. Nothing is saved yet.</b>${p.diff.map(d => `<div><span class="pill t-grey">${esc(d.change)} ${esc(d.rule_id)}</span>
+    ${d.before ? `<div class="b">${esc(d.before)}</div>` : ""}${d.after ? `<div class="a">${esc(d.after)}</div>` : ""}</div>`).join("")}
+    <div class="row"><button type="button" class="btn primary" data-apply>Apply change</button><span class="small mute">Saved with your name in the audit log. Can be undone.</span></div></div>`;
+}
+async function previewAndApply(box, payload, source) {
+  let p; try { p = await api("/api/rules/preview", { body: payload }); } catch (e) { p = { ok: false, problems: [e.message] }; }
+  box.innerHTML = previewHtml(p);
+  const ap = $("[data-apply]", box);
+  if (ap) ap.onclick = async () => { const by = me(); if (!by) return; ap.disabled = true;
+    try { await api("/api/rules/apply", { body: { ...payload, by, source } }); toast("Rule change applied."); viewRules(); } catch (e) { box.innerHTML = `<div class="problem">${esc(e.message)}</div>`; } };
+}
+async function viewRules() {
+  RULES = await api("/api/rules"); const changes = (await api("/api/rules/changes")).reverse();
+  const typeOf = t => RULES.types.find(x => x.type === t);
+  const cats = [["Request", "A · The request (checked before searching)"], ["Product", "B · Each product in an option"], ["Order", "C · The whole order"]];
+  $("#view").innerHTML = `<div class="stack">
+    <div class="row between"><div><h1>Rules</h1><p class="mute" style="margin:4px 0 0">What the agent may decide alone. Plain code checks every order against these; the agent orders by itself only if all pass.</p></div>
+      <button class="btn primary" id="addBtn">Add a rule</button></div>
+    <div class="card stack" style="gap:12px">
+      <label for="wish" style="font-weight:600">Tell the agent what to change</label>
+      <form class="row" id="wishForm"><input type="text" id="wish" placeholder="e.g. raise the spend limit to €2,500 · never buy Arla · allow Arla" style="flex:1 1 340px;min-height:48px;font-size:16px">
+        <button class="btn primary big" style="min-height:48px">Propose change</button></form>
+      <div class="small mute">The agent only proposes. You see the before and after, and nothing changes until you press Apply. If it isn't sure what you mean, it asks.</div>
+      <div id="wishBox"></div>
+    </div>
+    <div id="addBox"></div>
+    ${cats.map(([c, title]) => { const rs = RULES.rules.filter(r => r.category === c); return rs.length ? `<div class="card stack" style="gap:12px"><h2>${title}</h2>
+      ${rs.map(r => `<div class="rulecard" data-rule="${esc(r.id)}"><div class="row between" style="align-items:flex-start;gap:8px 16px">
+        <div style="flex:1 1 420px;min-width:0"><b>${esc(r.id)} · ${esc(r.name)}</b> ${r.locked ? pill("safety rule", "t-grey") : ""}<div style="color:var(--ink2);margin-top:2px">${esc(r.description)}</div></div>
+        <div class="row" style="gap:8px"><button class="btn" data-edit="${esc(r.id)}">Edit</button>${r.locked ? "" : `<button class="btn danger" data-remove="${esc(r.id)}">Remove</button>`}</div></div><div data-slot></div></div>`).join("")}</div>` : ""; }).join("")}
+    <p class="small mute" style="margin:0">Safety rules can be adjusted but not removed. The readable rulebook (rulebook.md) is rewritten automatically after every change.</p>
+    <details class="card"><summary style="cursor:pointer;font-weight:600">Edit the rules file as text (advanced)</summary>
+      <div class="stack" style="gap:12px;margin-top:14px"><textarea id="yaml" rows="22" spellcheck="false" style="font-family:ui-monospace,Menlo,monospace;font-size:13px">${esc(RULES.yaml)}</textarea>
+      <div class="row"><button class="btn primary" id="yamlPreview">Preview change</button></div><div id="yamlBox"></div></div></details>
+    <div class="card stack" style="gap:12px"><h2>Change history</h2>${changes.length ? changes.map(c => `<div class="rulecard"><div class="row between"><div><b>${esc(c.change_id)}</b> · ${esc(niceTime(c.time))} · by ${esc(c.by)} <span class="pill t-grey">${esc(c.source)}</span></div>
+      <button class="btn" data-undo="${esc(c.change_id)}">Undo this change</button></div>${c.diff.map(d => `<div class="small"><b>${esc(d.change)} ${esc(d.rule_id)}</b>${d.before ? `<div class="mute">Before: ${esc(d.before)}</div>` : ""}${d.after ? `<div>After: ${esc(d.after)}</div>` : ""}</div>`).join("")}</div>`).join("")
+      : `<div class="mute">No rule changes yet.</div>`}</div></div>`;
+  const v = $("#view");
+  $("#wishForm").onsubmit = async e => {
+    e.preventDefault(); const text = $("#wish").value.trim(), box = $("#wishBox"); if (!text) return toast("Write what you want to change first.");
+    box.innerHTML = `<div class="mute">Thinking…</div>`;
+    try {
+      const p = await api("/api/rules/propose", { body: { text } });
+      if (p.status === "question") { box.innerHTML = `<div class="banner t-ask" style="padding:14px 16px"><div><div class="label" style="color:inherit">The agent has a question · nothing changed · by ${esc(p.proposed_by)}</div>
+        <div style="font-size:16px;font-weight:500;color:var(--ink)">${esc(p.question)}</div><div class="small" style="color:var(--ink2)">Answer by rewriting your wish above.</div></div></div>`; $("#wish").focus(); return; }
+      box.innerHTML = `<div class="small mute" style="margin-bottom:6px">Proposed by ${esc(p.proposed_by)}${p.explanation ? ": " + esc(p.explanation) : ""}</div><div data-preview></div>`;
+      previewAndApply($("[data-preview]", box), { change: p.change, request_text: text }, "ai");
+    } catch (err) { box.innerHTML = `<div class="problem">${esc(err.message)}</div>`; }
+  };
+  v.querySelectorAll("[data-edit]").forEach(b => b.onclick = () => {
+    const r = RULES.rules.find(x => x.id === b.dataset.edit), t = typeOf(r.type), slot = $("[data-slot]", b.closest("[data-rule]"));
+    slot.innerHTML = ruleForm(t, r); const form = $("form", slot);
+    $("[data-cancel]", form).onclick = () => slot.innerHTML = "";
+    form.onsubmit = e => { e.preventDefault(); previewAndApply($("[data-preview]", form), { change: { action: "edit", rule_id: r.id, name: form.elements["name"].value, result: form.elements["result"].value, settings: readSettings(form, t.settings) } }, "manual"); };
+  });
+  v.querySelectorAll("[data-remove]").forEach(b => b.onclick = () => { const slot = $("[data-slot]", b.closest("[data-rule]")); slot.innerHTML = `<div data-preview></div>`; previewAndApply(slot.firstChild, { change: { action: "remove", rule_id: b.dataset.remove } }, "manual"); });
+  $("#addBtn").onclick = () => {
+    const addable = RULES.types.filter(t => !t.locked), box = $("#addBox");
+    box.innerHTML = `<div class="card stack" style="gap:12px"><h2>Add a rule</h2><label class="small" style="font-weight:600">What kind of rule?<br>
+      <select id="addType">${addable.map(t => `<option value="${t.type}">${esc(t.category)}: ${esc(t.title)}</option>`).join("")}</select></label><div id="addForm"></div></div>`;
+    const draw = () => { const t = typeOf($("#addType").value); $("#addForm").innerHTML = ruleForm(t, null); const form = $("#addForm form");
+      $("[data-cancel]", form).onclick = () => box.innerHTML = "";
+      form.onsubmit = e => { e.preventDefault(); previewAndApply($("[data-preview]", form), { change: { action: "add", type: t.type, name: form.elements["name"].value, result: form.elements["result"].value, settings: readSettings(form, t.settings) } }, "manual"); }; };
+    $("#addType").onchange = draw; draw(); box.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  };
+  $("#yamlPreview").onclick = () => previewAndApply($("#yamlBox"), { text: $("#yaml").value }, "text");
+  v.querySelectorAll("[data-undo]").forEach(b => b.onclick = async () => { const by = me(); if (!by) return; b.disabled = true;
+    try { await api(`/api/rules/changes/${b.dataset.undo}/undo`, { body: { by } }); toast("Change undone."); viewRules(); } catch (e) { toast(e.message); b.disabled = false; } });
+}
+
+// ---------- router
+let CURRENT = "";
+async function route() {
+  const [path, query] = (location.hash.slice(1) || "/new").split("?"), parts = path.split("/").filter(Boolean), params = new URLSearchParams(query || "");
+  CURRENT = parts[0] || "new";
+  document.querySelectorAll("#tabs a").forEach(a => a.classList.toggle("on", a.dataset.tab === CURRENT));
+  try {
+    if (CURRENT === "requests") await viewRequests(params, parts[1]);
+    else if (CURRENT === "log") { await loadRequests(); await viewLog(params); }
+    else if (CURRENT === "rules") { loadRequests(); await viewRules(); }
+    else { loadRequests(); await viewNew(params); }
+  } catch (e) { $("#view").innerHTML = `<div class="problem">Could not load this screen: ${esc(e.message)}</div>`; }
+  window.scrollTo(0, 0);
+  // on a phone the list sits above the details: jump to the request that was tapped
+  if (CURRENT === "requests" && parts[1] && window.innerWidth < 900) $(".detail")?.scrollIntoView();
+}
+window.addEventListener("hashchange", route);
+route();
+</script>
+</body>
+</html>

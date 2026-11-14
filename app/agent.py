@@ -11,7 +11,7 @@ Every sentence is built from data or rule results; nothing is invented.
 """
 from datetime import datetime, timezone
 
-from . import aimo, catalog, demo, log, orders, parse, rules, store
+from . import ai, aimo, catalog, demo, log, orders, rules, store
 
 MAX_SPLIT_PARTNERS = 8  # how many second products to try in a split
 
@@ -30,6 +30,12 @@ def _step(rec, step, msg, source, actor="agent", **data):
 def _name(pid):
     p = catalog.get(pid)
     return p["name_en"] or p["name_fi"]
+
+
+def _finish(rec):
+    """Last thing on every path: write the short summary (from rule results only), then save."""
+    rec["summary"] = ai.summarize(rec)
+    return store.save(rec)
 
 
 # ---------------------------------------------------------------- finding products
@@ -59,7 +65,13 @@ def _line(pid, qty, role, quote):
             "sales_unit": p["sales_unit"], "litres": round(qty * (p["litres_per_sales_unit"] or 0), 3),
             "price_per_unit_with_tax": price,
             "line_total_with_tax": round(qty * price, 2) if price is not None else None,
-            "role": role}
+            "role": role,
+            # facts for the dashboard, straight from the API answer
+            "litres_per_sales_unit": p["litres_per_sales_unit"],
+            "stock_status": q.get("stock_status"), "stock_amount": q.get("stock_amount"),
+            "demo_stock_override": bool(q.get("demo_stock_override")),
+            "available_date": q.get("available_date"), "closing_time": q.get("closing_time"),
+            "tax_rate": q.get("tax_rate")}
 
 
 def _usable_stock_units(q):
@@ -145,7 +157,7 @@ def handle(text=None, parsed=None, scenario=None, today=None, record=None):
     """Run the whole flow for one request. Returns the saved record."""
     rec = record or {"id": store.new_id(), "received_at": _now(), "text": text, "scenario": scenario,
                      "steps": [], "history": []}
-    req = parsed or parse.parse(text, today)
+    req = parsed or ai.parse_request(text, today)
     rec["parsed"] = req
     rec["not_checked"] = list(rules.rules()["not_checked"])
     amt = rules.num(req["amount"]) if req.get("amount") is not None else "?"
@@ -153,6 +165,18 @@ def handle(text=None, parsed=None, scenario=None, today=None, record=None):
           f"deadline {rules.nice_date(req['deadline']) if req.get('deadline') else '?'}.", req.get("parsed_by", "parser"), parsed=req)
     if scenario:
         _step(rec, "demo", f"Demo scenario '{scenario}': simulated stock numbers will be used.", "demo_stock_overrides.json")
+
+    # The AI read an amount that was not written as a number: check with the buyer first.
+    if req.get("unverified") and not req.get("buyer_confirmed_understanding"):
+        rec["request_checks"] = []
+        rec.update(status="ask_buyer", outcome="ask_buyer", options=[], chosen=None, ask_kind="understanding",
+                   question=f"I understood: {rules.num(req['amount'])} {req.get('unit') or ''} of "
+                            f"{req.get('product') or 'the product'}"
+                            + (f" by {rules.nice_date(req['deadline'])}" if req.get("deadline") else "") + ". Is that right?")
+        rec["not_checked"].insert(0, "Products, prices and stock: not looked up until the buyer answers")
+        _step(rec, "ask", f"Asked the buyer: {rec['question']}", "agent")
+        return _finish(rec)
+    rec.pop("ask_kind", None)
 
     # A: checks on the request itself
     req_results = rules.check_request(req)
@@ -165,7 +189,7 @@ def handle(text=None, parsed=None, scenario=None, today=None, record=None):
                    question=" ".join(r.detail for r in bad))
         rec["not_checked"].insert(0, "Products, prices and stock: not looked up until the buyer answers")
         _step(rec, "ask", f"Asked the buyer: {rec['question']}", "agent")
-        return store.save(rec)
+        return _finish(rec)
 
     # Search the product file
     usual, cands, labels = _candidates(req)
@@ -174,7 +198,7 @@ def handle(text=None, parsed=None, scenario=None, today=None, record=None):
         rec.update(status="cannot_fulfil", outcome="cannot_fulfil", options=[], chosen=None,
                    reason=f"No products found for '{req['product']}' that can be measured in {req['unit']}.")
         _step(rec, "search", rec["reason"], "product file")
-        return store.save(rec)
+        return _finish(rec)
     _step(rec, "search", f"Found {len(cands)} matching products"
           + (f" with label {', '.join(labels)}" if labels else "") + ".", "product file",
           products=[p["id"] for p in cands])
@@ -186,7 +210,7 @@ def handle(text=None, parsed=None, scenario=None, today=None, record=None):
         rec.update(status="cannot_fulfil", outcome="cannot_fulfil", options=[], chosen=None,
                    reason=f"Valio Aimo API error: {e}")
         _step(rec, "lookup", rec["reason"], "Aimo API")
-        return store.save(rec)
+        return _finish(rec)
     quote = demo.apply_stock_overrides(quote, scenario)
     rec["quote_checked_at"] = quote["checked_at"]
     qp = quote["products"]
@@ -227,13 +251,18 @@ def handle(text=None, parsed=None, scenario=None, today=None, record=None):
                    reason=f"None of the {len(blocked)} options can be used: " + "; ".join(parts) + ".",
                    blocked_by=[{"rule": rid, "name": name, "options": n} for (rid, name), n in counts.items()])
         _step(rec, "result", rec["reason"], "rules.yaml")
-        return store.save(rec)
+        return _finish(rec)
 
     best = usable[0]
     rec["chosen"] = best["option_id"]
     rec["why_chosen"] = _why(best, usable, usual)
     rec["alternatives"] = [f"{' + '.join(str(int(l['quantity'])) + ' × ' + l['product_id'] for l in o['lines'])}: "
                            f"€{o['total_with_tax']:,.2f}, {_first_problem(o)}" for o in (usable[1:4] + blocked[:2])]
+    rec["alternatives_detail"] = [
+        {"lines": [{"quantity": l["quantity"], "product_id": l["product_id"], "name": l["name"], "brand": l["brand"]}
+                   for l in o["lines"]],
+         "total_with_tax": o["total_with_tax"], "outcome": o["outcome"], "note": _first_problem(o)}
+        for o in (usable[1:4] + blocked[:3])]
     summary = " + ".join(f"{int(l['quantity'])} × {l['product_id']} ({l['brand']})" for l in best["lines"])
     _step(rec, "choose", f"Chose {best['option_id']}: {summary}, €{best['total_with_tax']:,.2f} incl. tax. "
           f"{rec['why_chosen']}", "agent", option=best["option_id"])
@@ -249,7 +278,7 @@ def handle(text=None, parsed=None, scenario=None, today=None, record=None):
     else:
         rec.update(status="needs_approval", outcome="needs_approval")
         _step(rec, "approval", "Sent to the dashboard for a person to approve or reject.", "agent")
-    return store.save(rec)
+    return _finish(rec)
 
 
 def _why(best, usable, usual):
@@ -285,13 +314,13 @@ def decide(rid, decision, by):
     if decision == "reject":
         rec.update(status="rejected", outcome="rejected", decided_by=by)
         _step(rec, "decision", f"Rejected by {by}. Nothing was ordered.", "dashboard", actor=f"person:{by}")
-        return store.save(rec)
+        return _finish(rec)
     if decision != "approve":
         raise ValueError("decision must be 'approve' or 'reject'")
     rec["decided_by"] = by
     _step(rec, "decision", f"Approved by {by}.", "dashboard", actor=f"person:{by}")
     _place(rec, option, rec["parsed"], placed_by=f"human:{by}")
-    return store.save(rec)
+    return _finish(rec)
 
 
 def answer(rid, confirm=False, new_amount=None):
@@ -302,14 +331,18 @@ def answer(rid, confirm=False, new_amount=None):
     req = dict(rec["parsed"])
     if new_amount is not None:
         req["amount"] = float(new_amount)
+        req["buyer_confirmed_understanding"] = True  # the buyer typed the amount themselves
         _step(rec, "answer", f"The buyer changed the amount to {rules.num(float(new_amount))} {req['unit']}.", "buyer", actor="buyer")
+    elif confirm and rec.get("ask_kind") == "understanding":
+        req["buyer_confirmed_understanding"] = True
+        _step(rec, "answer", "The buyer confirmed the agent understood the request correctly.", "buyer", actor="buyer")
     elif confirm:
         req["buyer_confirmed_amount"] = True
         _step(rec, "answer", f"The buyer confirmed {rules.num(req['amount'])} {req['unit']}.", "buyer", actor="buyer")
     else:
         raise ValueError("give confirm=True or new_amount")
     rec["history"].append({"status": rec["status"], "question": rec.get("question")})
-    for k in ("question", "options", "chosen", "why_chosen", "alternatives", "reason"):
+    for k in ("question", "options", "chosen", "why_chosen", "alternatives", "alternatives_detail", "reason", "blocked_by"):
         rec.pop(k, None)
     req["parsed_by"] = rec["parsed"].get("parsed_by", "parser") + " + buyer answer"
     return handle(parsed=req, scenario=rec.get("scenario"), record=rec)
