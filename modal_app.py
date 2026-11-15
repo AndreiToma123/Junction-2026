@@ -27,6 +27,8 @@ IGNORE = [
     "docs/aimo_api/valio_aimo_junction26_product_data.json", "docs/Challenge Instructions.txt",
     "Junction Platform.html", "Junction Platform_files", "Junction Platform_files/**",
     "Valio Aimo Junction 2026 Challenge - reference_files", "Valio Aimo Junction 2026 Challenge - reference_files/**",
+    # private pitch material and the scripts that make it
+    "voiceover", "voiceover/**", "slides", "slides/**", "PITCH.md", "PITCH_SCRIPT.md", "scripts/make_*.py",
 ]
 
 image = (

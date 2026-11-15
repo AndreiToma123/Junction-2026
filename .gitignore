@@ -18,3 +18,13 @@ data/events/
 # downloaded Junction platform page (contains personal account details)
 Junction Platform.html
 Junction Platform_files/
+voiceover/
+slides/
+
+# pitch material and the scripts that make it: private, kept on this laptop only
+PITCH.md
+PITCH_SCRIPT.md
+scripts/make_voiceover.py
+scripts/make_video.py
+scripts/make_screenshots.py
+scripts/make_slides.py

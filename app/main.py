@@ -356,9 +356,12 @@ def kitchen_receive():
 
 def _check_password(given):
     """On a public demo, DEMO_PASSWORD (set on the server) protects the actions that affect every tester."""
+    import hmac
     import os
+    import time
     want = os.getenv("DEMO_PASSWORD")
-    if want and given != want:
+    if want and not hmac.compare_digest(str(given or "").encode(), want.encode()):
+        time.sleep(1)  # slows down anyone trying many passwords
         raise HTTPException(403, "Wrong or missing demo password. Nothing was changed.")
 
 
