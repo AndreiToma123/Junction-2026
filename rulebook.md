@@ -2,7 +2,7 @@
 
 > **Generated from `rules.yaml`. Don't edit this file by hand.** Change the rules on the dashboard's
 > Rules screen (or edit `rules.yaml`); this file is rewritten automatically after every change.
-> Last generated: Sat 14 Nov 2026 23:35
+> Last generated: Sun 15 Nov 2026 11:43
 
 The agent checks **every** option against these rules. The checks are plain code, no AI.
 When a rule is not met, it gives one of these results:
